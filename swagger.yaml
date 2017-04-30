@@ -18,7 +18,8 @@ basePath: /v2
 tags:
   - name: user
     description: '회원가입, 회원탈퇴, 로그인, 로그아웃 등 유저와 관련된 항목들'
-
+  - name: team
+    description: '프로젝트 팀 생성, 삭제, 참여 등과 같은 프로젝트 팀과 관련된 항목들'
 schemes:
   - http
 paths:
@@ -79,11 +80,12 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: username
-          in: query
-          description: 회원가입할 유저의 패스워드
+        - name: userdata
+          in: body
+          description: 회원가입할 유저 정보
           required: true
-          type: string
+          schema:
+            $ref: '#/definitions/User'
       responses:
         '200':
           description: 정상적으로 회원가입 됨
@@ -157,6 +159,89 @@ paths:
           description: 잘못된 형식의 유저 이름이 전송됨
         '404':
           description: 유저가 발견되지 않음
+  '/team/{teamName}':
+    get:
+      tags:
+        - team
+      summary: 팀 정보를 불러옴
+      description: ''
+      operationId: getTeamData
+      produces:
+        - application/json
+      parameters:
+        - name: teamName
+          in: path
+          description: 불러올 프로젝트 팀의 이름
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 정상적으로 프로젝트 팀 데이터를 불러옴
+          schema:
+            $ref: '#/definitions/Team'
+        '404':
+          description: 존재하지 않는 팀 이름일 경우
+    put:
+      tags:
+        - team
+      summary: 새로운 팀을 생성함
+      description: ''
+      operationId: createTeam
+      produces:
+        - application/json
+      parameters:
+        - name: teamName
+          in: query
+          description: 새로 생성할 팀의 이름
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 정상적으로 팀이 생성 됨
+        '400':
+          description: 팀 생성 실패
+        '403':
+          description: 이미 존재하는 팀 이름
+    post:
+      tags:
+        - team
+      summary: 팀 정보를 수정
+      description: ''
+      operationId: updateTeam
+      produces:
+        - application/json
+      parameters:
+        - name: teamData
+          in: body
+          description: 정보를 수정할 팀의 이름
+          required: true
+          schema:
+            $ref: '#/definitions/Team'
+      responses:
+        '200':
+          description: 정상적으로 팀 정보가 수정 됨
+    delete:
+      tags:
+        - team
+      summary: 팀을 삭제
+      description: ''
+      operationId: delteTeam
+      produces:
+        - application/json
+      parameters:
+        - name: teamName
+          in: query
+          description: 삭제할
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 정상적으로 팀이 삭제됨
+        '400':
+          description: 팀 삭제 실패
+        '404':
+          description: 존재하지 않는 팀
+      
 securityDefinitions:
   petstore_auth:
     type: oauth2
@@ -173,7 +258,7 @@ definitions:
   User:
     type: object
     properties:
-      id:
+      userId:
         type: integer
         format: string
       username:
@@ -203,6 +288,26 @@ definitions:
         type: string
       message:
         type: string
+  Team:
+    type: object
+    description: 팀이 프로젝트를 뜻한다
+    properties:
+      teamId:
+        type: string
+      teamName:
+        type: string
+      createTime:
+        type: string
+        format: date-time
+      leaderId:
+        type: string
+      description:
+        type: string
+        description: 팀에 대한 설명
+      deleted:
+        type: boolean
+        description: 팀이 해체되었는지 여부
+        
 externalDocs:
   description: Find out more about Swagger
   url: 'http://swagger.io'
