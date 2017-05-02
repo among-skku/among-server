@@ -225,13 +225,13 @@ paths:
         - team
       summary: 팀을 삭제
       description: ''
-      operationId: delteTeam
+      operationId: deleteTeam
       produces:
         - application/json
       parameters:
         - name: teamName
           in: query
-          description: 삭제할
+          description: 삭제할 팀 이름
           required: true
           type: string
       responses:
