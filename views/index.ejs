@@ -1,11 +1,55 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
-  <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-  </body>
+	<head>
+		<title><%= title %></title>
+		<!-- <link rel='stylesheet' href='/stylesheets/style.css' /> -->
+	</head>
+	<body>	
+		<script src="/js/jquery-3.2.1.min.js"></script>
+		<h1><%= title %></h1>
+		<p>Welcome to <%= title %></p>
+		
+		Method
+		<input type="text" id="method"> <br />
+		Query-Key <input type="text" id="q-key"> Query-Value <input type="text" id="q-val"> <br />
+		Body <input type="text" id="body"> <br />
+		<button id="sendbtn">
+			Send
+		</button> <br />
+		
+		<hr>
+		<div id="output">
+			Output message box
+		</div>
+		<hr>
+		
+		<script>
+			
+			$('#sendbtn').click(function(e) {
+				var method = $('#method').val();
+				var qkey = $('#q-key').val();
+				var qval = $('#q-val').val();
+				var body = $('#body').val();
+				$.ajax({
+					async: true,
+					cache: false,
+					url: '/ajaxTest?' + qkey + '=' + qval,
+					type: method,
+					data: body,
+					success: function(result, status, xhr) {
+						console.log('ajax call success');
+						console.log('result:', result);
+						console.log('status:', status);
+						console.log('xhr:', xhr);
+					},
+					error: function(xhr, status, error) {
+						console.log('ajax call error');
+						console.log('xhr:', xhr);
+						console.log('status:', status);
+						console.log('error:', error);
+					}
+				});
+			});
+		</script>
+	</body>
 </html>

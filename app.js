@@ -96,12 +96,8 @@ var routes_view = require('./routes/view')
   , routes_ajax = require('./routes/ajax')
   , routes_sock = require('./routes/socket');
 
-console.log('-----------------------');
-console.log(typeof sessChk(false));
-console.log(typeof sessChk(true));
-console.log(typeof routes_view.index);
-console.log('-----------------------');
 app.get('/', routes_view.index);
+app.all('/ajaxTest', routes_ajax.ajaxTest);
 // app.get('/', sessChk(false), routes_view.index);
 // app.get('/', sessChk(false), sessChk(true), routes_view.index);
 // app.get('/login', sessChk(false), routes_view.login);
