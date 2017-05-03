@@ -6,6 +6,7 @@
 	</head>
 	<body>	
 		<script src="/js/jquery-3.2.1.min.js"></script>
+		<script src="/js/among.js"></script>
 		<h1><%= title %></h1>
 		<p>Welcome to <%= title %></p>
 		
@@ -21,9 +22,41 @@
 		<div id="output">
 			Output message box
 		</div>
+		<button id="exampleBtn">
+			test
+		</button>
 		<hr>
 		
 		<script>
+			$('#exampleBtn').click(function(e) {
+				$.get('/ajaxTest', {
+					param1: 'parameter1',
+					param2: 123123
+				}, function(result) {
+					console.log('answer about get request:', result);
+				});
+				
+				$.post('/ajaxTest', {
+					param1: 'parameter1',
+					param2: 123123
+				}, function(result) {
+					console.log('answer about post request:', result);
+				});
+				
+				$.put('/ajaxTest', {
+					param1: 'parameter1',
+					param2: 123123
+				}, function(result) {
+					console.log('answer about put request:', result);
+				});
+				
+				$.delete('/ajaxTest', {
+					param1: 'parameter1',
+					param2: 123123
+				}, function(result) {
+					console.log('answer about delete request:', result);
+				});
+			});
 			
 			$('#sendbtn').click(function(e) {
 				var method = $('#method').val();
