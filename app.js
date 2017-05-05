@@ -84,13 +84,13 @@ var sessionMiddleware = session({
 app.use(sessionMiddleware);
 app.set('port', port);
 
-// mongoose.connect(__dbHost);
+mongoose.connect(__mongodb_host);
 
-// var db_conn = mongoose.connection;
-// db_conn.on('error', console.error.bind(console, 'connection error:'));
-// db_conn.once('open', function() {
-//   console.log('mongodb connection established successfully');
-// });
+var db_conn = mongoose.connection;
+db_conn.on('error', console.error.bind(console, 'connection error:'));
+db_conn.once('open', function() {
+	console.log('mongodb connection established successfully');
+});
 
 var routes_view = require('./routes/view')
   , routes_ajax = require('./routes/ajax')
@@ -98,6 +98,12 @@ var routes_view = require('./routes/view')
 
 app.get('/', routes_view.index);
 app.all('/ajaxTest', routes_ajax.ajaxTest);
+app.all('/sessChk', routes_ajax.sessChk);
+
+app.get('/user/login', routes_ajax.login);
+app.get('/user/logout', routes_ajax.logout);
+app.put('/user/signup', routes_ajax.signup);
+
 // app.get('/', sessChk(false), routes_view.index);
 // app.get('/', sessChk(false), sessChk(true), routes_view.index);
 // app.get('/login', sessChk(false), routes_view.login);

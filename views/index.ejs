@@ -29,33 +29,16 @@
 		
 		<script>
 			$('#exampleBtn').click(function(e) {
-				$.get('/ajaxTest', {
-					param1: 'parameter1',
-					param2: 123123
-				}, function(result) {
-					console.log('answer about get request:', result);
-				});
 				
-				$.post('/ajaxTest', {
-					param1: 'parameter1',
-					param2: 123123
-				}, function(result) {
-					console.log('answer about post request:', result);
-				});
-				
-				$.put('/ajaxTest', {
-					param1: 'parameter1',
-					param2: 123123
+				$.put('/user/signup', {
+					user_id: 'Einstrasse',
+					user_name: '정한길',
+					password: '12321',
+
 				}, function(result) {
 					console.log('answer about put request:', result);
 				});
 				
-				$.delete('/ajaxTest', {
-					param1: 'parameter1',
-					param2: 123123
-				}, function(result) {
-					console.log('answer about delete request:', result);
-				});
 			});
 			
 			$('#sendbtn').click(function(e) {
