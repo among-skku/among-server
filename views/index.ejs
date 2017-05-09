@@ -23,7 +23,11 @@
 			Output message box
 		</div>
 		<button id="exampleBtn">
-			test
+			회원가입
+		</button>
+		<br />
+		<button id="login">
+			로그인
 		</button>
 		<hr>
 		
@@ -39,6 +43,15 @@
 					console.log('answer about put request:', result);
 				});
 				
+			});
+			
+			$('#login').click(function(e) {
+				$.get('/user/login', {
+					user_id: 'Einstrasse',
+					password: '12321'
+				}, function(result) {
+					console.log('login result:', result);
+				});
 			});
 			
 			$('#sendbtn').click(function(e) {

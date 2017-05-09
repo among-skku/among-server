@@ -100,9 +100,9 @@ app.get('/', routes_view.index);
 app.all('/ajaxTest', routes_ajax.ajaxTest);
 app.all('/sessChk', routes_ajax.sessChk);
 
-app.get('/user/login', routes_ajax.login);
+app.get('/user/login', sessChk(false), routes_ajax.login);
 app.get('/user/logout', routes_ajax.logout);
-app.put('/user/signup', routes_ajax.signup);
+app.put('/user/signup', sessChk(false), routes_ajax.signup);
 
 // app.get('/', sessChk(false), routes_view.index);
 // app.get('/', sessChk(false), sessChk(true), routes_view.index);
