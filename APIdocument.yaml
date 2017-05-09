@@ -1,0 +1,1179 @@
+swagger: '2.0'
+info:
+  description: >-
+    이 서버는 성균관대학교 2017년 봄학기 종합설계프로젝트 컴퓨터공학과     전용반 6조의 팀 프로젝트에서 사용되는 서버이다. 이
+    프로젝트는 대학생     팀프로젝트 협업 툴에 관련되어 있다.
+  version: 1.0.0
+  title: Among
+  termsOfService: 'http://among.iptime.org/'
+  contact:
+    email: hg9587@skku.edu
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+host: petstore.swagger.io
+basePath: /v2
+tags:
+  - name: user
+    description: '회원가입, 회원탈퇴, 로그인, 로그아웃 등 유저와 관련된 항목들'
+  - name: team
+    description: '프로젝트 팀 생성, 삭제, 참여 등과 같은 프로젝트 팀과 관련된 항목들'
+schemes:
+  - http
+paths:
+  /user/login:
+    get:
+      tags:
+        - user
+      summary: 유저를 로그인 시킨다.
+      description: ''
+      operationId: loginUser
+      produces:
+        - application/json
+      parameters:
+        - name: User_ID
+          in: query
+          description: 로그인할 유저 ID
+          required: true
+          type: string
+        - name: password
+          in: query
+          description: 해당 유저의 패스워드
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 정상적으로 로그인 됨
+          headers:
+            X-Rate-Limit:
+              type: integer
+              format: int32
+              description: calls per hour allowed by the user
+            X-Expires-After:
+              type: string
+              format: date-time
+              description: date in UTC when token expires
+        '400':
+          description: 잘못된 유저이름이나 패스워드가 주어진 경우
+  /user/logout:
+    get:
+      tags:
+        - user
+      summary: 현재 로그인된 유저를 로그아웃 처리함
+      description: ''
+      operationId: logoutUser
+      produces:
+        - application/json
+      parameters: []
+      responses:
+        default:
+          description: 정상적으로 로그아웃 됨
+  /user/signup:
+    put:
+      tags:
+        - user
+      summary: 회원가입을 함
+      description: ''
+      operationId: signupUser
+      produces:
+        - application/json
+      parameters:
+        - name: userdata
+          in: body
+          description: 회원가입할 유저 정보
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        '200':
+          description: 정상적으로 회원가입 됨
+        '400':
+          description: 필수 입력값이 부족한 경우
+  /user:
+    get:
+      tags:
+        - user
+      summary: 해당 유저 id를 가진 유저의 정보를 불러옴
+      description: ''
+      operationId: getUserById
+      produces:
+        - application/json
+      parameters:
+        - name: User_ID
+          in: query
+          description: 정보를 가져올 유저 id
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/User'
+        '400':
+          description: 잘못된 형식의 유저 이름
+        '404':
+          description: 유저가 발견되지 않음
+    post:
+      tags:
+        - user
+      summary: 유저의 정보를 변경한다
+      description: 해당 유저의 정보를 변경한다
+      operationId: updateUser
+      produces:
+        - application/json
+      parameters:
+        - name: User_Data
+          in: body
+          description: 유저 정보를 가진 JSON 데이터
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        '200':
+          description: 유저 정보 변경 성공
+        '400':
+          description: 허용되지 않는 값이 들어있음
+        '404':
+          description: 유저가 발견되지 않음
+    delete:
+      tags:
+        - user
+      summary: 유저 정보를 삭제한다
+      description: 로그인 된 유저에게만 적용할 수 있다.
+      operationId: deleteUser
+      produces:
+        - application/json
+      parameters: []
+      responses:
+        '400':
+          description: 잘못된 형식의 유저 이름이 전송됨
+        '404':
+          description: 유저가 발견되지 않음
+  /user/schedule/sync:
+    get:
+      tags:
+        - user_schedule
+      summary: 유저 스케줄을 업로드한 데이터 바탕으로 sync 요청
+      description: ''
+      operationId: syncSchedule
+      produces:
+        - application/json
+      parameters:
+        - name: sync_target
+          in: query
+          description: 'calendar, skku_portarl 중 선택'
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 성공적으로 sync 완료
+        '400':
+          description: sync 실패
+  /user/schedule:
+    get:
+      tags:
+        - user_schedule
+      summary: 유저 스케쥴 가져오기
+      description: ''
+      operationId: getUserSchedule
+      produces:
+        - application/json
+      parameters:
+        - name: User_ID
+          in: query
+          description: 유저 id
+          required: true
+          type: string
+        - name: type
+          in: query
+          description: all/temporal/regular 중 택 1
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 유저 스케쥴 성공적으로 가져옴
+        '400':
+          description: 스케쥴 가져오기 실패
+    put:
+      tags:
+        - user_schedule
+      summary: 유저 스케쥴 추가 (수기로 하나하나 작성하는 경우)
+      description: ''
+      operationId: addSchedule
+      produces:
+        - application/json
+      parameters:
+        - name: type
+          in: query
+          description: temporal/regular 중 택 1
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 성공적 추가
+        '400':
+          description: 추가 실패
+    post:
+      tags:
+        - user_schedule
+      summary: 유저 스케쥴 변경
+      description: ''
+      operationId: changeUserSchedule
+      produces:
+        - application/json
+      parameters:
+        - name: type
+          in: query
+          description: 'temporal, regular 택 1'
+          required: true
+          type: string
+        - name: Schedule_ID
+          in: query
+          description: 스케쥴 id
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 스케쥴 성공적으로 변경
+        '400':
+          description: 스케쥴 변경 실패
+        '404':
+          description: 스케쥴 존재하지 않음
+    delete:
+      tags:
+        - user_schedule
+      summary: 유저 스케쥴 삭제
+      description: ''
+      operationId: deleteUserSchedule
+      produces:
+        - application/json
+      parameters:
+        - name: Schedule_ID
+          in: query
+          description: 스케쥴 ID
+          required: true
+          type: string
+        - name: type
+          in: query
+          description: 'temporal, regular 택 1'
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 성공적 삭제
+        '400':
+          description: 삭제 실패
+        '404':
+          description: 스케쥴 존재하지 않음
+  '/team/invitations/{Team_ID}':
+    get:
+      tags:
+        - team_invite
+      summary: 팀원 초대 현황
+      description: ''
+      operationId: getTeamInvitation
+      produces:
+        - application/json
+      parameters:
+        - name: Team_ID
+          in: path
+          description: 팀 ID를 통해 초대 현황 확인
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 초대현황 성공적으로 조회
+        '400':
+          description: 초대현황 조회 실패
+        '404':
+          description: 팀 없음
+    put:
+      tags:
+        - team_invite
+      summary: 팀원 초대
+      description: ''
+      operationId: inviteMember
+      produces:
+        - application/json
+      parameters:
+        - name: User_ID
+          in: query
+          description: 초대할 팀원 ID
+          required: true
+          type: string
+        - name: Team_ID
+          in: query
+          description: 초대할 팀 ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 성공적으로 팀원 초대
+        '400':
+          description: 팀원 초대 실패
+        '403':
+          description: 존재하지 않는 팀
+        '404':
+          description: 존재하지 않는 팀원
+    delete:
+      tags:
+        - team_invite
+      summary: 초대 취소
+      description: ''
+      operationId: cancelInvitation
+      produces:
+        - application/json
+      parameters:
+        - name: Invitation_ID
+          in: query
+          description: 초대 고유 id
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 성공적으로 취소
+        '400':
+          description: 취소 실패
+        '404':
+          description: 존재하지 않는 초대
+  '/team/{Team_ID}':
+    get:
+      tags:
+        - team
+      summary: 팀 정보를 불러옴
+      description: ''
+      operationId: getTeamData
+      produces:
+        - application/json
+      parameters:
+        - name: Team_ID
+          in: path
+          description: 불러올 프로젝트 팀 ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 정상적으로 프로젝트 팀 데이터를 불러옴
+          schema:
+            $ref: '#/definitions/Team'
+        '400':
+          description: 팀 데이터 불러오기 실패
+        '404':
+          description: 존재하지 않는 팀 이름일 경우
+    put:
+      tags:
+        - team
+      summary: 새로운 팀을 생성함
+      description: ''
+      operationId: createTeam
+      produces:
+        - application/json
+      parameters:
+        - name: Team_Data
+          in: body
+          description: 새로 생성할 팀 데이터 JSON 파일
+          required: true
+          schema:
+            $ref: '#/definitions/Team'
+      responses:
+        '200':
+          description: 정상적으로 팀이 생성 됨
+        '400':
+          description: 팀 생성 실패
+    post:
+      tags:
+        - team
+      summary: 팀 정보를 수정
+      description: ''
+      operationId: updateTeam
+      produces:
+        - application/json
+      parameters:
+        - name: Team_Data
+          in: body
+          description: 수정할 팀 정보
+          required: true
+          schema:
+            $ref: '#/definitions/Team'
+      responses:
+        '200':
+          description: 정상적으로 팀 정보가 수정 됨
+        '400':
+          description: 팀 정보 수정 실패
+    delete:
+      tags:
+        - team
+      summary: 팀을 삭제
+      description: ''
+      operationId: deleteTeam
+      produces:
+        - application/json
+      parameters:
+        - name: Team_ID
+          in: query
+          description: 삭제할 팀 ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 정상적으로 팀이 삭제됨
+        '400':
+          description: 팀 삭제 실패
+        '404':
+          description: 존재하지 않는 팀
+  '/team/chat/{Team_ID}':
+    get:
+      tags:
+        - chat
+      summary: 팀 채팅 내용 조회
+      description: ''
+      operationId: getTeamChat
+      produces:
+        - application/json
+      parameters:
+        - name: Team_ID
+          in: path
+          description: Team ID
+          required: true
+          type: string
+        - name: Amount
+          in: query
+          description: lazyloading위한 갯수
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: 조회 성공
+          schema:
+            $ref: '#/definitions/Chat'
+        '400':
+          description: 조회 실패
+    put:
+      tags:
+        - chat
+      summary: 팀 채팅 전송
+      description: ''
+      operationId: sendChat
+      produces:
+        - application/json
+      parameters:
+        - name: Chat_Data
+          in: body
+          description: 채팅 데이터
+          required: true
+          schema:
+            $ref: '#/definitions/Chat'
+      responses:
+        '200':
+          description: 채팅 전송 성공
+        '400':
+          description: 채팅 전송 실패
+  '/team/chat/search/{Team_ID}':
+    get:
+      tags:
+        - chat
+      summary: 팀 채팅 검색
+      description: ''
+      operationId: searchChatting
+      produces:
+        - application/json
+      parameters:
+        - name: Team_ID
+          in: path
+          description: Team ID
+          required: true
+          type: string
+        - name: pattern
+          in: query
+          description: 검색 문구
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 검색 성공
+          schema:
+            $ref: '#/definitions/Chat'
+        '400':
+          description: 검색 실패
+        '404':
+          description: 검색문구 없음
+  '/team/file/{Team_ID}':
+    get:
+      tags:
+        - file
+      summary: 해당 팀의 공유된 파일 리스트
+      description: ''
+      operationId: getFileList
+      produces:
+        - application/json
+      parameters:
+        - name: Team_ID
+          in: path
+          description: 파일리스트 불러올 팀 ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 파일리스트 조회 성공
+        '400':
+          description: 파일리스트 조회 실패
+  '/team/file/{Team_ID}/{File_Directory}':
+    get:
+      tags:
+        - file
+      summary: 파일 다운로드
+      description: ''
+      operationId: getFile
+      produces:
+        - application/json
+      parameters:
+        - name: Team_ID
+          in: path
+          description: Team ID
+          required: true
+          type: string
+        - name: File_Directory
+          in: path
+          description: File-Directory
+          required: true
+          type: string
+        - name: File_Name
+          in: query
+          description: 다운로드할 파일 이름
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 파일 다운로드 성공
+          schema:
+            $ref: '#/definitions/File_Manager'
+        '400':
+          description: 파일 다운로드 실패
+        '404':
+          description: 존재하지 않는 파일
+    post:
+      tags:
+        - file
+      summary: 파일 관련 데이터 변경 (내용 말고 부가 설명)
+      description: ''
+      operationId: modifyFileData
+      produces:
+        - application/json
+      parameters:
+        - name: File_Data
+          in: body
+          description: 변경할 파일 데이터( 내용 아님 )
+          required: true
+          schema:
+            $ref: '#/definitions/File_Manager'
+      responses:
+        '200':
+          description: 파일 메타 데이터 변경 성공
+        '400':
+          description: 파일 데이터 변경 실패
+        '404':
+          description: 존재하지 않는 파일
+    put:
+      tags:
+        - file
+      summary: 파일 업로드
+      description: ''
+      operationId: uploadFile
+      produces:
+        - application/json
+      parameters:
+        - name: File_Data
+          in: body
+          description: 업로드할 파일 데이터
+          required: true
+          schema:
+            $ref: '#/definitions/File_Manager'
+      responses:
+        '200':
+          description: 파일 업로드 성공
+        '400':
+          description: 파일 업로드 실패
+    delete:
+      tags:
+        - file
+      summary: 파일 삭제
+      description: ''
+      operationId: deleteFileName
+      produces:
+        - application/json
+      parameters:
+        - name: File_Name
+          in: query
+          description: 삭제할 파일 이름
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 파일 삭제 성공
+        '400':
+          description: 파일 삭제 실패
+        '404':
+          description: 존재하지 않는 파일
+  '/team/schedule/{team_id}':
+    get:
+      tags:
+        - schedule
+      summary: 팀 일정 불러오기
+      description: ''
+      operationId: getTeamSchedule
+      produces:
+        - application/json
+      parameters:
+        - name: team_id
+          in: path
+          required: true
+          type: string
+          description: 일정 불러올 팀 id
+        - name: range
+          in: query
+          required: true
+          type: string
+          description: 'range (default: all / appointment / due_date)'
+      responses:
+        '200':
+          description: 팀 일정(전체 / 회의 일정 / 마감일)을 불러옴
+          schema:
+            $ref: '#/definitions/Appointment_Schedule'
+        '400':
+          description: 팀 일정을 불러오는 것에 실패함
+    post:
+      tags:
+        - schedule
+      summary: 팀 일정 수정
+      description: ''
+      operationId: modifyTeamSchedule
+      produces:
+        - application/json
+      parameters:
+        - name: calendar_data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Calendar'
+      responses:
+        '200':
+          description: 팀 일정을 수정하는 것에 성공함
+        '400':
+          description: 팀 일정을 수정하는 것에 실패함
+        '404':
+          description: 사용자가 존재하지 않는 일정을 수정하려는 경우
+    put:
+      tags:
+        - schedule
+      summary: 팀 일정 추가
+      description: ''
+      operationId: addTeamSchedule
+      produces:
+        - application/json
+      parameters:
+        - name: calendar_data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Calendar'
+      responses:
+        '200':
+          description: 팀 일정을 추가하는 것에 성공함
+        '400':
+          description: 팀 일정을 추가하는 것에 실패함
+    delete:
+      tags:
+        - schedule
+      summary: 팀 일정 삭제
+      description: ''
+      operationId: deleteTeamSchedule
+      produces:
+        - application/json
+      parameters:
+        - name: Subject
+          in: query
+          required: true
+          type: string
+          description: 삭제할 제목
+      responses:
+        '200':
+          description: 팀 일정을 삭제하는 것에 성공함
+        '400':
+          description: 팀 일정을 삭제하는 것에 실패함
+        '404':
+          description: 사용자가 존재하지않는 일정을 삭제하려고 시도하는 경우
+  '/team/report/{team_id}':
+    get:
+      tags:
+        - report
+      summary: 회의록을 불러온다.
+      description: ''
+      operationId: getReport
+      produces:
+        - application/json
+      parameters:
+        - name: team_id
+          in: path
+          required: true
+          type: string
+        - name: report_id
+          in: query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 정상적으로 회의록을 불러온다.
+          schema:
+            $ref: '#/definitions/Report'
+        '400':
+          description: 회의록을 불러오는 것에 실패한다.
+        '404':
+          description: 존재하지 않는 회의록을 요청할 때
+    post:
+      tags:
+        - report
+      summary: '회의록을 수정한다.(제목, 내용 등)'
+      description: ''
+      operationId: modifyReport
+      produces:
+        - application/json
+      parameters:
+        - name: report_data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Report'
+      responses:
+        '200':
+          description: '정상적으로 회의록을 수정한다.(제목, 내용 등)'
+        '400':
+          description: 회의록을 수정하는 것에 실패한 경우
+        '404':
+          description: 존재하지 않는 회의록에대해 수정을 요청할 때
+    put:
+      tags:
+        - report
+      summary: 회의록을 upload
+      description: ''
+      operationId: uploadReport
+      produces:
+        - application/json
+      parameters:
+        - name: report_data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Report'
+      responses:
+        '200':
+          description: 정상적으로 회의록을 업로드한다.
+        '400':
+          description: 회의록을 업로드하는 것에 실패한 경우
+    delete:
+      tags:
+        - report
+      summary: 회의록을 삭제
+      description: ''
+      operationId: deleteReport
+      produces:
+        - application/json
+      parameters:
+        - name: report_id
+          in: query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 정상적으로 회의록을 삭제한다.
+        '400':
+          description: 회의록 삭제를 실패한 경우
+        '404':
+          description: 존재하지 않는 회의록에대해 삭제를 요청할 때
+  '/team/notice/{Team_ID}':
+    get:
+      tags:
+        - team_notice
+      summary: 공지사항을 불러온다.(전체 or 최근 일부)
+      description: ''
+      operationId: getNotice
+      produces:
+        - application/json
+      parameters:
+        - name: Team_ID
+          in: path
+          description: 공지사항을 불러올 팀 ID
+          required: true
+          type: string
+        - name: limit
+          in: query
+          description: (1 = 최근 1개 / -1 = 전부 / 5 = 최근 5개 )
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: 정상적으로 공지사항을 받아온다.
+          schema:
+            $ref: '#/definitions/Notice'
+        '400':
+          description: 공지사항 받아오는 것을 실패한다.
+    put:
+      tags:
+        - team_notice
+      summary: 공지사항을 추가한다.
+      description: ''
+      operationId: addNotice
+      produces:
+        - application/json
+      parameters:
+        - name: notice_data
+          in: query
+          description: 공지사항
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 정상적으로 공지사항을 추가한 경우
+        '400':
+          description: 공지사항 추가를 실패한 경우
+    delete:
+      tags:
+        - team_notice
+      summary: 공지사항을 삭제한다.
+      description: ''
+      operationId: deleteNotice
+      produces:
+        - application/json
+      parameters:
+        - name: notice_id
+          in: query
+          description: 지울 공지사항 id
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 정상적으로 공지사항을 삭제한 경우
+        '400':
+          description: 공지사항 삭제를 실패한 경우
+        '404':
+          description: 존재하지 않는 공지사항 삭제를 요청한 경우
+  /team/feed:
+    get:
+      tags:
+        - team_feed
+      summary: feed 정보를 불러온다.
+      description: ''
+      operationId: getFeedInfo
+      produces:
+        - application/json
+      parameters:
+        - name: team_id
+          in: query
+          description: '없으면 관련된 모든 피드, 지정하면 해당 팀에 관련된 피드 리스트 출력'
+          required: false
+          type: string
+        - name: number_only
+          in: query
+          description: true이면 개수만 응답함. 없으면 개수와 내용 둘 다 응답
+          required: false
+          type: boolean
+        - name: limit
+          in: query
+          description: 보여줄 피드 리스트의 개수 제한
+          required: true
+          type: integer
+        - name: feed_id
+          in: query
+          description: feed_id를 보내면 피드 내용을 읽음 처리함
+          required: false
+          type: string
+      responses:
+        '200':
+          description: 정상적으로 Feed 정보를 받아옴
+          schema:
+            $ref: '#/definitions/Feed'
+        '400':
+          description: Feed 정보 수신을 실패했다.
+        '404':
+          description: 존재하지 않는 팀 이름일 경우
+securityDefinitions:
+  petstore_auth:
+    type: oauth2
+    authorizationUrl: 'http://petstore.swagger.io/oauth/dialog'
+    flow: implicit
+    scopes:
+      'write:pets': modify pets in your account
+      'read:pets': read your pets
+  api_key:
+    type: apiKey
+    name: api_key
+    in: header
+definitions:
+  User:
+    type: object
+    properties:
+      User_ID:
+        type: integer
+        format: string
+      User_Name:
+        type: string
+      Email:
+        type: string
+      Password:
+        type: string
+      phone:
+        type: string
+      deleted:
+        type: boolean
+        description: 유저가 탈퇴했는지 여부
+      Team_ID:
+        type: array
+        format: string
+      Regular_Schedule:
+        type: object
+      Temporal_Schedule:
+        type: object
+    xml:
+      name: User
+  ApiResponse:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      type:
+        type: string
+      message:
+        type: string
+  Temporal_Schedule:
+    type: object
+    description: 개인의 일시적인 일정
+    properties:
+      Schdule_ID:
+        type: string
+      Title:
+        type: string
+      Contents:
+        type: string
+      Start_Date:
+        type: string
+        format: date
+      End_Date:
+        type: string
+        format: date
+  Regular_Schedule:
+    type: object
+    description: 개인의 정기적인 스케쥴
+    properties:
+      Schedule_ID:
+        type: string
+      Place:
+        type: string
+      Title:
+        type: string
+      Contents:
+        type: string
+      Start_Date:
+        type: string
+        description: '해당 일정이 적용되는 기간 시작, date'
+      End_Date:
+        type: string
+        description: '해당 일정이 적용되는 기간 끝, date'
+      Start_Time:
+        type: string
+        description: '해당 일정이 매주 수행되는 시간 시작, time'
+      End_Time:
+        type: string
+        description: '해당 일정이 매주 수행되는 시간 끝, time'
+      Day:
+        type: string
+        description: 해당 일정이 수행되는 요일
+  Invitation:
+    type: object
+    description: 초대해볼까!!
+    properties:
+      Invitation_ID:
+        type: string
+      Team_ID:
+        type: string
+      User_ID:
+        type: string
+      State:
+        type: string
+        description: 'Accept, Reject, Pending, Canceled 중 한 개'
+  Appointment_Schedule:
+    type: object
+    description: 팀에서 지정한 모임 일정
+    properties:
+      Appointment_ID:
+        type: string
+      Name:
+        type: string
+      Place:
+        type: string
+      Title:
+        type: string
+      Contents:
+        type: string
+      Team_ID:
+        type: string
+      Start_Date:
+        type: string
+      End_Date:
+        type: string
+  Team:
+    type: object
+    description: 팀이 프로젝트를 뜻한다
+    properties:
+      Team_ID:
+        type: string
+      Team_Name:
+        type: string
+        description: 유니크
+      Manager_ID:
+        type: string
+      Member_ID:
+        type: array
+        format: string
+        description: User_ID 담아 놓은 array
+      Contents:
+        type: string
+        description: 팀에 대한 설명
+      deleted:
+        type: boolean
+        description: 팀이 해체되었는지 여부
+  File_Manager:
+    type: object
+    description: '파일 서버에 저장, Base64 Encoding 후 insert해도돼'
+    properties:
+      Team_ID:
+        type: string
+      File_Directory:
+        type: string
+      File_Name:
+        type: string
+      Contents:
+        type: string
+      Uploader:
+        type: string
+        format: User_ID
+      Upload_Time:
+        type: string
+        format: date
+  Chat:
+    type: object
+    description: 모든 메세지 ID 저장. 필요시 팀 단위로 검색하여 허용
+    properties:
+      Team_ID:
+        type: string
+      Sender_ID:
+        type: string
+      Message_ID:
+        type: string
+      Time:
+        type: string
+        format: time
+  Chat_Data:
+    type: object
+    description: 채팅데이터
+    properties:
+      Message_ID:
+        type: string
+      Contents:
+        type: string
+  Notice:
+    type: object
+    description: 사람이 직접 올리는 공지
+    properties:
+      Team_ID:
+        type: string
+      Speaker_ID:
+        type: string
+      Title:
+        type: string
+      Notice_ID:
+        type: string
+      Contents:
+        type: string
+      Create_Time:
+        type: string
+        format: date
+      Update_Time:
+        type: string
+        format: date
+  Feed:
+    type: object
+    description: 'facebook 피드처럼, 어떤 이벤트가 발생하면 그에 대한 notification'
+    properties:
+      Feed_ID:
+        type: string
+      Team_ID:
+        type: string
+      Event_date:
+        type: string
+        format: date
+      Reader_ID:
+        type: array
+        format: string
+        description: 읽은 사람 User_ID 담아놓기
+      Content_Subject:
+        type: string
+        description: 피드 이벤트 주체
+      Content_Action:
+        type: string
+        description: 피드 이벤트 종류
+      Content_Object:
+        type: string
+        description: 피드 이벤트 객체
+  Report:
+    type: object
+    description: calendar에 표시될 팀 활동 보고서
+    properties:
+      Report_ID:
+        type: string
+      Team_ID:
+        type: string
+      Title:
+        type: string
+      Contents:
+        type: string
+      Attendee:
+        type: array
+        format: string
+        description: 참석자 User_ID 리스트
+      Writer_ID:
+        type: string
+        format: User_ID
+      Create_Time:
+        type: string
+        format: date
+      Update_Time:
+        type: string
+        format: date
+  Due_Date:
+    type: object
+    description: '중간발표, 기말발표 등 프로젝트와 관련된 공식적인 일정'
+    properties:
+      Due_Date_ID:
+        type: string
+      Team_ID:
+        type: string
+      Title:
+        type: string
+      Contents:
+        type: string
+      Date:
+        type: string
+        format: date
+  Calendar:
+    type: object
+    description: 'schedules가 다른 db 엔티티에 종속적이지만, 자주 상ㅇ되는 정보이므로 중복으로 가지고 있는다.'
+    properties:
+      Team_ID:
+        type: string
+      Schedules:
+        type: array
+        format: object
+        description: temporal/regular/appointment/duedate 이렇게 네 가지에 따라 속성 다르게 있음 db 참고
+externalDocs:
+  description: Find out more about Swagger
+  url: 'http://swagger.io'
