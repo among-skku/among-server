@@ -3,10 +3,11 @@ var db = {
 	user: require(__path + 'modules/db/user')
 };
 
-exports.login = function(req, res) {
+exports.loginUser = function(req, res) {
 	if (Object.keys(req.query).length) {
 		req.body = req.query;
 	}
+		
 	var user_id = req.body.user_id || "";
 	var password = req.body.password || "";
 	async.waterfall([
@@ -51,7 +52,21 @@ exports.login = function(req, res) {
 	});
 };
 
-exports.signup = function(req, res) {
+exports.logoutUser = function(req, res) {
+	req.session.destroy();
+	
+	if (req.session) {
+		res.json({
+			err: '로그아웃 실패'
+		});
+	} else {
+		res.json({
+			result: '로그아웃 성공'
+		})
+	}
+};
+
+exports.signupUser = function(req, res) {
 	if (Object.keys(req.query).length) {
 		req.body = req.query;
 	}
@@ -71,13 +86,13 @@ exports.signup = function(req, res) {
 			}
 		},
 		cb => {
-			db.user.find({
+			db.user.findOne({
 				user_id: user_id
 			}, function(err, result) {
 				if (err) {
 					return cb(err);
 				}
-				cb(null, err);
+				cb(null, result);
 			});
 		},
 		(user_data, cb) => {
@@ -112,9 +127,112 @@ exports.signup = function(req, res) {
 		}
 	});
 };
-exports.logout = function(req, res) {
-	res.redirect('/login');
+
+exports.getUserById = function(req, res) {
+	if (Object.keys(req.query).length) {
+		req.body = req.query;
+	}
+	var user_id = req.body.user_id || req.session.user_id || '';
+	
+	async.waterfall([
+		cb => {
+			if (!user_id) {
+				cb('정보를 불러올 유저 정보가 명시되지 않았습니다.');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.user.findOne({
+				user_id: user_id
+			}, function(err, data) {
+				cb(err, data);
+			})
+		},
+		(user_data, cb) => {
+			if (!user_data) {
+				cb('해당 유저 정보가 없습니다.');
+			} else {
+				cb(null, user_data);
+			}
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
 };
+
+exports.updateUser = function(req, res) {
+	if (Object.keys(req.query).length) {
+		req.body = req.query;
+	}
+	
+	var user_id = req.body.user_id || '';
+	// var user_name = req.body.user_name || '';
+	// var email = req.body.email || '';
+	// var password = req.body.password || '';
+	// var phone = req.body.phone || '';
+	
+	var update_data = {};
+	var attr_list = ['user_name', 'email', 'password', 'phone'];
+	
+	attr_list.map(function(attr) {
+		if (req.body[attr]) {
+			update_data[attr] = req.body[attr];
+		}
+	});
+	
+	async.waterfall([
+		cb => {
+			if (!user_id) {
+				cb('user_id가 지정되지 않았습니다.');
+			} else {
+				cb(null);
+			}
+		}, 
+		cb => {
+			db.findOne({
+				user_id: user_id
+			}, function(err, user_data) {
+				cb(err, user_data);
+			})
+		},
+		(user_data, cb) => {
+			if (user_data) {
+				db.update({
+					user_id: user_id,
+					
+				}, update_data, function(err, result) {
+					if (err) {
+						cb(err);
+					} else {
+						cb(null, '유저 정보 변경 성공');
+					}			
+				});
+			} else {
+				cb('없는 유저입니다.');
+			}
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+};
+
 
 exports.ajaxTest = function(req, res) {
 	var msg = {
@@ -123,6 +241,7 @@ exports.ajaxTest = function(req, res) {
 		body: req.body
 	};
 	
+	console.log('req!:', msg);
 	res.send(JSON.stringify(msg));
 };
 

@@ -43,13 +43,19 @@ var sessChk = function(needSession) {
 			if (req.session && req.session.user_id) {
 				next();
 			} else {
-				res.redirect('/login');
+				res.json({
+					err: '로그인 하셔야합니다.'
+				});
+				//res.redirect('/login');
 			}
 		};
 	} else {
 		return function(req, res, next) { //로그인 하지 않은 상태에서만 접근 가능한 페이지
 			if (req.session && req.session.user_id) {
-				res.redirect('/lobby');
+				res.json({
+					err: '로그인한 상태에서는 접근하실 수 없습니다.'
+				});
+				// res.redirect('/lobby');
 			} else {
 				next();
 			}
@@ -96,20 +102,19 @@ var routes_view = require('./routes/view')
   , routes_ajax = require('./routes/ajax')
   , routes_sock = require('./routes/socket');
 
+
+//테스트용 API
 app.get('/', routes_view.index);
 app.all('/ajaxTest', routes_ajax.ajaxTest);
 app.all('/sessChk', routes_ajax.sessChk);
+//테스트용 API
 
-app.get('/user/login', sessChk(false), routes_ajax.login);
-app.get('/user/logout', routes_ajax.logout);
-app.put('/user/signup', sessChk(false), routes_ajax.signup);
+app.get('/user/login', sessChk(false), routes_ajax.loginUser);
+app.get('/user/logout', sessChk(true), routes_ajax.logoutUser);
+app.put('/user/signup', sessChk(false), routes_ajax.signupUser);
+app.get('/user', sessChk(true), routes_ajax.getUserById);
+app.post('/user', sessChk(true), routes_ajax.updateUser);
 
-// app.get('/', sessChk(false), routes_view.index);
-// app.get('/', sessChk(false), sessChk(true), routes_view.index);
-// app.get('/login', sessChk(false), routes_view.login);
-// app.get('/register', sessChk(false), routes_view.register);
-
-// app.get('/ajax/sessChk', routes_ajax.sessChk);
 
 routes_sock.init_io(io);
 global.__io = io;

@@ -9,7 +9,7 @@
 		<script src="/js/among.js"></script>
 		<h1><%= title %></h1>
 		<p>Welcome to <%= title %></p>
-		
+<!-- 		
 		Method
 		<input type="text" id="method"> <br />
 		Query-Key <input type="text" id="q-key"> Query-Value <input type="text" id="q-val"> <br />
@@ -19,41 +19,75 @@
 		</button> <br />
 		
 		<hr>
-		<div id="output">
-			Output message box
-		</div>
-		<button id="exampleBtn">
+		<hr> -->
+		<h2>
+			Login, Register Test form
+		</h2>
+		user_id <input type="text" value="test_id" id="user_id" class="user_form"><br>
+		user_name <input type="text" value="John" id="user_name" class="user_form"><br>
+		password <input type="text" value="12321" id="password" class="user_form"><br>
+		email <input type="text" value="hg9587@naver.com" id="email" class="user_form"><br>
+		phone <input type="text" value="010-8533-1234" id="phone" class="user_form"><br>
+		<button id="signup" class="send">
 			회원가입
 		</button>
 		<br />
-		<button id="login">
+		<button id="login" class="send">
 			로그인
 		</button>
+		<br>
+		<button id="logout" class="send">
+			로그아웃
+		</button>
+		<br>
+		<button id="getSession" class="send">
+			세션 정보 가져오기
+		</button>
 		<hr>
+		<div id="display" style="width: 400px;">
+			
+		</div>
 		
 		<script>
-			$('#exampleBtn').click(function(e) {
-				
-				$.put('/user/signup', {
-					user_id: 'Einstrasse',
-					user_name: '정한길',
-					password: '12321',
-
-				}, function(result) {
-					console.log('answer about put request:', result);
+			
+			var pretty = function(obj) {
+				return JSON.stringify(obj, null, 4);
+			}
+			var output = $('#display');
+			
+			$('.send').click(function(e) {
+				var request_data = {};
+				var btn_id = $(this).attr('id');
+				var url_path = ( $(this).attr('id') === 'signup' ? '/user/signup' : '/user/login' );
+				$('.user_form').map(function(item, index) {
+					var key = $(this).attr('id');
+					var val = $(this).val();
+					request_data[key] = val;
 				});
+				if ( btn_id === 'signup' ) {
+					$.put('/user/signup', request_data, function(res) {
+						console.log('answer of signup:', res);
+						output.text(pretty(res));
+					});	
+				} else if ( btn_id === 'login' ) {
+					$.get('/user/login', request_data, function(res) {
+						console.log('answer of login', res);
+						output.text(pretty(res));
+					});
+				} else if ( btn_id === 'logout') {
+					$.get('/user/logout', function(res) {
+						console.log('answer of logout', res);
+						output.text(pretty(res));
+					});
+				} else if ( btn_id === 'getSession') {
+					$.get('/sessChk', function(res) {
+						console.log('answer of SessChk', res);
+						output.text(pretty(res));
+					});
+				}
 				
 			});
-			
-			$('#login').click(function(e) {
-				$.get('/user/login', {
-					user_id: 'Einstrasse',
-					password: '12321'
-				}, function(result) {
-					console.log('login result:', result);
-				});
-			});
-			
+						
 			$('#sendbtn').click(function(e) {
 				var method = $('#method').val();
 				var qkey = $('#q-key').val();
