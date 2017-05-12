@@ -436,9 +436,14 @@ paths:
           description: Team ID
           required: true
           type: string
-        - name: Amount
+        - name: skip
           in: query
-          description: lazyloading위한 갯수
+          description: lazyloading위한 불러오드 데이터 시작 index
+          required: true
+          type: integer
+        - name: limit
+          in: query
+          description: lazyloding위한 불러오는 최대 데이터 수
           required: true
           type: integer
       responses:
@@ -718,8 +723,9 @@ paths:
           type: string
         - name: report_id
           in: query
-          required: true
+          required: false
           type: string
+          description: 이 항목이 없으면, 해당 팀의 report_id 리스트를 불러온다.
       responses:
         '200':
           description: 정상적으로 회의록을 불러온다.
@@ -1094,10 +1100,10 @@ definitions:
         type: string
       contents:
         type: string
-      create_Time:
+      create_time:
         type: string
         format: date
-      update_Time:
+      update_time:
         type: string
         format: date
   Feed:
@@ -1143,10 +1149,10 @@ definitions:
       writer_id:
         type: string
         format: user_id
-      create_Time:
+      create_time:
         type: string
         format: date
-      update_Time:
+      update_time:
         type: string
         format: date
   Due_Date:
