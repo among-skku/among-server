@@ -238,8 +238,6 @@ exports.getReport = function(req, res) {
 	var team_id = req.params.team_id || false;
 	var report_id = req.query.report_id || false;
 	
-	console.log('team_id:', team_id);
-	console.log('report_id:', report_id);
 	async.waterfall([
 		cb => {
 			if (!team_id) {
@@ -286,6 +284,70 @@ exports.getReport = function(req, res) {
 
 };
 
+exports.modifyReport = function(req, res) {
+	var team_id = req.params.team_id || false;
+	var report_id = req.body.report_id || false;
+	var title = req.body.title || false;
+	var contents = req.body.contents || false;
+	var attendee = req.body.attendee || false;
+	var update_time = new Date();
+	
+	if (attendee) {
+		try {
+			attendee = JSON.parse(attendee);
+			if (!Array.isArray(attendee)) {
+				throw 'attendee format is not array';
+			}
+		} catch (e) {
+			console.log('routes/ajax.js modifyReport attendee JSON parse error', e);
+			attendee = false;
+		}
+	}
+	
+	async.waterfall([
+		cb => {
+			if (!report_id || !team_id) {
+				cb('report_id, team_id가 지정되지 않았습니다.');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			var write_data = {
+				report_id: report_id,
+				team_id: team_id,
+				update_time: update_time
+			};
+			if (title) { write_data.title = title; }
+			if (contents) { write_data.contents = contents; }
+			if (attendee) { write_data.attendee = attendee; }
+			
+			db.report.update({
+				report_id: report_id,
+				team_id: team_id
+			}, {
+				$set: write_data
+			}, function(err) {
+				if (err) {
+					cb(err);
+				} else {
+					cb(null, '회의록 내용이 정상적으로 수정되었습니다.');
+				}
+			});
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+};
+
 exports.createReport = function(req, res) {
 	var team_id = req.params.team_id || false;
 	var report_id = 'report_' + randString(10);
@@ -320,6 +382,43 @@ exports.createReport = function(req, res) {
 					cb(err);
 				} else {
 					cb(null, '성공적으로 저장되었습니다.');
+				}
+			});
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+};
+
+exports.deleteReport = function(req, res) {
+	var team_id = req.params.team_id || false;
+	var report_id = req.body.report_id || false;
+	
+	async.waterfall([
+		cb => {
+			if (!team_id || !report_id) {
+				cb('team_id나 report_id가 없습니다.');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.report.remove({
+				team_id: team_id,
+				report_id: report_id
+			}, function(err) {
+				if (err) {
+					cb(err);
+				} else {
+					cb(null, '정상적으로 회의록이 삭제되었습니다.');
 				}
 			});
 		}

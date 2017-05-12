@@ -126,7 +126,9 @@ app.get('/user', sessChk(true), routes_ajax.getUserById);
 app.post('/user', sessChk(true), routes_ajax.updateUser);
 
 app.get('/team/report/:team_id', sessChk(true), routes_ajax.getReport);
+app.post('/team/report/:team_id', sessChk(true), routes_ajax.modifyReport);
 app.put('/team/report/:team_id', sessChk(true), routes_ajax.createReport);
+app.delete('/team/report/:team_id', sessChk(true), routes_ajax.deleteReport);
 
 
 routes_sock.init_io(io);
