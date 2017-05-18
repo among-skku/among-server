@@ -4,6 +4,14 @@
  */
 global.__path = __dirname + '/';
 
+global.randString = function (len) {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for( var i=0; i < len; i++ )
+    	text += possible.charAt(Math.floor(Math.random() * possible.length));
+    return text;
+};
+
 var express = require('express')
   , app = express()
   , server = require('http').Server(app)
@@ -115,6 +123,14 @@ app.put('/user/signup', sessChk(false), routes_ajax.signupUser);
 app.get('/user', sessChk(true), routes_ajax.getUserById);
 app.post('/user', sessChk(true), routes_ajax.updateUser);
 
+// chat
+app.put('/team/chat/:team_id', sessChk(true), routes_ajax.sendChat);
+app.get('/team/chat/search/:team_id', sessChk(true), routes_ajax.searchChatting);
+
+// notice
+app.put('/team/notice/:team_id', sessChk(true), routes_ajax.addNotice);
+app.get('/team/notice/:team_id', sessChk(true), routes_ajax.getNotice);
+app.delete('/team/notice/:team_id', sessChk(true), routes_ajax.deleteNotice);
 
 routes_sock.init_io(io);
 global.__io = io;
