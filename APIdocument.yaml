@@ -161,7 +161,7 @@ paths:
       parameters:
         - name: sync_target
           in: query
-          description: 'calendar, skku_portarl 중 선택'
+          description: 'calendar, skku_portal 중 선택'
           required: true
           type: string
       responses:
@@ -205,9 +205,14 @@ paths:
       parameters:
         - name: type
           in: query
-          description: temporal/regular 중 택 1
-          required: true
+          description: 'temporal/regular 중 택 1 지정하지 않을 시 둘 다 리턴'
+          required: false
           type: string
+        - name: schedule_data
+          in: query
+          description: '형식에 따라서 temporal_schedule이나 regular_schedule 스키마에 맞게 데이터가 전송됨'
+          type: string
+          required: true
       responses:
         '200':
           description: 성공적 추가
@@ -956,6 +961,8 @@ definitions:
     properties:
       schedule_id:
         type: string
+      place:
+        type: string
       title:
         type: string
       contents:
@@ -963,9 +970,11 @@ definitions:
       start_date:
         type: string
         format: date
+        description: 'new Date().getTime() 으로 얻어진 값으로 함'
       end_date:
         type: string
         format: date
+        description: 'new Date().getTime() 으로 얻어진 값으로 함'
   regular_Schedule:
     type: object
     description: 개인의 정기적인 스케쥴
@@ -980,22 +989,22 @@ definitions:
         type: string
       start_date:
         type: string
-        description: '해당 일정이 적용되는 기간 시작, date'
+        description: '해당 일정이 적용되는 기간 시작, new Date().getTime() 으로 얻어진 값으로 함'
       end_date:
         type: string
-        description: '해당 일정이 적용되는 기간 끝, date'
+        description: '해당 일정이 적용되는 기간 끝, new Date().getTime() 으로 얻어진 값으로 함'
       start_time:
         type: string
-        description: '해당 일정이 매주 수행되는 시간 시작, time'
+        description: '해당 일정이 매주 수행되는 시간 시작, time 22:00 와 같은 문자열 포멧으로 함'
       end_time:
         type: string
-        description: '해당 일정이 매주 수행되는 시간 끝, time'
+        description: '해당 일정이 매주 수행되는 시간 끝, time 23:35 와 같은 문자열 포멧으로 함'
       day:
         type: string
         description: 해당 일정이 수행되는 요일
   Invitation:
     type: object
-    description: 초대해볼까!!
+    description: '유저 초대 시 초대장 정보를 저장함'
     properties:
       invitation_id:
         type: string
