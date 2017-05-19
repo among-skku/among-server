@@ -169,6 +169,29 @@ paths:
           description: 성공적으로 sync 완료
         '400':
           description: sync 실패
+  /user/schedule/list:
+    get:
+      tags:
+        - user_schedule
+      summary: 유저 스케줄 id 리스트 가져오기
+      description: ''
+      operationId: getUserScheduleList
+      produces:
+        - application/json
+      parameters:
+        - name: user_id
+          in: query
+          description: '세션에서 가져오므로, 명시할 필요 없음'
+          required: false
+          type: string
+        - name: type
+          in: query
+          description: 'all/temporal/regular 중 택'
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 유저 스케줄 성공적으로 가져옴
   /user/schedule:
     get:
       tags:
@@ -181,13 +204,18 @@ paths:
       parameters:
         - name: user_id
           in: query
-          description: 유저 id
-          required: true
+          description: '세션에서 가져오므로, 명시하지 않아도 됨'
+          required: false
           type: string
         - name: type
           in: query
-          description: all/temporal/regular 중 택 1
+          description: 'all/temporal/regular 중 택 1'
           required: true
+          type: string
+        - name: schedule_id
+          in: query
+          description: 'schedule_id 를 명시하면 하나만 가져옴'
+          required: false
           type: string
       responses:
         '200':
@@ -205,7 +233,7 @@ paths:
       parameters:
         - name: type
           in: query
-          description: 'temporal/regular 중 택 1 지정하지 않을 시 둘 다 리턴'
+          description: 'temporal/regular 중 택 1'
           required: false
           type: string
         - name: schedule_data
@@ -341,6 +369,27 @@ paths:
           description: 취소 실패
         '404':
           description: 존재하지 않는 초대
+  '/team':
+    put:
+      tags:
+        - team
+      summary: 새로운 팀을 생성함
+      description: ''
+      operationId: createTeam
+      produces:
+        - application/json
+      parameters:
+        - name: team_data
+          in: body
+          description: 새로 생성할 팀 데이터 JSON 파일
+          required: true
+          schema:
+            $ref: '#/definitions/Team'
+      responses:
+        '200':
+          description: 정상적으로 팀이 생성 됨
+        '400':
+          description: 팀 생성 실패
   '/team/{team_id}':
     get:
       tags:
@@ -365,26 +414,6 @@ paths:
           description: 팀 데이터 불러오기 실패
         '404':
           description: 존재하지 않는 팀 이름일 경우
-    put:
-      tags:
-        - team
-      summary: 새로운 팀을 생성함
-      description: ''
-      operationId: createTeam
-      produces:
-        - application/json
-      parameters:
-        - name: team_data
-          in: body
-          description: 새로 생성할 팀 데이터 JSON 파일
-          required: true
-          schema:
-            $ref: '#/definitions/Team'
-      responses:
-        '200':
-          description: 정상적으로 팀이 생성 됨
-        '400':
-          description: 팀 생성 실패
     post:
       tags:
         - team
@@ -959,6 +988,8 @@ definitions:
     type: object
     description: 개인의 일시적인 일정
     properties:
+      user_id:
+        type: string
       schedule_id:
         type: string
       place:
@@ -979,6 +1010,8 @@ definitions:
     type: object
     description: 개인의 정기적인 스케쥴
     properties:
+      user_id:
+        type: string
       schedule_id:
         type: string
       place:
