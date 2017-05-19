@@ -145,6 +145,7 @@ app.get('/user/schedule/sync', sessChk(true), routes_ajax.syncSchedule);
 app.get('/user/schedule/list', sessChk(true), routes_ajax.getUserScheduleList);
 app.get('/user/schedule', sessChk(true), routes_ajax.getUserSchedule);
 app.put('/user/schedule', sessChk(true), routes_ajax.addSchedule);
+app.post('/user/schedule', sessChk(true), routes_ajax.modifyUserSchedule);
 
 
 routes_sock.init_io(io);

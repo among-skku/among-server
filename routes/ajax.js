@@ -543,6 +543,85 @@ exports.getUserSchedule = function(req, res) {
 	
 };
 
+exports.modifyUserSchedule = function(req, res) {
+	var type = req.body.type || false;
+	// 'temporal' | 'regular'
+	var schedule_id = req.body.schedule_id || false;
+	//regular, temporal 둘다 필수 항목
+	var place = req.body.place || false;
+	var title = req.body.title || false;
+	var contents = req.body.contents || false;
+	//date는 new Date().getTime() 형식의 Integer로 입력 받음
+	var start_date = req.body.start_date || false;
+	var end_date = req.body.end_date || false;
+	// regular schedule에만 필요함
+	//time은 22:35와 같은 형식의 string으로 입력받음
+	var start_time = req.body.start_time || false;
+	var end_time = req.body.end_time || false;
+	var day = req.body.day || false;
+	
+	async.waterfall([
+		cb => {
+			if (!type || !schedule_id) cb('insufficient parameter');
+			else if (type !== 'regular' && type !== 'temporal') cb('invalid type');
+			else cb(null);
+		},
+		cb => {
+			var write_data = {};
+			if (place) write_data.place = place;
+			if (title) write_data.title = title;
+			if (contents) write_data.contents = contents;
+			if (start_date) write_data.start_date = start_date;
+			if (end_date) write_data.end_date = end_date;
+			
+			if (type === 'regular') {
+				if (start_time) write_data.start_time = start_time;
+				if (end_time) write_data.end_time = end_time;
+				if (day) write_data.day = day;
+				
+				db.regular_schedule.findOneAndUpdate({
+					schedule_id: schedule_id
+				}, {
+					$set: write_data
+				}, function(err, data) {
+					if (err) {
+						cb(err, data);
+					} else if (!data) {
+						cb('유효하지 않은 스케쥴 아이디입니다.');
+					} else {
+						cb(null, '정규일정이 정상적으로 변경되었습니다.');
+					}
+				});
+			} else { // if type === 'temporal'
+				db.temporal_schedule.findOneAndUpdate({
+					schedule_id: schedule_id
+				}, {
+					$set: write_data
+				}, function(err, data) {
+					if (err) {
+						cb(err, data);
+					} else if (!data) {
+						cb('유효하지 않은 스케쥴 아이디입니다.');
+					} else {
+						cb(null, '비정규일정이 정상적으로 변경되었습니다.');
+					}
+				});
+			}
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+	
+};
+
 exports.modifyReport = function(req, res) {
 	var team_id = req.params.team_id || false;
 	var report_id = req.body.report_id || false;
