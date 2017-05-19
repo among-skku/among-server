@@ -270,6 +270,32 @@ exports.syncSchedule = function(req, res) {
 	// 여기서 시간표를 동기화 합니다.
 };
 
+exports.addSchedule = function(req, res) {
+	var type = req.body.type || false;
+	
+	async.waterfall([
+		cb => {
+			if (!type) {
+				cb('type is not specified');
+			} else if (type !== 'temporal' && type !== 'regular') {
+				cb('invalid type is given');
+			} else {
+				cb(null);
+			}
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	})
+}
+
 
 exports.ajaxTest = function(req, res) {
 	var msg = {
