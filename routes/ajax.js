@@ -1,7 +1,9 @@
 var async = require('async');
 var db = {
 	user: require(__path + 'modules/db/user'),
-	report: require(__path + 'modules/db/report')
+	report: require(__path + 'modules/db/report'),
+	regular_schedule: require(__path + 'modules/db/regular_schedule'),
+	temporal_schedule: require(__path + 'modules/db/temporal_schedule')
 };
 
 exports.loginUser = function(req, res) {
@@ -234,6 +236,38 @@ exports.updateUser = function(req, res) {
 	});
 };
 
+exports.syncSchedule = function(req, res) {
+	var sync_target = req.query.sync_target || false;
+	
+	async.waterfall([
+		cb => {
+			if (!sync_target) {
+				cb('invalid parameters');
+			}
+		},
+		cb => {
+			if (sync_target === 'calendar') {
+				cb(null, 'calendar 동기화 사부작사부작');
+				console.log('synchronization to calendar schedule');
+			} else if (sync_target === 'skku_portal') {
+				cb(null, 'skku_portal 동기화 사부작 사부작.');
+				console.log('synchronization to skku_portal schedule');
+			} else {
+				cb('options is not supported');
+			}
+		}], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+}
+
 exports.getReport = function(req, res) {
 	var team_id = req.params.team_id || false;
 	var report_id = req.query.report_id || false;
@@ -266,7 +300,11 @@ exports.getReport = function(req, res) {
 					team_id: team_id,
 					report_id: report_id
 				}, function(err, data) {
-					cb(err, data);
+					if (data) {
+						cb(err, data);
+					} else {
+						cb('유효하지 않은 회의록 입니다');
+					}
 				});
 			}
 		}
@@ -280,8 +318,362 @@ exports.getReport = function(req, res) {
 				result: result
 			});
 		}
-	});	
+	});
+	
+	// 여기서 시간표를 동기화 합니다.
+};
 
+exports.addSchedule = function(req, res) {
+	var user_id = req.session.user_id || false;
+	var type = req.body.type || false;
+	var schedule_id = 'report_' + randString(10);
+	//regular, temporal 둘다 필수 항목
+	var place = req.body.place || false;
+	var title = req.body.title || false;
+	var contents = req.body.contents || false;
+	//date는 new Date().getTime() 형식의 Integer로 입력 받음
+	var start_date = req.body.start_date || false;
+	var end_date = req.body.end_date || false;
+	// regular schedule에만 필요함
+	//time은 22:35와 같은 형식의 string으로 입력받음
+	var start_time = req.body.start_time || false;
+	var end_time = req.body.end_time || false;
+	var day = req.body.day || false;
+	
+	async.waterfall([
+		cb => {
+			if (!user_id) {
+				cb('need session');
+			} else if (!type) {
+				cb('type is not specified');
+			} else if (type !== 'temporal' && type !== 'regular') {
+				cb('invalid type is given');
+			} else if (!place || !title || !contents || !start_date || !end_date) {
+				cb('insufficient parameters');
+			} else {
+				if (type === 'temporal') {
+					cb(null);
+				} else if (type == 'regular') {
+					if (!start_time || !end_time || !day) {
+						cb('insufficient paramters for regular schedule');
+					} else {
+						cb(null);
+					}
+				}
+			}
+			
+		},
+		cb => {
+			if (type === 'temporal') {
+				var snapshot = new db.temporal_schedule({
+					user_id: user_id,
+					schedule_id: schedule_id,
+					place: place,
+					title: title,
+					contents: contents,
+					start_date: str2date(start_date),
+					end_date: str2date(end_date)
+				});
+								
+				snapshot.save(function(err) {
+					cb(err, '비정기 일정이 저장되었습니다.');
+				});
+			} else {//regular schedule
+				var snapshot = new db.regular_schedule({
+					user_id: user_id,
+					schedule_id: schedule_id,
+					place: place,
+					title: title,
+					contents: contents,
+					start_date: str2date(start_date),
+					end_date: str2date(end_date),
+					start_time: start_time,
+					end_time: end_time,
+					day: day
+				});
+				snapshot.save(function(err) {
+					cb(err, '정기 일정이 저장되었습니다.');
+				});
+			}
+		}
+	], function(err, result) {
+			if (err) {
+				res.json({
+					err: err
+				});
+			} else {
+				res.json({
+					result: result
+				});
+			}
+	});
+
+};
+
+exports.getUserScheduleList = function(req, res) {
+	var user_id = req.session.user_id || '';
+	// 'all' | 'temporal' | 'regular'
+	var type = req.query.type || '';
+	
+	async.waterfall([
+		cb => {
+			if (!user_id) cb('need session');
+			else if (!type) cb('type is not specified');
+			else if (type !== 'all' && type !== 'temporal' && type !== 'regular') cb('invalid type');
+			else cb(null);
+		},
+		cb => {
+			async.parallel({
+				temporal: function(pcb) {
+					if (type === 'all' || type === 'temporal') {
+						db.temporal_schedule.find({
+							user_id: user_id
+						}, function(err, tmp_data) {
+							if (err) {
+								pcb(err);
+							} else {
+								async.map(tmp_data, function(item, next) {
+									next(null, item.schedule_id);
+								}, function(merr, mdata) {
+									pcb(merr, mdata);
+								});
+							}
+							// pcb(err, tmp_data);
+						});
+					} else {
+						pcb(null);
+					}
+				},
+				regular: function(pcb) {
+					if (type === 'all' || type === 'regular') {
+						db.regular_schedule.find({
+							user_id: user_id
+						}, function(err, reg_data) {
+							if (err) {
+								pcb(err);
+							} else {
+								async.map(reg_data, function(item, next) {
+									next(null, item.schedule_id);
+								}, function(merr, mdata) {
+									pcb(merr, mdata);
+								});
+							}
+							// pcb(err, reg_data); 
+						})
+					} else {
+						pcb(null);
+					}
+				}
+			}, function(err, pdata) {
+				cb(err, pdata);
+			});
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+};
+
+exports.getUserSchedule = function(req, res) {
+	var user_id = req.session.user_id;
+	// 'all' | 'temporal' | 'regular'
+	var type = req.query.type || false;
+	var schedule_id = req.query.schedule_id || false;
+	
+	var find_query = {
+		user_id: user_id
+	};
+	
+	if (schedule_id) {
+		find_query.schedule_id = schedule_id;
+	}
+	
+	async.waterfall([
+		cb => {
+			if (!type) {
+				cb('type is not specified');
+			} else if (type !== 'all' && type !== 'temporal' && type !== 'regular') {
+				cb('invalid type is given');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			async.parallel({
+				temporal: function(pcb) {
+					if (type === 'all' || type === 'temporal') {
+						db.temporal_schedule.find(find_query, function(err, tmp_data) {
+							pcb(err, tmp_data);
+						});
+					} else {
+						pcb(null);
+					}
+				},
+				regular: function(pcb) {
+					if (type === 'all' || type === 'regular') {
+						db.regular_schedule.find(find_query, function(err, reg_data) {
+							pcb(err, reg_data); 
+						})
+					} else {
+						pcb(null);
+					}
+				}
+			}, function(err, pdata) {
+				cb(err, pdata);
+			});
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+	
+};
+
+exports.modifyUserSchedule = function(req, res) {
+	var type = req.body.type || false;
+	// 'temporal' | 'regular'
+	var schedule_id = req.body.schedule_id || false;
+	//regular, temporal 둘다 필수 항목
+	var place = req.body.place || false;
+	var title = req.body.title || false;
+	var contents = req.body.contents || false;
+	//date는 new Date().getTime() 형식의 Integer로 입력 받음
+	var start_date = req.body.start_date || false;
+	var end_date = req.body.end_date || false;
+	// regular schedule에만 필요함
+	//time은 22:35와 같은 형식의 string으로 입력받음
+	var start_time = req.body.start_time || false;
+	var end_time = req.body.end_time || false;
+	var day = req.body.day || false;
+	
+	async.waterfall([
+		cb => {
+			if (!type || !schedule_id) cb('insufficient parameter');
+			else if (type !== 'regular' && type !== 'temporal') cb('invalid type');
+			else cb(null);
+		},
+		cb => {
+			var write_data = {};
+			if (place) write_data.place = place;
+			if (title) write_data.title = title;
+			if (contents) write_data.contents = contents;
+			if (start_date) write_data.start_date = start_date;
+			if (end_date) write_data.end_date = end_date;
+			
+			if (type === 'regular') {
+				if (start_time) write_data.start_time = start_time;
+				if (end_time) write_data.end_time = end_time;
+				if (day) write_data.day = day;
+				
+				db.regular_schedule.findOneAndUpdate({
+					schedule_id: schedule_id
+				}, {
+					$set: write_data
+				}, function(err, data) {
+					if (err) {
+						cb(err, data);
+					} else if (!data) {
+						cb('유효하지 않은 스케쥴 아이디입니다.');
+					} else {
+						cb(null, '정규일정이 정상적으로 변경되었습니다.');
+					}
+				});
+			} else { // if type === 'temporal'
+				db.temporal_schedule.findOneAndUpdate({
+					schedule_id: schedule_id
+				}, {
+					$set: write_data
+				}, function(err, data) {
+					if (err) {
+						cb(err, data);
+					} else if (!data) {
+						cb('유효하지 않은 스케쥴 아이디입니다.');
+					} else {
+						cb(null, '비정규일정이 정상적으로 변경되었습니다.');
+					}
+				});
+			}
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+	
+};
+
+exports.deleteUserSchedule = function(req, res) {
+	var type = req.body.type || false;
+	var schedule_id = req.body.schedule_id || false;
+	
+	async.waterfall([
+		cb => {
+			if (!type || !schedule_id) cb('insufficient parameters');
+			else if (type !== 'temporal' && type !== 'regular') cb('invalid type param');
+			else cb(null);
+		},
+		cb => {
+			if (type === 'temporal') {
+				db.temporal_schedule.findOne({
+					schedule_id: schedule_id
+				}, function(err, data) {
+					if (err) cb(err);
+					else if (!data) cb('유효하지 않은 비정기 스케쥴입니다.');
+					else {
+						db.temporal_schedule.remove({
+							schedule_id: schedule_id
+						}, function(err) {
+							cb(err, '성공적으로 비정기 일정 삭제');
+						});
+					}
+				});
+			} else { //type === 'regular'
+				db.regular_schedule.findOne({
+					schedule_id: schedule_id
+				}, function(err, data) {
+					if (err) cb(err);
+					else if (!data) cb('유효하지 않은 정기 스케쥴입니다.');
+					else {
+						db.regular_schedule.remove({
+							schedule_id: schedule_id
+						}, function(err) {
+							cb(err, '성공적으로 정기 일정 삭제');
+						});
+					}
+				});
+			}
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
 };
 
 exports.modifyReport = function(req, res) {

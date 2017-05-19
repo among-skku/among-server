@@ -12,6 +12,17 @@ global.randString = function (len) {
     return text;
 };
 
+global.str2date = function(str) {
+	if (typeof str === 'string') {
+		return new Date(Number(str));
+	} else if (typeof str === 'number') {
+		return new Date(str);
+	} else {
+		console.log('invalid usage of str2date', typeof str);
+		return null;
+	}
+};
+
 var express = require('express')
   , app = express()
   , server = require('http').Server(app)
@@ -129,6 +140,13 @@ app.get('/team/report/:team_id', sessChk(true), routes_ajax.getReport);
 app.post('/team/report/:team_id', sessChk(true), routes_ajax.modifyReport);
 app.put('/team/report/:team_id', sessChk(true), routes_ajax.createReport);
 app.delete('/team/report/:team_id', sessChk(true), routes_ajax.deleteReport);
+
+app.get('/user/schedule/sync', sessChk(true), routes_ajax.syncSchedule);
+app.get('/user/schedule/list', sessChk(true), routes_ajax.getUserScheduleList);
+app.get('/user/schedule', sessChk(true), routes_ajax.getUserSchedule);
+app.put('/user/schedule', sessChk(true), routes_ajax.addSchedule);
+app.post('/user/schedule', sessChk(true), routes_ajax.modifyUserSchedule);
+app.delete('/user/schedule', sessChk(true), routes_ajax.deleteUserSchedule);
 
 
 routes_sock.init_io(io);
