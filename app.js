@@ -126,6 +126,7 @@ app.post('/user', sessChk(true), routes_ajax.updateUser);
 // chat
 app.put('/team/chat/:team_id', sessChk(true), routes_ajax.sendChat);
 app.get('/team/chat/search/:team_id', sessChk(true), routes_ajax.searchChatting);
+app.get('/team/chat/:team_id', sessChk(true), routes_ajax.getTeamChat);
 
 // notice
 app.put('/team/notice/:team_id', sessChk(true), routes_ajax.addNotice);

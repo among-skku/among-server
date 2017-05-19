@@ -5,6 +5,8 @@ var db = {
 	chat: require(__path + 'modules/db/chat'),
 	chat_data: require(__path + 'modules/db/chat_data'),
 	notice: require(__path + 'modules/db/notice'),
+	team: require(__path + 'modules/db/team'),
+	
 };
 
 exports.loginUser = function(req, res) {
@@ -300,7 +302,7 @@ exports.sendChat = function (req, res) {
 	});	
 };
 
-exports.searchChatting = function(req, res) {
+/*exports.searchChatting = function(req, res) {
 	
 	if (Object.keys(req.query).length) {
 		req.body = req.query;		
@@ -326,21 +328,7 @@ exports.searchChatting = function(req, res) {
 		},
 		(data, cb) => {
 			
-			var searchResult = [];
-			
-			/*data.forEach(function(data) {
-				db.chat.find({
-					message_id: data.message_id
-				}, function(err, data) {					
-					searchResult.push(data[0]);
-					console.log(searchResult.length);
-				});
-				
-			}, function(err, searchResult){
-				console.log(searchResult);
-				cb(err, searchResult);
-			});
-			*/
+			var searchResult = [];			
 			var cbflag = 0;
 			for (var idx in data) {			
 				
@@ -389,7 +377,126 @@ exports.searchChatting = function(req, res) {
 			});
 		}
 	});	
+}*/
+
+exports.searchChatting = function (req, res) {
+	
+	if (Object.keys(req.query).length) {
+		req.body = req.query;		
+	}
+	
+	var team_id = req.params.team_id || '';
+	var pattern = req.body.pattern || '';
+	
+	async.waterfall([
+		cb => {
+			if (!pattern) {
+				cb('검색할 내용이 명시되지 않았습니다.');
+			} else {				
+				cb(null);
+			}
+		},
+		cb => {
+			db.chat_data.find({
+				contents: {$regex: pattern, $options: 'i'}
+			}, function(err, data) {
+				cb(err, data);
+			})			
+		},
+		(data, cb) => {
+			
+			// mapLimit Error 처리 문제
+			async.mapLimit(data, 100, function(item, next) {				
+				db.chat.findOne({
+					message_id: item.message_id
+				}, function (err, message_data) {
+					if (err) {
+						item.contents = "Fail loading data";
+						next(err);
+					} else {
+						item.sender_id = message_data.sender_id;
+						item.time = message_data.time;
+						next(null, item);
+					}
+				});				
+			}, function (err, merged_data) {
+				if (err) {
+					console.log('chat message merging failed');
+				} else {
+					console.log(merged_data);
+					cb(err, merged_data);
+				}
+			});			
+		}			
+	], function(err, searchResult) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: searchResult
+			});
+		}
+	});	
 }
+
+
+exports.getTeamChat = function (req, res) {
+		
+	if (Object.keys(req.query).length) {
+		req.body = req.query;		
+	}
+	
+	var team_id = req.params.team_id || '';
+	var skip = req.body.skip || '';
+	var limit = req.body.limit || '';	
+	
+	async.waterfall([
+		cb => {			
+			db.chat.find({team_id: team_id})
+				.sort({time: -1}).skip(parseInt(skip)).limit(parseInt(limit))
+				.exec(function (err, data) {
+				cb(err, data);
+			});				
+		},		
+		(data, cb) => {						
+			// Error 처리 문제 -> Error가 있을 때 중지
+			async.mapLimit(data, 10, function(item, next) {
+				db.chat_data.findOne({
+					message_id: item.message_id
+				}, function(err, message_data) {
+					if (err) {
+						item.contents = "Fail loading data";
+						next(err);
+					} else {
+						item.contents = message_data.contents;
+						next(null, item);
+					}
+				})
+			}, function(err, merged_data) {
+				if (err) {
+					console.log('chat message merging failed');
+				} else {
+					console.log(merged_data);
+					cb(err, merged_data);
+				}
+			});			
+		}	
+	], function (err, result) {
+		
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}		
+	});	
+}
+
 
 exports.addNotice = function (req, res) {
 	
@@ -445,15 +552,13 @@ exports.getNotice = function (req, res) {
 	}
 	
 	var team_id = req.params.team_id || '';
-	var limit = req.body.limit || '';
-	
-	console.log("team_id: " + team_id + "	limit: " + typeof(limit));
+	var limit = req.body.limit || '';	
 	
 	async.waterfall([
 		cb => {
 			db.notice.find({
 				team_id: team_id}).
-			 sort({create_time : -1}).limit(parseInt(limit)).exec( function(err, data) {	
+			 sort({create_time : -1}).limit(parseInt(limit)).exec( function(err, data) {
 				cb(err, data);
 			});			
 		}
@@ -492,8 +597,7 @@ exports.deleteNotice = function (req, res) {
 			db.notice.remove({
 				//notice_id: notice_id
 				$and: [{team_id: team_id}, {notice_id: notice_id}]				
-			}, function(err, data) {	
-				console.log("data : " + err );
+			}, function(err, data) {					
 				cb(err, data);
 			});			
 		}
@@ -510,8 +614,6 @@ exports.deleteNotice = function (req, res) {
 		}		
 	});	
 }
-
-
 
 
 exports.ajaxTest = function(req, res) {
