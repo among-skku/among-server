@@ -410,10 +410,90 @@ exports.addSchedule = function(req, res) {
 
 };
 
+exports.getUserScheduleList = function(req, res) {
+	var user_id = req.session.user_id || '';
+	// 'all' | 'temporal' | 'regular'
+	var type = req.query.type || '';
+	
+	async.waterfall([
+		cb => {
+			if (!user_id) cb('need session');
+			else if (!type) cb('type is not specified');
+			else if (type !== 'all' && type !== 'temporal' && type !== 'regular') cb('invalid type');
+			else cb(null);
+		},
+		cb => {
+			async.parallel({
+				temporal: function(pcb) {
+					if (type === 'all' || type === 'temporal') {
+						db.temporal_schedule.find({
+							user_id: user_id
+						}, function(err, tmp_data) {
+							if (err) {
+								pcb(err);
+							} else {
+								async.map(tmp_data, function(item, next) {
+									next(null, item.schedule_id);
+								}, function(merr, mdata) {
+									pcb(merr, mdata);
+								});
+							}
+							// pcb(err, tmp_data);
+						});
+					} else {
+						pcb(null);
+					}
+				},
+				regular: function(pcb) {
+					if (type === 'all' || type === 'regular') {
+						db.regular_schedule.find({
+							user_id: user_id
+						}, function(err, reg_data) {
+							if (err) {
+								pcb(err);
+							} else {
+								async.map(reg_data, function(item, next) {
+									next(null, item.schedule_id);
+								}, function(merr, mdata) {
+									pcb(merr, mdata);
+								});
+							}
+							// pcb(err, reg_data); 
+						})
+					} else {
+						pcb(null);
+					}
+				}
+			}, function(err, pdata) {
+				cb(err, pdata);
+			});
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+};
+
 exports.getUserSchedule = function(req, res) {
 	var user_id = req.session.user_id;
 	// 'all' | 'temporal' | 'regular'
 	var type = req.query.type || false;
+	var schedule_id = req.query.schedule_id || false;
+	
+	var find_query = {
+		user_id: user_id
+	};
+	
+	if (schedule_id) {
+		find_query.schedule_id = schedule_id;
+	}
 	
 	async.waterfall([
 		cb => {
@@ -429,9 +509,7 @@ exports.getUserSchedule = function(req, res) {
 			async.parallel({
 				temporal: function(pcb) {
 					if (type === 'all' || type === 'temporal') {
-						db.temporal_schedule.find({
-							user_id: user_id
-						}, function(err, tmp_data) {
+						db.temporal_schedule.find(find_query, function(err, tmp_data) {
 							pcb(err, tmp_data);
 						});
 					} else {
@@ -440,9 +518,7 @@ exports.getUserSchedule = function(req, res) {
 				},
 				regular: function(pcb) {
 					if (type === 'all' || type === 'regular') {
-						db.regular_schedule.find({
-							user_id: user_id
-						}, function(err, reg_data) {
+						db.regular_schedule.find(find_query, function(err, reg_data) {
 							pcb(err, reg_data); 
 						})
 					} else {

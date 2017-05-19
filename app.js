@@ -142,7 +142,7 @@ app.put('/team/report/:team_id', sessChk(true), routes_ajax.createReport);
 app.delete('/team/report/:team_id', sessChk(true), routes_ajax.deleteReport);
 
 app.get('/user/schedule/sync', sessChk(true), routes_ajax.syncSchedule);
-
+app.get('/user/schedule/list', sessChk(true), routes_ajax.getUserScheduleList);
 app.get('/user/schedule', sessChk(true), routes_ajax.getUserSchedule);
 app.put('/user/schedule', sessChk(true), routes_ajax.addSchedule);
 
