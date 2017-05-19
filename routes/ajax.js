@@ -233,6 +233,43 @@ exports.updateUser = function(req, res) {
 	});
 };
 
+exports.syncSchedule = function(req, res) {
+	var sync_target = req.query.sync_target || false;
+	
+	async.waterfall([
+		cb => {
+			if (!sync_target) {
+				cb('invalid parameters');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			if (sync_target === 'calendar') {
+				cb(null, 'calendar 동기화 사부작사부작');
+				console.log('synchronization to calendar schedule');
+			} else if (sync_target === 'skku_portal') {
+				cb(null, 'skku_portal 동기화 사부작 사부작.');
+				console.log('synchronization to skku_portal schedule');
+			} else {
+				cb('options is not supported');
+			}
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+	
+	// 여기서 시간표를 동기화 합니다.
+};
+
 
 exports.ajaxTest = function(req, res) {
 	var msg = {

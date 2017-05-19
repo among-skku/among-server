@@ -115,6 +115,8 @@ app.put('/user/signup', sessChk(false), routes_ajax.signupUser);
 app.get('/user', sessChk(true), routes_ajax.getUserById);
 app.post('/user', sessChk(true), routes_ajax.updateUser);
 
+app.get('/user/schedule/sync', sessChk(true), routes_ajax.syncSchedule);
+
 
 routes_sock.init_io(io);
 global.__io = io;
