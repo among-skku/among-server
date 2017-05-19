@@ -324,6 +324,7 @@ exports.getReport = function(req, res) {
 };
 
 exports.addSchedule = function(req, res) {
+	var user_id = req.session.user_id || false;
 	var type = req.body.type || false;
 	var schedule_id = 'report_' + randString(10);
 	//regular, temporal 둘다 필수 항목
@@ -341,7 +342,9 @@ exports.addSchedule = function(req, res) {
 	
 	async.waterfall([
 		cb => {
-			if (!type) {
+			if (!user_id) {
+				cb('need session');
+			} else if (!type) {
 				cb('type is not specified');
 			} else if (type !== 'temporal' && type !== 'regular') {
 				cb('invalid type is given');
@@ -363,6 +366,7 @@ exports.addSchedule = function(req, res) {
 		cb => {
 			if (type === 'temporal') {
 				var snapshot = new db.temporal_schedule({
+					user_id: user_id,
 					schedule_id: schedule_id,
 					place: place,
 					title: title,
@@ -376,6 +380,7 @@ exports.addSchedule = function(req, res) {
 				});
 			} else {//regular schedule
 				var snapshot = new db.regular_schedule({
+					user_id: user_id,
 					schedule_id: schedule_id,
 					place: place,
 					title: title,
