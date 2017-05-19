@@ -12,6 +12,17 @@ global.randString = function (len) {
     return text;
 };
 
+global.str2date = function(str) {
+	if (typeof str === 'string') {
+		return new Date(Number(str));
+	} else if (typeof str === 'number') {
+		return new Date(str);
+	} else {
+		console.log('invalid usage of str2date', typeof str);
+		return null;
+	}
+};
+
 var express = require('express')
   , app = express()
   , server = require('http').Server(app)

@@ -1,7 +1,9 @@
 var async = require('async');
 var db = {
 	user: require(__path + 'modules/db/user'),
-	report: require(__path + 'modules/db/report')
+	report: require(__path + 'modules/db/report'),
+	regular_schedule: require(__path + 'modules/db/regular_schedule'),
+	temporal_schedule: require(__path + 'modules/db/temporal_schedule')
 };
 
 exports.loginUser = function(req, res) {
@@ -323,6 +325,19 @@ exports.getReport = function(req, res) {
 
 exports.addSchedule = function(req, res) {
 	var type = req.body.type || false;
+	var schedule_id = 'report_' + randString(10);
+	//regular, temporal 둘다 필수 항목
+	var place = req.body.place || false;
+	var title = req.body.title || false;
+	var contents = req.body.contents || false;
+	//date는 new Date().getTime() 형식의 Integer로 입력 받음
+	var start_date = req.body.start_date || false;
+	var end_date = req.body.end_date || false;
+	// regular schedule에만 필요함
+	//time은 22:35와 같은 형식의 string으로 입력받음
+	var start_time = req.body.start_time || false;
+	var end_time = req.body.end_time || false;
+	var day = req.body.day || false;
 	
 	async.waterfall([
 		cb => {
@@ -330,10 +345,53 @@ exports.addSchedule = function(req, res) {
 				cb('type is not specified');
 			} else if (type !== 'temporal' && type !== 'regular') {
 				cb('invalid type is given');
+			} else if (!place || !title || !contents || !start_date || !end_date) {
+				cb('insufficient parameters');
 			} else {
-				cb(null);
+				if (type === 'temporal') {
+					cb(null);
+				} else if (type == 'regular') {
+					if (!start_time || !end_time || !day) {
+						cb('insufficient paramters for regular schedule');
+					} else {
+						cb(null);
+					}
+				}
 			}
-		}], function(err, result) {
+			
+		},
+		cb => {
+			if (type === 'temporal') {
+				var snapshot = new db.temporal_schedule({
+					schedule_id: schedule_id,
+					place: place,
+					title: title,
+					contents: contents,
+					start_date: str2date(start_date),
+					end_date: str2date(end_date)
+				});
+								
+				snapshot.save(function(err) {
+					cb(err, '비정기 일정이 저장되었습니다.');
+				});
+			} else {//regular schedule
+				var snapshot = new db.regular_schedule({
+					schedule_id: schedule_id,
+					place: place,
+					title: title,
+					contents: contents,
+					start_date: str2date(start_date),
+					end_date: str2date(end_date),
+					start_time: start_time,
+					end_time: end_time,
+					day: day
+				});
+				snapshot.save(function(err) {
+					cb(err, '정기 일정이 저장되었습니다.');
+				});
+			}
+		}
+	], function(err, result) {
 			if (err) {
 				res.json({
 					err: err
