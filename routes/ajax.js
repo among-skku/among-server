@@ -622,6 +622,60 @@ exports.modifyUserSchedule = function(req, res) {
 	
 };
 
+exports.deleteUserSchedule = function(req, res) {
+	var type = req.body.type || false;
+	var schedule_id = req.body.schedule_id || false;
+	
+	async.waterfall([
+		cb => {
+			if (!type || !schedule_id) cb('insufficient parameters');
+			else if (type !== 'temporal' && type !== 'regular') cb('invalid type param');
+			else cb(null);
+		},
+		cb => {
+			if (type === 'temporal') {
+				db.temporal_schedule.findOne({
+					schedule_id: schedule_id
+				}, function(err, data) {
+					if (err) cb(err);
+					else if (!data) cb('유효하지 않은 비정기 스케쥴입니다.');
+					else {
+						db.temporal_schedule.remove({
+							schedule_id: schedule_id
+						}, function(err) {
+							cb(err, '성공적으로 비정기 일정 삭제');
+						});
+					}
+				});
+			} else { //type === 'regular'
+				db.regular_schedule.findOne({
+					schedule_id: schedule_id
+				}, function(err, data) {
+					if (err) cb(err);
+					else if (!data) cb('유효하지 않은 정기 스케쥴입니다.');
+					else {
+						db.regular_schedule.remove({
+							schedule_id: schedule_id
+						}, function(err) {
+							cb(err, '성공적으로 정기 일정 삭제');
+						});
+					}
+				});
+			}
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+};
+
 exports.modifyReport = function(req, res) {
 	var team_id = req.params.team_id || false;
 	var report_id = req.body.report_id || false;
