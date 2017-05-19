@@ -410,6 +410,63 @@ exports.addSchedule = function(req, res) {
 
 };
 
+exports.getUserSchedule = function(req, res) {
+	var user_id = req.session.user_id;
+	// 'all' | 'temporal' | 'regular'
+	var type = req.query.type || false;
+	
+	async.waterfall([
+		cb => {
+			if (!type) {
+				cb('type is not specified');
+			} else if (type !== 'all' && type !== 'temporal' && type !== 'regular') {
+				cb('invalid type is given');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			async.parallel({
+				temporal: function(pcb) {
+					if (type === 'all' || type === 'temporal') {
+						db.temporal_schedule.find({
+							user_id: user_id
+						}, function(err, tmp_data) {
+							pcb(err, tmp_data);
+						});
+					} else {
+						pcb(null);
+					}
+				},
+				regular: function(pcb) {
+					if (type === 'all' || type === 'regular') {
+						db.regular_schedule.find({
+							user_id: user_id
+						}, function(err, reg_data) {
+							pcb(err, reg_data); 
+						})
+					} else {
+						pcb(null);
+					}
+				}
+			}, function(err, pdata) {
+				cb(err, pdata);
+			});
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+	
+};
+
 exports.modifyReport = function(req, res) {
 	var team_id = req.params.team_id || false;
 	var report_id = req.body.report_id || false;
