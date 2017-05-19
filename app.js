@@ -4,6 +4,14 @@
  */
 global.__path = __dirname + '/';
 
+global.randString = function (len) {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for( var i=0; i < len; i++ )
+    	text += possible.charAt(Math.floor(Math.random() * possible.length));
+    return text;
+};
+
 var express = require('express')
   , app = express()
   , server = require('http').Server(app)
@@ -63,6 +71,8 @@ var sessChk = function(needSession) {
 	}
 };
 
+
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -114,6 +124,11 @@ app.get('/user/logout', sessChk(true), routes_ajax.logoutUser);
 app.put('/user/signup', sessChk(false), routes_ajax.signupUser);
 app.get('/user', sessChk(true), routes_ajax.getUserById);
 app.post('/user', sessChk(true), routes_ajax.updateUser);
+
+app.get('/team/report/:team_id', sessChk(true), routes_ajax.getReport);
+app.post('/team/report/:team_id', sessChk(true), routes_ajax.modifyReport);
+app.put('/team/report/:team_id', sessChk(true), routes_ajax.createReport);
+app.delete('/team/report/:team_id', sessChk(true), routes_ajax.deleteReport);
 
 app.get('/user/schedule/sync', sessChk(true), routes_ajax.syncSchedule);
 
