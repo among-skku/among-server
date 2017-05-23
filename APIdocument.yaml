@@ -562,7 +562,7 @@ paths:
         - file
       summary: 파일 다운로드
       description: ''
-      operationId: getFile
+      operationId: downloadFile
       produces:
         - application/json
       parameters:
@@ -640,6 +640,8 @@ paths:
       summary: 파일 업로드
       description: ''
       operationId: uploadFile
+      consumes:
+        - multipart/form-data
       produces:
         - application/json
       parameters:
@@ -658,12 +660,12 @@ paths:
           required: false
           type: string
           description: 업로드 하는 파일에 대한 설명
-        - name: File_data
-          in: body
+        - name: file
+          in: formData
           description: 업로드할 파일 데이터
           required: true
-          schema:
-            $ref: '#/definitions/File_Manager'
+          type: string
+          format: binary
       responses:
         '200':
           description: 파일 업로드 성공
