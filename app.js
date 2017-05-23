@@ -32,7 +32,9 @@ var express = require('express')
   , fs = require('fs')
   , path = require('path')
   , session = require('express-session')
-  , cookieParser = require('cookie-parser');
+  , cookieParser = require('cookie-parser')
+  , multer = require('multer')
+  , mkdirp = require('mkdirp');;
   // , redis = require('redis')
   // , sharedsession = require("express-socket.io-session");
 
@@ -49,6 +51,19 @@ if (fs.existsSync(__path + 'config.json')) {
 	console.log( __path + 'config.json 파일을 설정해주십시오');
 }
 
+__storage_path = __path + __storage_path;
+__temp_path = __path + __temp_path;
+
+var multer_upload = multer({dest: __temp_path });
+console.log('__temp_path:', __temp_path);
+
+if (!fs.existsSync(__temp_path)) {
+	mkdirp(__temp_path, function(err) {
+		if (err) {
+			console.log('creating temp directory failed!', err);
+		}
+	});
+}
 /*
 global.__client = redis.createClient(__redisPort, __redisHost);
 __client.on('error', function (err) {
@@ -148,10 +163,13 @@ app.put('/user/schedule', sessChk(true), routes_ajax.addSchedule);
 app.post('/user/schedule', sessChk(true), routes_ajax.modifyUserSchedule);
 app.delete('/user/schedule', sessChk(true), routes_ajax.deleteUserSchedule);
 
+app.get('/team/file/:team_id/list', sessChk(true), routes_ajax.getFileList);
+app.post('/team/file/:team_id/upload', sessChk(true), multer_upload.single('upload'), routes_ajax.uploadFile);
+
 
 routes_sock.init_io(io);
 global.__io = io;
 
 server.listen(app.get('port'), function(){
-  console.log("Express server listening on port " + app.get('port'));
+	console.log("Express server listening on port " + app.get('port'));
 });

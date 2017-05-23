@@ -1,9 +1,12 @@
 var async = require('async');
+var fs = require('fs');
+var mkdirp = require('mkdirp');
 var db = {
 	user: require(__path + 'modules/db/user'),
 	report: require(__path + 'modules/db/report'),
 	regular_schedule: require(__path + 'modules/db/regular_schedule'),
-	temporal_schedule: require(__path + 'modules/db/temporal_schedule')
+	temporal_schedule: require(__path + 'modules/db/temporal_schedule'),
+	file_manager: require(__path + 'modules/db/file_manager')
 };
 
 exports.loginUser = function(req, res) {
@@ -826,6 +829,111 @@ exports.deleteReport = function(req, res) {
 		}
 	});
 };
+
+exports.getFileList = function(req, res) {
+	var team_id = req.params.team_id || false;
+	
+	async.waterfall([
+		cb => {
+			if (!team_id) {
+				cb('insufficient params');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.file_manager.find({
+				team_id: team_id
+			}).sort({
+				upload_time: -1
+			}).exec(function(err, file_data) {
+				cb(err, file_data);
+			});
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+};
+
+exports.uploadFile = function(req, res) {
+	var team_id = req.params.team_id || false;;
+	var file_id = 'file_' + randString(10);
+	var file_path = __storage_path + '/' + team_id + '/' + file_id;
+	var file_name = req.query.file_name || false;
+	var contents = req.query.contents || '';
+	var uploader = req.session.user_id || false;
+	var upload_time = new Date();
+	
+	console.log('req.file:', req.file);
+
+	async.waterfall([
+		cb => {
+			if (!team_id || !file_name || !uploader) {
+				// cb(req.body);
+				cb('insufficient parameters');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			if (fs.existsSync(__storage_path + '/' + team_id)) {
+				cb(null);
+			} else {
+				mkdirp(__storage_path + '/' + team_id, function(err) {
+					cb(err);
+				});
+			}
+		},
+		cb => {
+			async.parallel([
+				nj => {
+					var snapshot = new db.file_manager({
+						team_id: team_id,
+						file_id: file_id,
+						file_path: file_path,
+						file_name: file_name,
+						contents: contents,
+						uploaer: uploader,
+						upload_time: upload_time
+					});
+
+					snapshot.save(function(err) {
+						nj(err);
+					});
+					
+				},
+				nj => {
+					var tmp_path = req.file.path;
+					fs.rename(tmp_path, file_path, function(_err) {
+						//fs.chmod(target_path, 0755);	// 755 is wrong. 0755 or '755' are correct.
+						nj(_err);
+					});
+				}
+			], function(err) {
+				cb(err, '파일이 정상적으로 업로드 되었습니다.');
+			});
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+};
+
 
 
 exports.ajaxTest = function(req, res) {
