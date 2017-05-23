@@ -251,7 +251,7 @@ paths:
         - user_schedule
       summary: 유저 스케쥴 변경
       description: ''
-      operationId: changeUserSchedule
+      operationId: modifyUserSchedule
       produces:
         - application/json
       parameters:
@@ -536,7 +536,7 @@ paths:
           description: 검색 실패
         '404':
           description: 검색문구 없음
-  '/team/file/{team_id}':
+  '/team/file/{team_id}/list':
     get:
       tags:
         - file
@@ -556,7 +556,7 @@ paths:
           description: 파일리스트 조회 성공
         '400':
           description: 파일리스트 조회 실패
-  '/team/file/{team_id}/{file_directory}':
+  '/team/file/{team_id}':
     get:
       tags:
         - file
@@ -571,9 +571,9 @@ paths:
           description: Team ID
           required: true
           type: string
-        - name: file_directory
-          in: path
-          description: File-Directory
+        - name: file_id
+          in: query
+          description: file_id
           required: true
           type: string
         - name: file_name
@@ -612,26 +612,6 @@ paths:
           description: 파일 데이터 변경 실패
         '404':
           description: 존재하지 않는 파일
-    put:
-      tags:
-        - file
-      summary: 파일 업로드
-      description: ''
-      operationId: uploadFile
-      produces:
-        - application/json
-      parameters:
-        - name: File_data
-          in: body
-          description: 업로드할 파일 데이터
-          required: true
-          schema:
-            $ref: '#/definitions/File_Manager'
-      responses:
-        '200':
-          description: 파일 업로드 성공
-        '400':
-          description: 파일 업로드 실패
     delete:
       tags:
         - file
@@ -653,6 +633,43 @@ paths:
           description: 파일 삭제 실패
         '404':
           description: 존재하지 않는 파일
+  '/team/file/{team_id}/upload':
+    post:
+      tags:
+        - file
+      summary: 파일 업로드
+      description: ''
+      operationId: uploadFile
+      produces:
+        - application/json
+      parameters:
+        - name: team_id
+          in: path
+          required: true
+          type: string
+          description: 파일을 업로드할 팀의 이름
+        - name: file_name
+          in: query
+          required: true
+          type: string
+          description: 업로드 하는 파일 이름
+        - name: contents
+          in: query
+          required: false
+          type: string
+          description: 업로드 하는 파일에 대한 설명
+        - name: File_data
+          in: body
+          description: 업로드할 파일 데이터
+          required: true
+          schema:
+            $ref: '#/definitions/File_Manager'
+      responses:
+        '200':
+          description: 파일 업로드 성공
+        '400':
+          description: 파일 업로드 실패
+    
   '/team/schedule/{team_id}':
     get:
       tags:
@@ -1095,7 +1112,9 @@ definitions:
     properties:
       team_id:
         type: string
-      file_directory:
+      file_id:
+        type: string
+      file_path:
         type: string
       file_name:
         type: string
