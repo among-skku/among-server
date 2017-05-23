@@ -934,6 +934,46 @@ exports.uploadFile = function(req, res) {
 	});
 };
 
+exports.downloadFile = function(req, res) {
+	var team_id = req.params.team_id || false;
+	var file_id = req.query.file_id || false;
+	var file_name = req.query.file_name || false;
+	
+	async.waterfall([
+		cb => {
+			if (!team_id || !file_id || !file_name) {
+				cb('insufficient params');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.file_manager.findOne({
+				team_id: team_id,
+				file_id: file_id,
+				file_name: file_name
+			}, function(err, file_data) {
+				if (!file_data) {
+					cb('cannot find file');
+				} else {
+					cb(err, file_data);
+				}
+			});
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.download(result.file_path, result.file_name);
+			// res.json({
+			// 	result: result
+			// });
+		}
+	});
+	
+};
 
 
 exports.ajaxTest = function(req, res) {

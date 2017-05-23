@@ -164,6 +164,7 @@ app.post('/user/schedule', sessChk(true), routes_ajax.modifyUserSchedule);
 app.delete('/user/schedule', sessChk(true), routes_ajax.deleteUserSchedule);
 
 app.get('/team/file/:team_id/list', sessChk(true), routes_ajax.getFileList);
+app.get('/team/file/:team_id', sessChk(true), routes_ajax.downloadFile);
 app.post('/team/file/:team_id/upload', sessChk(true), multer_upload.single('upload'), routes_ajax.uploadFile);
 
 
