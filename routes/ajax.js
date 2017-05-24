@@ -879,6 +879,8 @@ exports.uploadFile = function(req, res) {
 			if (!team_id || !file_name || !uploader) {
 				// cb(req.body);
 				cb('insufficient parameters');
+			} else if (typeof req.file === 'undefined') {
+				cb('file is not uploaded');
 			} else {
 				cb(null);
 			}
@@ -901,7 +903,7 @@ exports.uploadFile = function(req, res) {
 						file_path: file_path,
 						file_name: file_name,
 						contents: contents,
-						uploaer: uploader,
+						uploader: uploader,
 						upload_time: upload_time
 					});
 
@@ -967,13 +969,70 @@ exports.downloadFile = function(req, res) {
 			});
 		} else {
 			res.download(result.file_path, result.file_name);
-			// res.json({
-			// 	result: result
-			// });
 		}
 	});
-	
 };
+
+exports.modifyFileMetaData = function(req, res) {
+	var team_id = req.params.team_id || false;
+	var file_id = req.body.file_id || false;
+	var file_name = req.body.file_name || false;
+	var contents = req.body.contents || false;
+	var uploader = req.session.user_id || false;
+	
+	async.waterfall([
+		cb => {
+			if (!team_id || !file_id) {
+				cb('insufficient params');
+			} else if (!uploader) {
+				cb('need session. please login');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.file_manager.findOne({
+				team_id: team_id,
+				file_id: file_id
+			}, function(err, file_meta_data) {
+				if (!file_meta_data) {
+					cb('cannot find that file!');
+				} else {
+					cb(err, file_meta_data);
+				}
+			});
+		},
+		(meta_data, cb) => {
+			if (meta_data.uploader !== uploader) {
+				cb('only uploader can modify file meta data');
+			} else {
+				var change_data = {};
+				if (file_name) change_data.file_name = file_name;
+				if (contents) change_data.contents = contents;
+				
+				db.file_manager.update({
+					team_id: team_id,
+					file_id: file_id
+				}, {
+					$set: change_data
+				}, function(err) {
+					cb(err, 'file meta data changed successfully');
+				});
+			}
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+}
+
 
 
 exports.ajaxTest = function(req, res) {
