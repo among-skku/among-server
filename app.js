@@ -34,7 +34,7 @@ var express = require('express')
   , session = require('express-session')
   , cookieParser = require('cookie-parser')
   , multer = require('multer')
-  , mkdirp = require('mkdirp');;
+  , mkdirp = require('mkdirp');
   // , redis = require('redis')
   // , sharedsession = require("express-socket.io-session");
 
