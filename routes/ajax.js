@@ -1031,7 +1031,70 @@ exports.modifyFileMetaData = function(req, res) {
 			});
 		}
 	});
-}
+};
+
+exports.deleteFileName = function(req, res) {
+	var team_id = req.params.team_id || false;
+	var file_id = req.body.file_id || false;
+	
+	async.waterfall([
+		cb => {
+			if (!team_id || !file_id) {
+				cb('insufficient params');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.file_manager.findOne({
+				file_id: file_id,
+				team_id: team_id
+			}, function(err, file_meta_data) {
+				if (!file_meta_data) {
+					cb('cannot find file');
+				} else {
+					cb(err, file_meta_data);
+				}
+			});
+		},
+		(meta_data, cb) => {
+			var real_file_path = meta_data.file_path;
+			
+			fs.stat(real_file_path, function(stat_err, status) {
+				if (stat_err) {
+					cb(stat_err);
+				} else {
+					if (status.isFile()) {
+						fs.unlink(real_file_path, function(unlink_err) {
+							cb(unlink_err);
+						})
+					} else {
+						console.log(real_file_path, 'is not simple file. cannot delete this');
+						cb(null);
+					}
+				}
+			});
+		},
+		cb => {
+			db.file_manager.remove({
+				file_id: file_id,
+				team_id: team_id
+			}, function(err) {
+				cb(err, '파일이 성공적으로 삭제되었습니다.');
+			});
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+};
 
 
 
