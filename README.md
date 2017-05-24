@@ -17,8 +17,10 @@ https://docs.mongodb.com/master/tutorial/install-mongodb-on-ubuntu/
 Create file on path */workspace/among-server/config.json*
     
 	{
-		"__mongodb_host": "mongodb://localhost:27017/among"
-    }
+		"__mongodb_host": "mongodb://localhost:27017/among",
+		"__storage_path": "./storage",
+		"__temp_path": "./tmp"
+	}
 
 ### Server starting command
 

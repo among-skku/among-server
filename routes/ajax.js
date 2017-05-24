@@ -1,9 +1,12 @@
 var async = require('async');
+var fs = require('fs');
+var mkdirp = require('mkdirp');
 var db = {
 	user: require(__path + 'modules/db/user'),
 	report: require(__path + 'modules/db/report'),
 	regular_schedule: require(__path + 'modules/db/regular_schedule'),
-	temporal_schedule: require(__path + 'modules/db/temporal_schedule')
+	temporal_schedule: require(__path + 'modules/db/temporal_schedule'),
+	file_manager: require(__path + 'modules/db/file_manager')
 };
 
 exports.loginUser = function(req, res) {
@@ -826,6 +829,273 @@ exports.deleteReport = function(req, res) {
 		}
 	});
 };
+
+exports.getFileList = function(req, res) {
+	var team_id = req.params.team_id || false;
+	
+	async.waterfall([
+		cb => {
+			if (!team_id) {
+				cb('insufficient params');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.file_manager.find({
+				team_id: team_id
+			}).sort({
+				upload_time: -1
+			}).exec(function(err, file_data) {
+				cb(err, file_data);
+			});
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+};
+
+exports.uploadFile = function(req, res) {
+	var team_id = req.params.team_id || false;;
+	var file_id = 'file_' + randString(10);
+	var file_path = __storage_path + '/' + team_id + '/' + file_id;
+	var file_name = req.query.file_name || false;
+	var contents = req.query.contents || '';
+	var uploader = req.session.user_id || false;
+	var upload_time = new Date();
+	
+	console.log('req.file:', req.file);
+
+	async.waterfall([
+		cb => {
+			if (!team_id || !file_name || !uploader) {
+				// cb(req.body);
+				cb('insufficient parameters');
+			} else if (typeof req.file === 'undefined') {
+				cb('file is not uploaded');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			if (fs.existsSync(__storage_path + '/' + team_id)) {
+				cb(null);
+			} else {
+				mkdirp(__storage_path + '/' + team_id, function(err) {
+					cb(err);
+				});
+			}
+		},
+		cb => {
+			async.parallel([
+				nj => {
+					var snapshot = new db.file_manager({
+						team_id: team_id,
+						file_id: file_id,
+						file_path: file_path,
+						file_name: file_name,
+						contents: contents,
+						uploader: uploader,
+						upload_time: upload_time
+					});
+
+					snapshot.save(function(err) {
+						nj(err);
+					});
+					
+				},
+				nj => {
+					var tmp_path = req.file.path;
+					fs.rename(tmp_path, file_path, function(_err) {
+						//fs.chmod(target_path, 0755);	// 755 is wrong. 0755 or '755' are correct.
+						nj(_err);
+					});
+				}
+			], function(err) {
+				cb(err, '파일이 정상적으로 업로드 되었습니다.');
+			});
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+};
+
+exports.downloadFile = function(req, res) {
+	var team_id = req.params.team_id || false;
+	var file_id = req.query.file_id || false;
+	var file_name = req.query.file_name || false;
+	
+	async.waterfall([
+		cb => {
+			if (!team_id || !file_id || !file_name) {
+				cb('insufficient params');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.file_manager.findOne({
+				team_id: team_id,
+				file_id: file_id,
+				file_name: file_name
+			}, function(err, file_data) {
+				if (!file_data) {
+					cb('cannot find file');
+				} else {
+					cb(err, file_data);
+				}
+			});
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.download(result.file_path, result.file_name);
+		}
+	});
+};
+
+exports.modifyFileMetaData = function(req, res) {
+	var team_id = req.params.team_id || false;
+	var file_id = req.body.file_id || false;
+	var file_name = req.body.file_name || false;
+	var contents = req.body.contents || false;
+	var uploader = req.session.user_id || false;
+	
+	async.waterfall([
+		cb => {
+			if (!team_id || !file_id) {
+				cb('insufficient params');
+			} else if (!uploader) {
+				cb('need session. please login');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.file_manager.findOne({
+				team_id: team_id,
+				file_id: file_id
+			}, function(err, file_meta_data) {
+				if (!file_meta_data) {
+					cb('cannot find that file!');
+				} else {
+					cb(err, file_meta_data);
+				}
+			});
+		},
+		(meta_data, cb) => {
+			if (meta_data.uploader !== uploader) {
+				cb('only uploader can modify file meta data');
+			} else {
+				var change_data = {};
+				if (file_name) change_data.file_name = file_name;
+				if (contents) change_data.contents = contents;
+				
+				db.file_manager.update({
+					team_id: team_id,
+					file_id: file_id
+				}, {
+					$set: change_data
+				}, function(err) {
+					cb(err, 'file meta data changed successfully');
+				});
+			}
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+};
+
+exports.deleteFileName = function(req, res) {
+	var team_id = req.params.team_id || false;
+	var file_id = req.body.file_id || false;
+	
+	async.waterfall([
+		cb => {
+			if (!team_id || !file_id) {
+				cb('insufficient params');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.file_manager.findOne({
+				file_id: file_id,
+				team_id: team_id
+			}, function(err, file_meta_data) {
+				if (!file_meta_data) {
+					cb('cannot find file');
+				} else {
+					cb(err, file_meta_data);
+				}
+			});
+		},
+		(meta_data, cb) => {
+			var real_file_path = meta_data.file_path;
+			
+			fs.stat(real_file_path, function(stat_err, status) {
+				if (stat_err) {
+					cb(stat_err);
+				} else {
+					if (status.isFile()) {
+						fs.unlink(real_file_path, function(unlink_err) {
+							cb(unlink_err);
+						})
+					} else {
+						console.log(real_file_path, 'is not simple file. cannot delete this');
+						cb(null);
+					}
+				}
+			});
+		},
+		cb => {
+			db.file_manager.remove({
+				file_id: file_id,
+				team_id: team_id
+			}, function(err) {
+				cb(err, '파일이 성공적으로 삭제되었습니다.');
+			});
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+};
+
 
 
 exports.ajaxTest = function(req, res) {
