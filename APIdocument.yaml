@@ -595,7 +595,7 @@ paths:
         - file
       summary: 파일 관련 데이터 변경 (내용 말고 부가 설명)
       description: ''
-      operationId: modifyFileData
+      operationId: modifyFileMetaData
       produces:
         - application/json
       parameters:
