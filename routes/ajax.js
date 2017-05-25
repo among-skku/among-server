@@ -6,7 +6,9 @@ var db = {
 	report: require(__path + 'modules/db/report'),
 	regular_schedule: require(__path + 'modules/db/regular_schedule'),
 	temporal_schedule: require(__path + 'modules/db/temporal_schedule'),
-	file_manager: require(__path + 'modules/db/file_manager')
+	file_manager: require(__path + 'modules/db/file_manager'),
+	team: require(__path + 'modules/db/team'),
+	invitation: require(__path + 'modules/db/invitation')
 };
 
 exports.loginUser = function(req, res) {
@@ -1081,6 +1083,174 @@ exports.deleteFileName = function(req, res) {
 				team_id: team_id
 			}, function(err) {
 				cb(err, '파일이 성공적으로 삭제되었습니다.');
+			});
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+};
+
+exports.getTeamInvitation = function(req, res) {
+	var team_id = req.params.team_id || false;
+	async.waterfall([
+		cb => {
+			if (!team_id) {
+				cb('insufficient params');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.invitation.find({
+				team_id: team_id
+			}, function(err, invit_data) {
+				cb(err, invit_data);
+			});
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+};
+
+exports.inviteMember = function(req, res) {
+	var team_id = req.params.team_id || false;
+	var user_id = req.body.user_id || false;
+	var current_user_id = req.session.user_id || false;
+	var invitation_id = 'invitation_' + randString(10);
+	async.waterfall([
+		cb => {
+			if (!team_id || !user_id || !current_user_id) {
+				cb('insufficient params');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.team.findOne({
+				team_id: team_id
+			}, function(err, team_data) {
+				if (!team_data) {
+					cb('cannot find team');
+				} else {
+					cb(err, team_data);
+				}
+			});
+		},
+		(team_data, cb) => {
+			var manager_id = team_data.manager_id;
+			var team_id = team_data.team_id;
+			if (manager_id !== current_user_id) {
+				cb('조장만 초대할 수 있습니다.');
+			} else {
+				cb(null, team_id);
+			}
+		},
+		(team_id, cb) => {
+			db.user.findOne({
+				user_id: user_id
+			}, function(err, user_data) {
+				if (!user_data) {
+					cb('존재하지 않는 유저입니다.');
+				} else {
+					cb(null, team_id);
+				}
+			});
+		},
+		(team_id, cb) => {
+			var snapshot = new db.invitation({
+				invitation_id: invitation_id,
+				team_id: team_id,
+				user_id: user_id,
+				state: 'Pending'
+			});
+			
+			snapshot.save(function(err) {
+				cb(err, '성공적으로 초대되었습니다.');
+			});
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+};
+
+exports.cancelInvitation = function(req, res) {
+	var team_id = req.params.team_id || false;
+	var invitation_id = req.body.invitation_id || false;
+	var current_user_id = req.session.user_id || false;
+	async.waterfall([
+		cb => {
+			if (!team_id || !invitation_id || !current_user_id) {
+				cb('insufficient params');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.team.findOne({
+				team_id: team_id
+			}, function(err, team_data) {
+				if (!team_data) {
+					cb('cannot find team');
+				} else {
+					cb(err, team_data);
+				}
+			});
+		},
+		(team_data, cb) => {
+			var manager_id = team_data.manager_id;
+			var team_id = team_data.team_id;
+			if (manager_id !== current_user_id) {
+				cb('조장만 초대를 취소할 수 있습니다.');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.invitation.findOne({
+				invitation_id: invitation_id,
+				state: 'Pending'
+			}, function(err, invite_data) {
+				if (!invite_data) {
+					cb('cannot find invitation');
+				} else {
+					cb(err, invite_data);
+				}
+			});
+		},
+		(invite_data, cb) => {
+			db.invitation.update({
+				invitation_id: invitation_id,
+				state: 'Pending'
+			}, {
+				$set: {
+					state: 'Canceled'
+				}
+			}, function(err) {
+				cb(err, '성공적으로 초대가 취소되었습니다.');
 			});
 		}
 	], function(err, result) {

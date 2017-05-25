@@ -169,6 +169,10 @@ app.post('/team/file/:team_id', sessChk(true), routes_ajax.modifyFileMetaData);
 app.post('/team/file/:team_id/upload', sessChk(true), multer_upload.single('upload'), routes_ajax.uploadFile);
 app.delete('/team/file/:team_id', sessChk(true), routes_ajax.deleteFileName);
 
+app.get('/team/invitations/:team_id', sessChk(true), routes_ajax.getTeamInvitation);
+app.put('/team/invitations/:team_id', sessChk(true), routes_ajax.inviteMember);
+app.delete('/team/invitations/:team_id', sessChk(true), routes_ajax.cancelInvitation);
+
 
 routes_sock.init_io(io);
 global.__io = io;
