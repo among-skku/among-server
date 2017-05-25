@@ -615,6 +615,256 @@ exports.deleteNotice = function (req, res) {
 	});	
 }
 
+exports.createTeam = function (req, res) {
+	
+	if (Object.keys(req.query).length) {
+		req.body = req.query;		
+	}
+	
+	var team_id = 'team_' + randString(10);
+	//var team_id = "team_mj4VfQitGc";
+	var team_name = req.body.team_name || "";
+	var manager_id = req.body.manager_id || req.session.user_id || '';
+	var member_id = req.body.member_id || ""; 
+	var contents = req.body.contents || "";
+	var deleted = false;
+	
+	async.waterfall([
+		cb => {
+			if (!team_name || !manager_id) {
+				cb('invalid inputs');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.team.findOne({
+				team_id: team_id
+			}, function(err, result) {
+				if (err) {
+					return cb(err);
+				}
+				cb(null, result);
+			});
+		},
+		(team_id_data, cb) => {
+			if (team_id_data) {
+				return cb('team id already exist');
+			}
+			var new_team = new db.team({				
+				team_id: team_id,
+				team_name: team_name,
+				manager_id: manager_id,
+				member_id: member_id,
+				contents: contents,
+				deleted: deleted				
+			});
+			
+			new_team.save( function(err) {
+				if (err) {
+					cb(err);
+				} else {
+					cb(null, '팀 생성 성공!');
+				}
+			});
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});	
+}
+
+exports.getTeamData = function (req, res) {
+	
+	if (Object.keys(req.query).length) {
+		req.body = req.query;		
+	}
+	
+	var team_id = req.params.team_id || "";
+	
+	async.waterfall([
+		cb => {
+			if (!team_id) {
+				cb('정보를 불러올 팀 정보가 명시되지 않았습니다.');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.team.findOne({
+				team_id: team_id
+			}, function (err, data) {
+				cb(err, data);
+			})
+		},
+		(team_data, cb) => {
+			if (!team_data) {
+				cb('해당 팀에 대한 정보가 없습니다.');
+			} else {
+				cb(null, team_data);
+			}
+		}
+	], function (err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});	
+}
+
+exports.updateTeam = function (req, res) {
+	
+	if (Object.keys(req.query).length) {
+		req.body = req.query;		
+	}
+	
+	var team_id = req.params.team_id || false;
+	var team_name = req.body.team_name || false;
+	var manager_id = req.body.team_id || false;
+	var member_id = req.body.member_id || false;
+	var contents = req.body.contents || false;
+	
+	if (member_id) {
+		try {
+			member_id = JSON.parse(member_id);
+			if (!Array.isArray(member_id)) {
+				throw 'member_id format is not array';
+			}
+		} catch (e) {
+			console.log('routes/ajax.js updateTeam member_id JSON parse error', e);
+			member_id = false;
+		}
+	}
+	
+	async.waterfall ([
+		cb => {
+			var write_data = {
+				team_id: team_id,
+			};
+			
+			if (manager_id) {write_data.manager_id = manager_id;}
+			// 매니저 변경은 생각해볼 필요...
+			if (team_name) {write_data.team_name = team_name;}
+			if (contents) {write_data.contents = contents;}
+			
+			db.team.update({
+				team_id: team_id,
+			}, {
+				$set: write_data
+			}, function (err) {
+				if (err) {
+					cb(err);
+				} else {
+					cb(null, '팀 정보가 정상적으로 수정되었습니다.');
+				}
+			});
+		}
+	], function (err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}		
+	});
+}
+
+exports.deleteTeam = function (req, res){
+
+	if (Object.keys(req.query).length) {
+		req.body = req.query;		
+	}
+	
+	var team_id = req.params.team_id || '';
+	
+			// due_date, report, file_manager
+			// user에서 team_id  삭제
+			// appointment_schedule, team, feed
+			
+			// invitation 처리??
+	
+	async.waterfall([
+		cb => {
+			if (!team_id) {
+				cb('삭제할 팀의 정보가 명시되지 않았습니다.');
+			} else {
+				cb(null);
+			}
+		},
+		cb => { // notice에서 해당 팀의 정보 삭제
+			db.notice.remove({
+				team_id: team_id				
+			}, function(err, result) {					
+				cb(err, result);
+			});		
+		},
+		(result, cb) => { // chat, chat_data에서 해당 팀의 정보 삭제
+			async.mapLimit(data, 10, function (item, next) {
+				db.chat.find({
+					team_id: item.team_id
+				}, function (err, message_data) {
+					if (err) {
+						next(err);
+					} else {						
+						db.chat_data.remove({
+							message_id: message_data.message_id
+						}, function (err, remove) {						
+							if (err) {
+								console.log('delete chat_data failed');
+							} else {
+								console.log(remove);
+								cb(err, remove);
+							}
+						});						
+					}
+				});
+			}, function (err, remove) {
+				if (err) {
+					console.log(err);
+				} else {
+					db.chat.remove({
+						team_id: team_id				
+					}, function(err, result) {					
+						cb(err, result);
+					});				
+				}
+			});			
+		},
+		(team_data, cb) => {
+			if (!team_data) {
+				cb('해당 팀에 대한 정보가 없습니다.');
+			} else {
+				cb(null, team_data);
+			}
+		}
+	], function (err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});	
+}
+
 
 exports.ajaxTest = function(req, res) {
 	var msg = {

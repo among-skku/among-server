@@ -133,6 +133,12 @@ app.put('/team/notice/:team_id', sessChk(true), routes_ajax.addNotice);
 app.get('/team/notice/:team_id', sessChk(true), routes_ajax.getNotice);
 app.delete('/team/notice/:team_id', sessChk(true), routes_ajax.deleteNotice);
 
+// team
+app.put('/team', sessChk(true), routes_ajax.createTeam);
+app.get('/team/:team_id', sessChk(true), routes_ajax.getTeamData);
+app.post('/team/:team_id', sessChk(true), routes_ajax.updateTeam);
+app.delete('/team/:team_id', sessChk(true), routes_ajax.deleteTeam);
+
 routes_sock.init_io(io);
 global.__io = io;
 
