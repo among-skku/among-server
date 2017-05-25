@@ -23,6 +23,7 @@ global.str2date = function(str) {
 	}
 };
 
+
 var express = require('express')
   , app = express()
   , server = require('http').Server(app)
@@ -172,6 +173,17 @@ app.delete('/team/file/:team_id', sessChk(true), routes_ajax.deleteFileName);
 app.get('/team/invitations/:team_id', sessChk(true), routes_ajax.getTeamInvitation);
 app.put('/team/invitations/:team_id', sessChk(true), routes_ajax.inviteMember);
 app.delete('/team/invitations/:team_id', sessChk(true), routes_ajax.cancelInvitation);
+
+
+// chat
+app.put('/team/chat/:team_id', sessChk(true), routes_ajax.sendChat);
+app.get('/team/chat/search/:team_id', sessChk(true), routes_ajax.searchChatting);
+app.get('/team/chat/:team_id', sessChk(true), routes_ajax.getTeamChat);
+
+// notice
+app.put('/team/notice/:team_id', sessChk(true), routes_ajax.addNotice);
+app.get('/team/notice/:team_id', sessChk(true), routes_ajax.getNotice);
+app.delete('/team/notice/:team_id', sessChk(true), routes_ajax.deleteNotice);
 
 
 routes_sock.init_io(io);
