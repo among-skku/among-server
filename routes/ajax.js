@@ -6,6 +6,7 @@ var db = {
 	report: require(__path + 'modules/db/report'),
 	regular_schedule: require(__path + 'modules/db/regular_schedule'),
 	temporal_schedule: require(__path + 'modules/db/temporal_schedule'),
+	team_schedule: require(__path + 'modules/db/team_schedule'),
 	chat: require(__path + 'modules/db/chat'),
 	chat_data: require(__path + 'modules/db/chat_data'),
 	notice: require(__path + 'modules/db/notice'),
@@ -1643,6 +1644,183 @@ exports.deleteNotice = function (req, res) {
 			});
 		}		
 	});	
+}
+
+exports.getTeamSchedule = function(req, res) {
+	var team_id = req.params.team_id || false;
+	var tag = req.query.tag || false;
+	var team_schedule_id = req.query.team_schedule_id || false;
+	
+	var find_query = {
+		team_id: team_id
+	};
+	if (tag) find_query.tag = new RegExp(tag);
+	if (team_schedule_id) find_query.team_schedule_id = team_schedule_id;
+	
+	async.waterfall([
+		cb => {
+			//implement me!		
+			if (!team_id) {
+				cb('insufficient params');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.team_schedule.find(find_query, function(err, schedule_data) {
+				cb(err, schedule_data);
+			});
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+}
+exports.modifyTeamSchedule = function(req, res) {
+	var team_schedule_id = req.body.team_schedule_id || false;
+	var team_id = req.params.team_id || false;
+	var tag = req.body.tag || false;
+	var place = req.body.place || false;
+	var title = req.body.title || false;
+	var contents = req.body.contents || false;
+	var start_date = req.body.start_date || false;
+	var end_date = req.body.end_date || false;
+	
+	var update_query = {};
+	if (tag) update_query.tag = tag;
+	if (place) update_query.place = place;
+	if (title) update_query.title = title;
+	if (contents) update_query.contents = contents;
+	if (start_date) update_query.start_date = str2date(start_date);
+	if (end_date) update_query.end_date = str2date(end_date);
+	
+	async.waterfall([
+		cb => {
+			if (!team_id) {
+				cb('insufficient params');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.team_schedule.findOneAndUpdate({
+				team_schedule_id: team_schedule_id,
+				team_id: team_id
+			}, update_query, function(err, data) {
+				if (!data) {
+					cb('해당 팀 일정이 없습니다.');
+				} else {
+					cb(err, '팀 일정이 성공적으로 변경되었습니다.');
+				}
+			})
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+}
+exports.addTeamSchedule = function(req, res) {
+	var team_id = req.params.team_id || false;
+	var team_schedule_id = 'team_schedule_' + randString(10);
+	var tag = req.body.tag || '';
+	var place = req.body.place || '';
+	var title = req.body.title || '';
+	var contents = req.body.contents || '';
+	var start_date = str2date(req.body.start_date);
+	var end_date = str2date(req.body.end_date);
+	async.waterfall([
+		cb => {
+			if (!team_id || !tag || !place || !title || !contents) {
+				cb('insufficient params');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			var snapshot = db.team_schedule({
+				team_schedule_id: team_schedule_id,
+				tag: tag, //분류용 태그
+				place: place,
+				title: title,
+				contents: contents,
+				team_id: team_id,
+				start_date: start_date,
+				end_date: end_date
+			});
+			
+			snapshot.save(function(err) {
+				cb(err, '일정이 성공적으로 저장되었습니다.');
+			});
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+}
+exports.deleteTeamSchedule = function(req, res) {
+	var team_id = req.params.team_id || false;
+	var team_schedule_id = req.body.team_schedule_id || false;
+	async.waterfall([
+		cb => {
+			//implement me!		
+			if (!team_id || !team_schedule_id) {
+				cb('insufficient params');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.team_schedule.findOne({
+				team_id: team_id,
+				team_schedule_id: team_schedule_id
+			}, function(err, schedule_data) {
+				if (!schedule_data) {
+					cb('유효하지 않은 팀 스케쥴입니다.');
+				} else {
+					cb(err);
+				}
+			});
+		},
+		cb => {
+			db.team_schedule.remove({
+				team_id: team_id,
+				team_schedule_id: team_schedule_id
+			}, function(err) {
+				cb(err, '성공적으로 팀 스케쥴을 삭제했습니다.');
+			})
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
 }
 
 exports.ajaxTest = function(req, res) {

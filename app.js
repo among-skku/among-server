@@ -19,7 +19,7 @@ global.str2date = function(str) {
 		return new Date(str);
 	} else {
 		console.log('invalid usage of str2date', typeof str);
-		return null;
+		return new Date();
 	}
 };
 
@@ -184,6 +184,12 @@ app.get('/team/chat/:team_id', sessChk(true), routes_ajax.getTeamChat);
 app.put('/team/notice/:team_id', sessChk(true), routes_ajax.addNotice);
 app.get('/team/notice/:team_id', sessChk(true), routes_ajax.getNotice);
 app.delete('/team/notice/:team_id', sessChk(true), routes_ajax.deleteNotice);
+
+//team schedule
+app.get('/team/schedule/:team_id', sessChk(true), routes_ajax.getTeamSchedule);
+app.post('/team/schedule/:team_id', sessChk(true), routes_ajax.modifyTeamSchedule);
+app.put('/team/schedule/:team_id', sessChk(true), routes_ajax.addTeamSchedule);
+app.delete('/team/schedule/:team_id', sessChk(true), routes_ajax.deleteTeamSchedule);
 
 
 routes_sock.init_io(io);
