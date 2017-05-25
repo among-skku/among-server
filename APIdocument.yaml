@@ -1104,11 +1104,11 @@ definitions:
       state:
         type: string
         description: 'Accept, Reject, Pending, Canceled 중 한 개'
-  Appointment_Schedule:
+  Team_Schedule:
     type: object
     description: 팀에서 지정한 모임 일정
     properties:
-      appointment_id:
+      team_schedule_id:
         type: string
       name:
         type: string
