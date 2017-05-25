@@ -18,6 +18,16 @@ tags:
     description: '회원가입, 회원탈퇴, 로그인, 로그아웃 등 유저와 관련된 항목들'
   - name: team
     description: '프로젝트 팀 생성, 삭제, 참여 등과 같은 프로젝트 팀과 관련된 항목들'
+  - name: team_invite
+    description: '팀에서 이루어지는 초대 관련된 항목들'
+  - name: user_invite
+    description: '유저와 관련있는 초대 관련된 항목들'
+  - name: user_schedule
+    description: '유저 개인의 일정과 관련된 항목들'
+  - name: report
+    description: '팀 회의록과 관련된 항목들'
+  - name: schedule
+    description: '팀 일정과 관련된 항목들'
 schemes:
   - http
 paths:
@@ -149,26 +159,53 @@ paths:
           description: 잘못된 형식의 유저 이름이 전송됨
         '404':
           description: 유저가 발견되지 않음
-  /user/schedule/sync:
+  /user/invite:
     get:
       tags:
-        - user_schedule
-      summary: 유저 스케줄을 업로드한 데이터 바탕으로 sync 요청
+        - user_invite
+      summary: '유저 자신에게 온 초대장 목록을 받아봄'
       description: ''
-      operationId: syncSchedule
+      operationId: getMyInvitations
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: '성공적으로 초대장 목록을 받아옴'
+    post:
+      tags:
+        - user_invite
+      summary: '유저 자신에게 온 초대를 승낙함'
+      description: ''
+      operationId: acceptInvitation
       produces:
         - application/json
       parameters:
-        - name: sync_target
+        - name: invitation_id
           in: query
-          description: 'calendar, skku_portal 중 선택'
+          description: '승낙할 초대장 아이디'
           required: true
           type: string
       responses:
         '200':
-          description: 성공적으로 sync 완료
-        '400':
-          description: sync 실패
+          description: '성공적으로 초대를 거절함'
+    delete:
+      tags:
+        - user_invite
+      summary: '유저 자신에게 온 초대를 승낙함'
+      description: ''
+      operationId: rejectInvitation
+      produces:
+        - application/json
+      parameters:
+        - name: invitation_id
+          in: query
+          description: '거절할 초대장 아이디'
+          required: true
+          type: string
+      responses:
+        '200':
+          description: '성공적으로 초대를 거절함'
+
   /user/schedule/list:
     get:
       tags:
@@ -251,7 +288,7 @@ paths:
         - user_schedule
       summary: 유저 스케쥴 변경
       description: ''
-      operationId: changeUserSchedule
+      operationId: modifyUserSchedule
       produces:
         - application/json
       parameters:
@@ -536,7 +573,7 @@ paths:
           description: 검색 실패
         '404':
           description: 검색문구 없음
-  '/team/file/{team_id}':
+  '/team/file/{team_id}/list':
     get:
       tags:
         - file
@@ -556,13 +593,13 @@ paths:
           description: 파일리스트 조회 성공
         '400':
           description: 파일리스트 조회 실패
-  '/team/file/{team_id}/{file_directory}':
+  '/team/file/{team_id}':
     get:
       tags:
         - file
       summary: 파일 다운로드
       description: ''
-      operationId: getFile
+      operationId: downloadFile
       produces:
         - application/json
       parameters:
@@ -571,9 +608,9 @@ paths:
           description: Team ID
           required: true
           type: string
-        - name: file_directory
-          in: path
-          description: File-Directory
+        - name: file_id
+          in: query
+          description: file_id
           required: true
           type: string
         - name: file_name
@@ -612,26 +649,6 @@ paths:
           description: 파일 데이터 변경 실패
         '404':
           description: 존재하지 않는 파일
-    put:
-      tags:
-        - file
-      summary: 파일 업로드
-      description: ''
-      operationId: uploadFile
-      produces:
-        - application/json
-      parameters:
-        - name: File_data
-          in: body
-          description: 업로드할 파일 데이터
-          required: true
-          schema:
-            $ref: '#/definitions/File_Manager'
-      responses:
-        '200':
-          description: 파일 업로드 성공
-        '400':
-          description: 파일 업로드 실패
     delete:
       tags:
         - file
@@ -641,9 +658,9 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: file_name
+        - name: file_id
           in: query
-          description: 삭제할 파일 이름
+          description: 삭제할 파일 아이디
           required: true
           type: string
       responses:
@@ -653,6 +670,45 @@ paths:
           description: 파일 삭제 실패
         '404':
           description: 존재하지 않는 파일
+  '/team/file/{team_id}/upload':
+    post:
+      tags:
+        - file
+      summary: 파일 업로드
+      description: ''
+      operationId: uploadFile
+      consumes:
+        - multipart/form-data
+      produces:
+        - application/json
+      parameters:
+        - name: team_id
+          in: path
+          required: true
+          type: string
+          description: 파일을 업로드할 팀의 이름
+        - name: file_name
+          in: query
+          required: true
+          type: string
+          description: 업로드 하는 파일 이름
+        - name: contents
+          in: query
+          required: false
+          type: string
+          description: 업로드 하는 파일에 대한 설명
+        - name: file
+          in: formData
+          description: 업로드할 파일 데이터
+          required: true
+          type: string
+          format: binary
+      responses:
+        '200':
+          description: 파일 업로드 성공
+        '400':
+          description: 파일 업로드 실패
+    
   '/team/schedule/{team_id}':
     get:
       tags:
@@ -668,16 +724,21 @@ paths:
           required: true
           type: string
           description: 일정 불러올 팀 id
-        - name: range
+        - name: tag
           in: query
-          required: true
+          required: false
           type: string
-          description: 'range (default: all / appointment / due_date)'
+          description: 'tag를 통하여 필터링 한다. RegExp 사용 가능. 생략할 시 모든 태그를 응답함.'
+        - name: team_schedul_id
+          in: query
+          required: false
+          type: string
+          description: '명시할 시 해당 스케줄 아이디에 해당하는 항목만 불러옴'
       responses:
         '200':
-          description: 팀 일정(전체 / 회의 일정 / 마감일)을 불러옴
+          description: 팀 일정(전체 / 회의 일정 / 마감일 등)을 불러옴
           schema:
-            $ref: '#/definitions/Appointment_Schedule'
+            $ref: '#/definitions/team_Schedule'
         '400':
           description: 팀 일정을 불러오는 것에 실패함
     post:
@@ -689,11 +750,11 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: calendar_data
+        - name: team_schedule_data
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Calendar'
+            $ref: '#/definitions/team_Schedule'
       responses:
         '200':
           description: 팀 일정을 수정하는 것에 성공함
@@ -710,11 +771,11 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: calendar_data
+        - name: team_schedule_data
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Calendar'
+            $ref: '#/definitions/team_Schedule'
       responses:
         '200':
           description: 팀 일정을 추가하는 것에 성공함
@@ -729,11 +790,11 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: Subject
+        - name: team_schedule_id
           in: query
           required: true
           type: string
-          description: 삭제할 제목
+          description: 삭제할 팀 일정 아이디
       responses:
         '200':
           description: 팀 일정을 삭제하는 것에 성공함
@@ -1048,14 +1109,15 @@ definitions:
       state:
         type: string
         description: 'Accept, Reject, Pending, Canceled 중 한 개'
-  Appointment_Schedule:
+  team_Schedule:
     type: object
     description: 팀에서 지정한 모임 일정
     properties:
-      appointment_id:
+      team_schedule_id:
         type: string
-      name:
+      tag:
         type: string
+        description: '팀 스케줄 카테고리 이름 (발표/주간모임 등등)'
       place:
         type: string
       title:
@@ -1066,8 +1128,10 @@ definitions:
         type: string
       start_date:
         type: string
+        format: date
       end_date:
         type: string
+        format: date
   Team:
     type: object
     description: 팀이 프로젝트를 뜻한다
@@ -1095,7 +1159,9 @@ definitions:
     properties:
       team_id:
         type: string
-      file_directory:
+      file_id:
+        type: string
+      file_path:
         type: string
       file_name:
         type: string
