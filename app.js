@@ -99,7 +99,6 @@ var sessChk = function(needSession) {
 };
 
 
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -142,6 +141,11 @@ var routes_view = require('./routes/view')
 
 //테스트용 API
 app.get('/', routes_view.index);
+
+app.get('/login', routes_view.loginPage);
+
+
+
 app.all('/ajaxTest', routes_ajax.ajaxTest);
 app.all('/sessChk', routes_ajax.sessChk);
 //테스트용 API
