@@ -1,0 +1,121 @@
+<!doctype html>
+
+<html>
+	<head>
+		<title>among 서비스 회원가입 페이지</title>
+		<!--
+		<link rel="stylesheet" href="/css/bootstrap.css" />	
+		-->
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css">
+	</head>
+	
+	<body>
+		<div class="form-horizontal" action='/user/signup' method="POST">
+		  <fieldset>
+			<div id="legend">
+			  <legend class="">Among 서비스 회원가입</legend>
+			</div>
+			<div class="control-group">
+				<label class="control-label"  for="user_id">유저 ID</label>
+			  <div class="controls">
+				<input type="text" id="user_id" name="user_id" placeholder="" class="input-xlarge">
+				<p class="help-block">Username can contain any letters or numbers, without spaces</p>
+			  </div>
+			  <!-- Username -->
+			  <label class="control-label"  for="username">유저 이름</label>
+			  <div class="controls">
+				<input type="text" id="username" name="username" placeholder="" class="input-xlarge">
+				<p class="help-block">Username can contain any letters or numbers, without spaces</p>
+			  </div>
+			</div>
+
+			<div class="control-group">
+			  <!-- E-mail -->
+			  <label class="control-label" for="email">E-mail</label>
+			  <div class="controls">
+				<input type="text" id="email" name="email" placeholder="" class="input-xlarge">
+				<p class="help-block">Please provide your E-mail</p>
+			  </div>
+			</div>
+
+			<div class="control-group">
+			  <label class="control-label" for="password">Password</label>
+			  <div class="controls">
+				<input type="password" id="password" name="password" placeholder="" class="input-xlarge">
+				<p class="help-block">Password should be at least 4 characters</p>
+			  </div>
+			</div>
+
+			<div class="control-group">
+			  <label class="control-label"  for="password_confirm">Password (Confirm)</label>
+			  <div class="controls">
+				<input type="password" id="password_confirm" name="password_confirm" placeholder="" class="input-xlarge">
+				<p class="help-block">Please confirm password</p>
+			  </div>
+			</div>
+			  
+			<div class="control-group">
+			  <label class="control-label"  for="username">휴대폰 번호</label>
+			  <div class="controls">
+				<input type="text" id="phone" name="phone" placeholder="" class="input-xlarge">
+				<p class="help-block">휴대폰 번호를 - 없이 입력해주세요</p>
+			  </div>
+			</div>
+
+			<div class="control-group">
+			  <div class="controls">
+				<button id="registerBtn" class="btn btn-success">회원가입</button>
+				<a href="/login">
+				  <div class="btn btn-default">돌아가기</div>
+				</a>
+			  </div>
+			</div>
+		  </fieldset>
+		</div>
+		<script src="/js/jquery-3.2.1.min.js"></script>
+		<script src="/js/among.js"></script>
+		<script src="/js/bootstrap.min.js"></script>
+		<script>
+			$('#registerBtn').click(function(e) {
+				var user_id = $('#user_id').val();
+				var username = $('#username').val();
+				var email = $('#email').val();
+				var password = $('#password').val();
+				var password_confirm = $('#password_confirm').val();
+				var email = $('#email').val();
+				var phone = $('#phone').val();
+				
+				if (!user_id || !username || !email || !password || !password_confirm || !email || !phone) {
+					alert('빈 칸을 다 채워주세요');
+					return;
+				}
+				
+				if (password !== password_confirm) {
+					alert('패스워드와 패스워드 확인이 다릅니다.');
+					return;
+				}
+				
+				
+				$.put('/user/signup', {
+					user_id: user_id,
+					user_name: username,
+					password: password,
+					email: email,
+					phone: phone
+				}, function(res) {
+					if (res && !res.err) {
+						alert(res.result);
+					} else {
+						if (res.err) {
+							alert('회원가입에 실패했습니다. ' + res.err);
+						} else {
+							alert('회원가입에 실패했습니다. 관리자에게 문의해주세요.');
+						}
+					}
+				});
+				
+				
+			});
+		</script>
+	</body>
+</html>
