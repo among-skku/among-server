@@ -116,6 +116,7 @@ var routes_view = require('./routes/view')
 app.get('/', routes_view.index);
 
 app.get('/login', routes_view.loginPage);
+app.get('/register', routes_view.registerPage);
 
 
 
