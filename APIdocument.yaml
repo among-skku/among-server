@@ -161,7 +161,7 @@ paths:
       parameters:
         - name: sync_target
           in: query
-          description: 'calendar, skku_portarl 중 선택'
+          description: 'calendar, skku_portal 중 선택'
           required: true
           type: string
       responses:
@@ -169,6 +169,29 @@ paths:
           description: 성공적으로 sync 완료
         '400':
           description: sync 실패
+  /user/schedule/list:
+    get:
+      tags:
+        - user_schedule
+      summary: 유저 스케줄 id 리스트 가져오기
+      description: ''
+      operationId: getUserScheduleList
+      produces:
+        - application/json
+      parameters:
+        - name: user_id
+          in: query
+          description: '세션에서 가져오므로, 명시할 필요 없음'
+          required: false
+          type: string
+        - name: type
+          in: query
+          description: 'all/temporal/regular 중 택'
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 유저 스케줄 성공적으로 가져옴
   /user/schedule:
     get:
       tags:
@@ -181,13 +204,18 @@ paths:
       parameters:
         - name: user_id
           in: query
-          description: 유저 id
-          required: true
+          description: '세션에서 가져오므로, 명시하지 않아도 됨'
+          required: false
           type: string
         - name: type
           in: query
-          description: all/temporal/regular 중 택 1
+          description: 'all/temporal/regular 중 택 1'
           required: true
+          type: string
+        - name: schedule_id
+          in: query
+          description: 'schedule_id 를 명시하면 하나만 가져옴'
+          required: false
           type: string
       responses:
         '200':
@@ -205,9 +233,14 @@ paths:
       parameters:
         - name: type
           in: query
-          description: temporal/regular 중 택 1
-          required: true
+          description: 'temporal/regular 중 택 1'
+          required: false
           type: string
+        - name: schedule_data
+          in: query
+          description: '형식에 따라서 temporal_schedule이나 regular_schedule 스키마에 맞게 데이터가 전송됨'
+          type: string
+          required: true
       responses:
         '200':
           description: 성공적 추가
@@ -336,6 +369,27 @@ paths:
           description: 취소 실패
         '404':
           description: 존재하지 않는 초대
+  '/team':
+    put:
+      tags:
+        - team
+      summary: 새로운 팀을 생성함
+      description: ''
+      operationId: createTeam
+      produces:
+        - application/json
+      parameters:
+        - name: team_data
+          in: body
+          description: 새로 생성할 팀 데이터 JSON 파일
+          required: true
+          schema:
+            $ref: '#/definitions/Team'
+      responses:
+        '200':
+          description: 정상적으로 팀이 생성 됨
+        '400':
+          description: 팀 생성 실패
   '/team/{team_id}':
     get:
       tags:
@@ -360,26 +414,6 @@ paths:
           description: 팀 데이터 불러오기 실패
         '404':
           description: 존재하지 않는 팀 이름일 경우
-    put:
-      tags:
-        - team
-      summary: 새로운 팀을 생성함
-      description: ''
-      operationId: createTeam
-      produces:
-        - application/json
-      parameters:
-        - name: team_data
-          in: body
-          description: 새로 생성할 팀 데이터 JSON 파일
-          required: true
-          schema:
-            $ref: '#/definitions/Team'
-      responses:
-        '200':
-          description: 정상적으로 팀이 생성 됨
-        '400':
-          description: 팀 생성 실패
     post:
       tags:
         - team
@@ -436,9 +470,14 @@ paths:
           description: Team ID
           required: true
           type: string
-        - name: Amount
+        - name: skip
           in: query
-          description: lazyloading위한 갯수
+          description: lazyloading위한 불러오드 데이터 시작 index
+          required: true
+          type: integer
+        - name: limit
+          in: query
+          description: lazyloding위한 불러오는 최대 데이터 수
           required: true
           type: integer
       responses:
@@ -718,8 +757,9 @@ paths:
           type: string
         - name: report_id
           in: query
-          required: true
+          required: false
           type: string
+          description: 이 항목이 없으면, 해당 팀의 report_id 리스트를 불러온다.
       responses:
         '200':
           description: 정상적으로 회의록을 불러온다.
@@ -732,7 +772,7 @@ paths:
     post:
       tags:
         - report
-      summary: '회의록을 수정한다.(제목, 내용 등)'
+      summary: '회의록을 정보를 수정한다.'
       description: ''
       operationId: modifyReport
       produces:
@@ -745,17 +785,17 @@ paths:
             $ref: '#/definitions/Report'
       responses:
         '200':
-          description: '정상적으로 회의록을 수정한다.(제목, 내용 등)'
+          description: '정상적으로 회의록을 수정한 경우'
         '400':
           description: 회의록을 수정하는 것에 실패한 경우
         '404':
-          description: 존재하지 않는 회의록에대해 수정을 요청할 때
+          description: 존재하지 않는 회의록에대해 수정을 요청한 경우
     put:
       tags:
         - report
-      summary: 회의록을 upload
+      summary: 회의록을 생성한다
       description: ''
-      operationId: uploadReport
+      operationId: createReport
       produces:
         - application/json
       parameters:
@@ -766,9 +806,9 @@ paths:
             $ref: '#/definitions/Report'
       responses:
         '200':
-          description: 정상적으로 회의록을 업로드한다.
+          description: 정상적으로 회의록을 생성한 경우.
         '400':
-          description: 회의록을 업로드하는 것에 실패한 경우
+          description: 회의록 생성에 실패한 경우
     delete:
       tags:
         - report
@@ -948,22 +988,8 @@ definitions:
     type: object
     description: 개인의 일시적인 일정
     properties:
-      schedule_id:
+      user_id:
         type: string
-      title:
-        type: string
-      contents:
-        type: string
-      start_date:
-        type: string
-        format: date
-      end_date:
-        type: string
-        format: date
-  regular_Schedule:
-    type: object
-    description: 개인의 정기적인 스케쥴
-    properties:
       schedule_id:
         type: string
       place:
@@ -974,22 +1000,44 @@ definitions:
         type: string
       start_date:
         type: string
-        description: '해당 일정이 적용되는 기간 시작, date'
+        format: date
+        description: 'new Date().getTime() 으로 얻어진 값으로 함'
       end_date:
         type: string
-        description: '해당 일정이 적용되는 기간 끝, date'
+        format: date
+        description: 'new Date().getTime() 으로 얻어진 값으로 함'
+  regular_Schedule:
+    type: object
+    description: 개인의 정기적인 스케쥴
+    properties:
+      user_id:
+        type: string
+      schedule_id:
+        type: string
+      place:
+        type: string
+      title:
+        type: string
+      contents:
+        type: string
+      start_date:
+        type: string
+        description: '해당 일정이 적용되는 기간 시작, new Date().getTime() 으로 얻어진 값으로 함'
+      end_date:
+        type: string
+        description: '해당 일정이 적용되는 기간 끝, new Date().getTime() 으로 얻어진 값으로 함'
       start_time:
         type: string
-        description: '해당 일정이 매주 수행되는 시간 시작, time'
+        description: '해당 일정이 매주 수행되는 시간 시작, time 22:00 와 같은 문자열 포멧으로 함'
       end_time:
         type: string
-        description: '해당 일정이 매주 수행되는 시간 끝, time'
+        description: '해당 일정이 매주 수행되는 시간 끝, time 23:35 와 같은 문자열 포멧으로 함'
       day:
         type: string
         description: 해당 일정이 수행되는 요일
   Invitation:
     type: object
-    description: 초대해볼까!!
+    description: '유저 초대 시 초대장 정보를 저장함'
     properties:
       invitation_id:
         type: string
@@ -1094,10 +1142,10 @@ definitions:
         type: string
       contents:
         type: string
-      create_Time:
+      create_time:
         type: string
         format: date
-      update_Time:
+      update_time:
         type: string
         format: date
   Feed:
@@ -1143,10 +1191,10 @@ definitions:
       writer_id:
         type: string
         format: user_id
-      create_Time:
+      create_time:
         type: string
         format: date
-      update_Time:
+      update_time:
         type: string
         format: date
   Due_Date:

@@ -794,8 +794,7 @@ exports.deleteTeam = function (req, res){
 	
 			// due_date, report, file_manager
 			// user에서 team_id  삭제
-			// appointment_schedule, team, feed
-			
+			// appointment_schedule, feed			
 			// invitation 처리??
 	
 	async.waterfall([
@@ -843,6 +842,13 @@ exports.deleteTeam = function (req, res){
 						cb(err, result);
 					});				
 				}
+			});			
+		},
+		(result, cb) => { // team 정보에서 진행프로젝트 삭제			
+			db.team.remove({
+				team_id: team_id
+			}, function(err, result) {
+				cb(err, result);
 			});			
 		},
 		(team_data, cb) => {
