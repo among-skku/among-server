@@ -6,7 +6,6 @@ var db = {
 	chat_data: require(__path + 'modules/db/chat_data'),
 	notice: require(__path + 'modules/db/notice'),
 	team: require(__path + 'modules/db/team'),
-	
 };
 
 exports.loginUser = function(req, res) {
@@ -792,10 +791,8 @@ exports.deleteTeam = function (req, res){
 	
 	var team_id = req.params.team_id || '';
 	
-			// due_date, report, file_manager
-			// user에서 team_id  삭제
-			// appointment_schedule, feed			
-			// invitation 처리??
+	// invitation??, feed??
+	// appointment schedule, [due date, calendar 차이]		
 	
 	async.waterfall([
 		cb => {
@@ -809,46 +806,105 @@ exports.deleteTeam = function (req, res){
 			db.notice.remove({
 				team_id: team_id				
 			}, function(err, result) {					
-				cb(err, result);
+				if (err) {
+					cb(err);
+				} else {
+					cb(result);
+				}
 			});		
 		},
-		(result, cb) => { // chat, chat_data에서 해당 팀의 정보 삭제
-			async.mapLimit(data, 10, function (item, next) {
-				db.chat.find({
-					team_id: item.team_id
-				}, function (err, message_data) {
+		cb => { // report에서 해당 팀의 정보 삭제
+			db.report.remove({
+				team_id: team_id
+			}, function (err, result) {
+				if (err) {
+					cb(err);
+				} else {
+					cb(result);
+				}
+			});
+		},
+		cb => { // file_manager에서 해당 팀의 정보 삭제
+			db.file_manager.remove({
+				team_id: team_id
+			}, function (err, result) {
+				if (err) {
+					cb(err);
+				} else {
+					cb(result);
+				}
+			});
+		},
+		cb => { // chat_data에서 해당 팀의 정보 삭제		
+			db.chat.find({
+				team_id: team_id
+			}, function (err, chat_info) {				
+				async.mapLimit(chat_info, 100, function (item, next) {
+					db.chat_data.remove({
+						message_id: item.message_id
+					}, function (err, success) {
+						if (err) {
+							next(err);
+						} else {
+							next(null, success);
+						}
+					});
+				}, function (err, success) {
 					if (err) {
-						next(err);
-					} else {						
-						db.chat_data.remove({
-							message_id: message_data.message_id
-						}, function (err, remove) {						
-							if (err) {
-								console.log('delete chat_data failed');
-							} else {
-								console.log(remove);
-								cb(err, remove);
-							}
-						});						
+						console.log(err);
+					} else {
+						cb(err, success);
 					}
 				});
-			}, function (err, remove) {
+			});			
+		},
+		(result, cb) => { // chat에서 해당 팀의 정보 삭제
+			db.chat.remove({
+				team_id: team_id
+			}, function (err, success) {
 				if (err) {
-					console.log(err);
+					cb(err);
 				} else {
-					db.chat.remove({
-						team_id: team_id				
-					}, function(err, result) {					
-						cb(err, result);
-					});				
+					cb(null, success);
 				}
+			});
+		},
+		(result, cb) => { // user에서 team_id 삭제			
+			db.team.findOne({
+				team_id: team_id
+			}, function (err, team_info) {
+				async.mapLimit(team_info.member_id, 10, function (item, next) {
+					// for each member_id
+					db.user.findOne({
+						user_id: team_info.member_id
+					}, function (err, user) {
+						// user의 team_id Array에서 해당 team_id 삭제
+						if (user.includes(team_id)) { // true인 경우
+							db.user.update({
+								$pull: {team_id: team_id}
+							}, function (err, success) {
+								if (err) {
+									cb(err);
+								} else {
+									cb(null, success);
+								}
+							});						
+						} else { // false 인 경우
+							cb(false);
+						}
+					});
+				});
 			});			
 		},
 		(result, cb) => { // team 정보에서 진행프로젝트 삭제			
 			db.team.remove({
 				team_id: team_id
 			}, function(err, result) {
-				cb(err, result);
+				if (err) {
+					cb(err);
+				} else {
+					cb(err, result);
+				}
 			});			
 		},
 		(team_data, cb) => {
@@ -871,6 +927,24 @@ exports.deleteTeam = function (req, res){
 	});	
 }
 
+
+/*exports.inviteMember = function (req, res) {
+		
+	if (Object.keys(req.query).length) {
+		req.body = req.query;		
+	}
+	
+	var team_id = req.params.team_id || '';
+	var user_id = req.body.user_id || false;
+	
+	// user에서 team_id  추가, invitation에 생성 과정 고민!!, team에 member_id 추가
+	
+	async.waterfall([
+		cb => {
+			
+		}
+	])	
+}*/
 
 exports.ajaxTest = function(req, res) {
 	var msg = {

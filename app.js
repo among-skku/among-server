@@ -146,6 +146,9 @@ app.get('/team/:team_id', sessChk(true), routes_ajax.getTeamData);
 app.post('/team/:team_id', sessChk(true), routes_ajax.updateTeam);
 app.delete('/team/:team_id', sessChk(true), routes_ajax.deleteTeam);
 
+// team_invite
+//app.put('/team/invitations/:team_id', sessChk(true), routes_ajax.inviteMember);
+
 routes_sock.init_io(io);
 global.__io = io;
 
