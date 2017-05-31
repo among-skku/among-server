@@ -144,6 +144,7 @@ app.get('/', routes_view.index);
 
 app.get('/login', routes_view.loginPage);
 app.get('/register', routes_view.registerPage);
+app.get('/dashboard', routes_view.dashboard);
 
 
 

@@ -16,3 +16,12 @@ exports.registerPage = function(req, res) {
 exports.login = function(req, res) {
 	res.render('login');
 };
+
+exports.dashboard = function(req, res) {
+	res.render('dashboard', {
+		contents: 'fragment/contents_default',
+		footer: 'fragment/footer_default',
+		sidebar: 'fragment/sidebar_default',
+		navbar: 'fragment/navbar_default'
+	});
+};
