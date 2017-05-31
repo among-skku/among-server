@@ -10,7 +10,7 @@
 
 		<!-- bootstrap & fontawesome -->
 		<link rel="stylesheet" href="/css/bootstrap.min.css" />
-		<link rel="stylesheet" href="/font-awesome/4.5.0/css/font-awesome.min.css" />
+		<link rel="stylesheet" href="/font-awesome/4.7.0/css/font-awesome.min.css" />
 
 		<!-- text fonts -->
 		<link rel="stylesheet" href="/css/fonts.googleapis.com.css" />
@@ -153,47 +153,62 @@
 										<div class="widget-main">
 											<h4 class="header green lighter bigger">
 												<i class="ace-icon fa fa-users blue"></i>
-												New User Registration
+												회원가입
 											</h4>
 
 											<div class="space-6"></div>
-											<p> Enter your details to begin: </p>
+											<p> 아래 내용을 채워주세요: </p>
 
 											<form>
 												<fieldset>
 													<label class="block clearfix">
 														<span class="block input-icon input-icon-right">
-															<input type="email" class="form-control" placeholder="Email" />
+															<input type="text" class="form-control" placeholder="유저 아이디" />
+															<i class="ace-icon fa fa-id-badge"></i>
+														</span>
+													</label>
+													
+													<label class="block clearfix">
+														<span class="block input-icon input-icon-right">
+															<input type="text" class="form-control" placeholder="유저 이름" />
+															<i class="ace-icon fa fa-user"></i>
+														</span>
+													</label>
+													
+													<label class="block clearfix">
+														<span class="block input-icon input-icon-right">
+															<input type="email" class="form-control" placeholder="이메일 주소" />
 															<i class="ace-icon fa fa-envelope"></i>
 														</span>
 													</label>
 
-													<label class="block clearfix">
-														<span class="block input-icon input-icon-right">
-															<input type="text" class="form-control" placeholder="Username" />
-															<i class="ace-icon fa fa-user"></i>
-														</span>
-													</label>
 
 													<label class="block clearfix">
 														<span class="block input-icon input-icon-right">
-															<input type="password" class="form-control" placeholder="Password" />
+															<input type="password" class="form-control" placeholder="비밀번호" />
 															<i class="ace-icon fa fa-lock"></i>
 														</span>
 													</label>
+													
 
 													<label class="block clearfix">
 														<span class="block input-icon input-icon-right">
-															<input type="password" class="form-control" placeholder="Repeat password" />
+															<input type="password" class="form-control" placeholder="비밀번호 확인" />
 															<i class="ace-icon fa fa-retweet"></i>
 														</span>
 													</label>
 
+													<label class="block clearfix">
+														<span class="block input-icon input-icon-right">
+															<input type="text" class="form-control" placeholder="휴대전화 번호" />
+															<i class="ace-icon fa fa-phone"></i>
+														</span>
+													</label>
 													<label class="block">
 														<input type="checkbox" class="ace" />
 														<span class="lbl">
-															I accept the
-															<a href="#">User Agreement</a>
+															<a href="#">회원 약관에</a>
+															동의합니다.
 														</span>
 													</label>
 
@@ -202,11 +217,11 @@
 													<div class="clearfix">
 														<button type="reset" class="width-30 pull-left btn btn-sm">
 															<i class="ace-icon fa fa-refresh"></i>
-															<span class="bigger-110">Reset</span>
+															<span class="bigger-110">초기화</span>
 														</button>
 
 														<button type="button" class="width-65 pull-right btn btn-sm btn-success">
-															<span class="bigger-110">Register</span>
+															<span class="bigger-110">회원가입</span>
 
 															<i class="ace-icon fa fa-arrow-right icon-on-right"></i>
 														</button>
@@ -218,7 +233,7 @@
 										<div class="toolbar center">
 											<a href="#" data-target="#login-box" class="back-to-login-link">
 												<i class="ace-icon fa fa-arrow-left"></i>
-												Back to login
+												로그인 페이지로 돌아가기
 											</a>
 										</div>
 									</div><!-- /.widget-body -->
@@ -247,13 +262,25 @@
 
 		<!-- inline scripts related to this page -->
 		<script type="text/javascript">
-			jQuery(function($) {
-			 $(document).on('click', '.toolbar a[data-target]', function(e) {
-				e.preventDefault();
+			
+			var swap_page = function(e) {
+				//e could be '#signup-box' or '#login-box'
+				if (typeof e !== 'string') {
+					e.preventDefault();
+				}
 				var target = $(this).data('target');
 				$('.widget-box.visible').removeClass('visible');//hide others
-				$(target).addClass('visible');//show target
-			 });
+				if (typeof e !== 'string') {
+					$(target).addClass('visible');//show target
+				} else {
+					$(e).addClass('visible');
+				}
+			 };
+			
+			<%- exec_code %>
+			
+			jQuery(function($) {
+			 $(document).on('click', '.toolbar a[data-target]', swap_page);
 			});
 			
 			$('#user_id').keydown(function(e) {

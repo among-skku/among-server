@@ -6,11 +6,15 @@ exports.index = function(req, res){
 };
 
 exports.loginPage = function(req, res) {
-	res.render('login');
+	res.render('login_register', {
+		exec_code: '//'
+	});
 };
 
 exports.registerPage = function(req, res) {
-	res.render('register');
+	res.render('login_register', {
+		exec_code: 'swap_page("#signup-box")'
+	});
 };
 
 exports.login = function(req, res) {
