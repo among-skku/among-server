@@ -16,3 +16,12 @@ exports.registerPage = function(req, res) {
 exports.login = function(req, res) {
 	res.render('login');
 };
+
+exports.calendarPage = function (req, res) {
+	res.render('calendar');
+};
+
+exports.newsFeedPage = function (req, res) {
+	res.render('news_feed');
+}
+
