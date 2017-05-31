@@ -22,6 +22,6 @@ exports.dashboard = function(req, res) {
 		contents: 'fragment/contents_default',
 		footer: 'fragment/footer_default',
 		sidebar: 'fragment/sidebar_default',
-		navbar: 'fragment/navbar_default'
+		navbar: 'fragment/navbar'
 	});
 };

@@ -25,7 +25,7 @@ exports.loginUser = function(req, res) {
 	async.waterfall([
 		cb => {
 			if (!user_id || !password) {
-				return cb('please insert id and password');
+				return cb('아이디와 패스워드를 모두 입력해주세요.');
 			}
 			cb(null);
 		},
@@ -38,7 +38,7 @@ exports.loginUser = function(req, res) {
 					return cb(err);
 				}
 				if (!user_data) {
-					return cb('invalid id or password');
+					return cb('잘못된 아이디나 패스워드입니다.');
 				} 
 				req.session.regenerate(function(err) {
 					
