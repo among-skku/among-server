@@ -32,11 +32,13 @@ exports.dashboard = function(req, res) {
 };
 
 exports.createTeamPage = function(req, res) {
+	var user_id = req.session.user_id || '로그인 해주세요';
 	res.render('dashboard', {
 		contents: 'contents/create_team',
 		footer: 'fragment/among_footer',
 		sidebar: 'fragment/among_sidebar',
-		navbar: 'fragment/among_navbar'
+		navbar: 'fragment/among_navbar',
+		user_id: user_id
 	});
 };
 

@@ -1841,8 +1841,10 @@ exports.createTeam = function (req, res) {
 	
 	async.waterfall([
 		cb => {
-			if (!team_name || !manager_id) {
-				cb('invalid inputs');
+			if (!team_name) {
+				cb('팀 이름을 기입해주세요.');
+			} else if (!manager_id) {
+				cb('로그인 하셔야 팀을 만들 수 있습니다.');
 			} else {
 				cb(null);
 			}
