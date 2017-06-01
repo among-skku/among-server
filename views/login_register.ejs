@@ -163,21 +163,21 @@
 												<fieldset>
 													<label class="block clearfix">
 														<span class="block input-icon input-icon-right">
-															<input type="text" class="form-control" placeholder="유저 아이디" />
+															<input id="register_user_id" type="text" class="form-control" placeholder="유저 아이디" />
 															<i class="ace-icon fa fa-id-badge"></i>
 														</span>
 													</label>
 													
 													<label class="block clearfix">
 														<span class="block input-icon input-icon-right">
-															<input type="text" class="form-control" placeholder="유저 이름" />
+															<input id="register_user_name" type="text" class="form-control" placeholder="유저 이름" />
 															<i class="ace-icon fa fa-user"></i>
 														</span>
 													</label>
 													
 													<label class="block clearfix">
 														<span class="block input-icon input-icon-right">
-															<input type="email" class="form-control" placeholder="이메일 주소" />
+															<input id="register_email" type="email" class="form-control" placeholder="이메일 주소" />
 															<i class="ace-icon fa fa-envelope"></i>
 														</span>
 													</label>
@@ -185,7 +185,7 @@
 
 													<label class="block clearfix">
 														<span class="block input-icon input-icon-right">
-															<input type="password" class="form-control" placeholder="비밀번호" />
+															<input id="register_password" type="password" class="form-control" placeholder="비밀번호" />
 															<i class="ace-icon fa fa-lock"></i>
 														</span>
 													</label>
@@ -193,14 +193,14 @@
 
 													<label class="block clearfix">
 														<span class="block input-icon input-icon-right">
-															<input type="password" class="form-control" placeholder="비밀번호 확인" />
+															<input id="register_password_confirm" type="password" class="form-control" placeholder="비밀번호 확인" />
 															<i class="ace-icon fa fa-retweet"></i>
 														</span>
 													</label>
 
 													<label class="block clearfix">
 														<span class="block input-icon input-icon-right">
-															<input type="text" class="form-control" placeholder="휴대전화 번호" />
+															<input id="register_phone" type="text" class="form-control" placeholder="휴대전화 번호" />
 															<i class="ace-icon fa fa-phone"></i>
 														</span>
 													</label>
@@ -220,7 +220,7 @@
 															<span class="bigger-110">초기화</span>
 														</button>
 
-														<button type="button" class="width-65 pull-right btn btn-sm btn-success">
+														<button id="registerBtn" type="button" class="width-65 pull-right btn btn-sm btn-success">
 															<span class="bigger-110">회원가입</span>
 
 															<i class="ace-icon fa fa-arrow-right icon-on-right"></i>
@@ -320,6 +320,43 @@
 					  }
 				  });
 			  });
+			
+			$('#registerBtn').click(function(e) {
+				var user_id = $('#register_user_id').val();
+				var user_name = $('#register_user_name').val();
+				var email = $('#register_email').val();
+				var password = $('#register_password').val();
+				var password_confirm = $('#register_password_confirm').val();
+				var phone = $('#register_phone').val();
+				
+				if (!user_id || !user_name || !email || !password || !password_confirm || !phone) {
+					alert('빈 값을 모두 채워주세요.');
+					return;
+				}
+				if (password !== password_confirm) {
+					alert('패스워드와 패스워드 확인이 다릅니다.');
+					return;
+				}
+				
+				$.put('/user/signup', {
+					user_id: user_id,
+					user_name: user_name,
+					email: email,
+					password: password,
+					phone: phone
+				}, function(res) {
+					if (res) {
+						if (res.err) {
+							alert(res.err);
+						} else {
+							alert(res.result);
+							swap_page('#login-box');
+						}
+					} else {
+						alert('네트워크 에러! 회원가입이 정상적으로 되지 않았습니다');
+					}
+				});
+			});
 			
 		</script>
 	</body>

@@ -92,7 +92,7 @@ exports.signupUser = function(req, res) {
 	async.waterfall([
 		cb => {
 			if (!user_id || !user_name || !password) {
-				cb('invalid inputs');
+				cb('필수 입력값을 모두 채워주세요.');
 			} else {
 				cb(null);
 			}
@@ -109,7 +109,7 @@ exports.signupUser = function(req, res) {
 		},
 		(user_data, cb) => {
 			if (user_data) {
-				return cb('user data already exist');
+				return cb('중복된 아이디입니다.');
 			}
 			var snapshot = new db.user({
 				user_id: user_id,
