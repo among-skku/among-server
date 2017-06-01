@@ -38,7 +38,7 @@ jQuery(function($) {
 	var calendar = $('#calendar').fullCalendar({
 		//isRTL: true,
 		//firstDay: 1,// >> change first day of week 
-		
+		lang: 'ko',
 		buttonHtml: {
 			prev: '<i class="ace-icon fa fa-chevron-left"></i>',
 			next: '<i class="ace-icon fa fa-chevron-right"></i>'
