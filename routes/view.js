@@ -23,5 +23,9 @@ exports.calendarPage = function (req, res) {
 
 exports.newsFeedPage = function (req, res) {
 	res.render('news_feed');
-}
+};
+
+exports.reportPage = function (req, res) {
+	res.render('report');
+};
 

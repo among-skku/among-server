@@ -1208,6 +1208,27 @@
 		eventClick: function(calEvent, jsEvent, view) {
 
 			//display a modal
+			
+			// var modal = 
+			// '<div class="modal fade">\
+			//   <div class="modal-dialog">\
+			//    <div class="modal-content">\
+			// 	 <div class="modal-body">\
+			// 	   <button type="button" class="close" data-dismiss="modal" style="margin-top:-10px;">&times;</button>\
+			// 	   <form class="no-margin">\
+			// 		  <label>Change event name &nbsp;</label>\
+			// 		  <input class="middle" autocomplete="off" type="text"  />\
+			// 		 <button type="submit" class="btn btn-sm btn-success">Save</button>\
+			// 	   </form>\
+			// 	 </div>\
+			// 	 <div class="modal-footer">\
+			// 		<button type="button" class="btn btn-sm btn-danger" data-action="delete"> Delete Event</button>\
+			// 		<button type="button" class="btn btn-sm" data-dismiss="modal"> Cancel</button>\
+			// 	 </div>\
+			//   </div>\
+			//  </div>\
+			// </div>';
+			
 			var modal = 
 			'<div class="modal fade">\
 			  <div class="modal-dialog">\
@@ -1215,18 +1236,55 @@
 				 <div class="modal-body">\
 				   <button type="button" class="close" data-dismiss="modal" style="margin-top:-10px;">&times;</button>\
 				   <form class="no-margin">\
-					  <label>Change event name &nbsp;</label>\
-					  <input class="middle" autocomplete="off" type="text" value="' + calEvent.title + '" />\
-					 <button type="submit" class="btn btn-sm btn-success"><i class="ace-icon fa fa-check"></i> Save</button>\
+					  <label style="display: block;">팀 일정 등록하기 &nbsp;</label>\
+					  <label>날짜</lable>\
+					  <input style="width: 80%;margin: 0 5px 5px 0;" class="middle" autocomplete="off" type="text"  /><br />\
+ <label>제목</label>\
+<input style="width: 80%;margin: 0 5px 5px 0;" class="middle" autocomplete="off" type="text"  /><br />\
+ <label>내용</lable>\
+<input style="width: 80%;margin: 0 5px 5px 0;" class="middle" autocomplete="off" type="text"  /><br />\
+					 <button type="submit" class="btn btn-sm btn-success">Save</button>\
 				   </form>\
 				 </div>\
 				 <div class="modal-footer">\
-					<button type="button" class="btn btn-sm btn-danger" data-action="delete"><i class="ace-icon fa fa-trash-o"></i> Delete Event</button>\
-					<button type="button" class="btn btn-sm" data-dismiss="modal"><i class="ace-icon fa fa-times"></i> Cancel</button>\
+					<button type="button" class="btn btn-sm btn-danger" data-action="delete"> Delete Event</button>\
+					<button type="button" class="btn btn-sm" data-dismiss="modal"> Cancel</button>\
 				 </div>\
 			  </div>\
 			 </div>\
 			</div>';
+			
+			/*var modal = 
+			'<div class="modal fade">\
+			  <div class="modal-dialog">\
+			   <div class="modal-content">\
+				 <div class="modal-body">\
+				   <button type="button" class="close" data-dismiss="modal" style="margin-top:-10px;">&times;</button>\
+				   <form class="no-margin">\
+					<fieldset>\
+		<label>날짜</label>	\
+      <input placeholder="YYYY-MM-DD" type="text" tabindex="1" required autofocus>\
+    </fieldset>\
+    <fieldset>\
+		<label>제목</label>	\
+      <input placeholder="" type="text" tabindex="2" required>\
+    </fieldset>\
+    <fieldset>\
+		<label>내용</label>	\
+      <input placeholder="" type="text" tabindex="3" required>\     </fieldset>\
+			<button type="submit" class="btn btn-sm btn-success"> Save</button>\
+				   </form>\
+				 </div>\
+				 <div class="modal-footer">\
+
+					<button type="button" class="btn btn-sm btn-danger" data-action="delete"> Delete Event</button>\
+					<button type="button" class="btn btn-sm" data-dismiss="modal"> Cancel</button>\
+				 </div>\
+			  </div>\
+			 </div>\
+			</div>';*/
+			
+			
 		
 		
 			var modal = $(modal).appendTo('body');

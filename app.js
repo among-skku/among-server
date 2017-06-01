@@ -147,6 +147,8 @@ app.get('/register', routes_view.registerPage);
 app.get('/calendar', routes_view.calendarPage);
 app.get('/news_feed', routes_view.newsFeedPage);
 
+app.get('/report', routes_view.reportPage);
+
 
 
 app.all('/ajaxTest', routes_ajax.ajaxTest);
