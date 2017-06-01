@@ -31,6 +31,15 @@ exports.dashboard = function(req, res) {
 	});
 };
 
+exports.createTeamPage = function(req, res) {
+	res.render('dashboard', {
+		contents: 'contents/create_team',
+		footer: 'fragment/among_footer',
+		sidebar: 'fragment/among_sidebar',
+		navbar: 'fragment/among_navbar'
+	});
+};
+
 exports.calendarPage = function (req, res) {
 	res.render('calendar');
 };
