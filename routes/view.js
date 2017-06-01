@@ -23,7 +23,7 @@ exports.login = function(req, res) {
 
 exports.dashboard = function(req, res) {
 	res.render('dashboard', {
-		contents: 'fragment/among_contents',
+		contents: 'contents/dashboard_main',
 		footer: 'fragment/among_footer',
 		sidebar: 'fragment/among_sidebar',
 		navbar: 'fragment/among_navbar'
