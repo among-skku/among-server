@@ -149,6 +149,8 @@ app.get('/dashboard/create_team', routes_view.createTeamPage);
 app.get('/calendar', routes_view.calendarPage);
 app.get('/news_feed', routes_view.newsFeedPage);
 
+app.get('/report', routes_view.reportPage);
+
 
 
 app.all('/ajaxTest', routes_ajax.ajaxTest);
