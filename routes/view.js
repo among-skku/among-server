@@ -21,6 +21,7 @@ exports.login = function(req, res) {
 	res.render('login');
 };
 
+
 exports.dashboard = function(req, res) {
 	res.render('dashboard', {
 		contents: 'contents/dashboard_main',
@@ -29,3 +30,12 @@ exports.dashboard = function(req, res) {
 		navbar: 'fragment/among_navbar'
 	});
 };
+
+exports.calendarPage = function (req, res) {
+	res.render('calendar');
+};
+
+exports.newsFeedPage = function (req, res) {
+	res.render('news_feed');
+};
+

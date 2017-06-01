@@ -145,6 +145,8 @@ app.get('/', routes_view.index);
 app.get('/login', routes_view.loginPage);
 app.get('/register', routes_view.registerPage);
 app.get('/dashboard', routes_view.dashboard);
+app.get('/calendar', routes_view.calendarPage);
+app.get('/news_feed', routes_view.newsFeedPage);
 
 
 
@@ -197,10 +199,18 @@ app.post('/team/schedule/:team_id', sessChk(true), routes_ajax.modifyTeamSchedul
 app.put('/team/schedule/:team_id', sessChk(true), routes_ajax.addTeamSchedule);
 app.delete('/team/schedule/:team_id', sessChk(true), routes_ajax.deleteTeamSchedule);
 
+// team
+app.put('/team', sessChk(true), routes_ajax.createTeam);
+app.get('/team/:team_id', sessChk(true), routes_ajax.getTeamData);
+app.post('/team/:team_id', sessChk(true), routes_ajax.updateTeam);
+app.delete('/team/:team_id', sessChk(true), routes_ajax.deleteTeam);
+
+// team_invite
+//app.put('/team/invitations/:team_id', sessChk(true), routes_ajax.inviteMember);
 
 routes_sock.init_io(io);
 global.__io = io;
 
 server.listen(app.get('port'), function(){
-	console.log("Express server listening on port " + app.get('port'));
+  console.log("Express server listening on port " + app.get('port'));
 });
