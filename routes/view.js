@@ -23,9 +23,9 @@ exports.login = function(req, res) {
 
 exports.dashboard = function(req, res) {
 	res.render('dashboard', {
-		contents: 'fragment/contents_default',
-		footer: 'fragment/footer_default',
-		sidebar: 'fragment/sidebar_default',
-		navbar: 'fragment/navbar'
+		contents: 'fragment/among_contents',
+		footer: 'fragment/among_footer',
+		sidebar: 'fragment/among_sidebar',
+		navbar: 'fragment/among_navbar'
 	});
 };
