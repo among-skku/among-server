@@ -6,15 +6,40 @@ exports.index = function(req, res){
 };
 
 exports.loginPage = function(req, res) {
-	res.render('login');
+	res.render('login_register', {
+		exec_code: '//'
+	});
 };
 
 exports.registerPage = function(req, res) {
-	res.render('register');
+	res.render('login_register', {
+		exec_code: 'swap_page("#signup-box")'
+	});
 };
 
 exports.login = function(req, res) {
 	res.render('login');
+};
+
+
+exports.dashboard = function(req, res) {
+	res.render('dashboard', {
+		contents: 'contents/dashboard_main',
+		footer: 'fragment/among_footer',
+		sidebar: 'fragment/among_sidebar',
+		navbar: 'fragment/among_navbar'
+	});
+};
+
+exports.createTeamPage = function(req, res) {
+	var user_id = req.session.user_id || '로그인 해주세요';
+	res.render('dashboard', {
+		contents: 'contents/create_team',
+		footer: 'fragment/among_footer',
+		sidebar: 'fragment/among_sidebar',
+		navbar: 'fragment/among_navbar',
+		user_id: user_id
+	});
 };
 
 exports.calendarPage = function (req, res) {
@@ -24,8 +49,11 @@ exports.calendarPage = function (req, res) {
 exports.newsFeedPage = function (req, res) {
 	res.render('news_feed');
 };
+<<<<<<< HEAD
 
 exports.reportPage = function (req, res) {
 	res.render('report');
 };
+=======
+>>>>>>> d749e7df3678c550c9df974b699d2d9f258ed480
 

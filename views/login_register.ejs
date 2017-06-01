@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+		<meta charset="utf-8" />
+		<title>Among 로그인</title>
+
+		<meta name="description" content="User login page" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+
+		<!-- bootstrap & fontawesome -->
+		<link rel="stylesheet" href="/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="/font-awesome/4.7.0/css/font-awesome.min.css" />
+
+		<!-- text fonts -->
+		<link rel="stylesheet" href="/css/fonts.googleapis.com.css" />
+
+		<!-- ace styles -->
+		<link rel="stylesheet" href="/css/ace.min.css" />
+
+		<!--[if lte IE 9]>
+			<link rel="stylesheet" href="/css/ace-part2.min.css" />
+		<![endif]-->
+		<link rel="stylesheet" href="/css/ace-rtl.min.css" />
+
+		<!--[if lte IE 9]>
+		  <link rel="stylesheet" href="/css/ace-ie.min.css" />
+		<![endif]-->
+
+		<!-- HTML5shiv and Respond.js for IE8 to support HTML5 elements and media queries -->
+
+		<!--[if lte IE 8]>
+		<script src="/js/html5shiv.min.js"></script>
+		<script src="/js/respond.min.js"></script>
+		<![endif]-->
+		
+	</head>
+
+	<body class="login-layout light-login">
+		<div class="main-container">
+			<div class="main-content">
+				<div class="row">
+					<div class="col-sm-10 col-sm-offset-1">
+						<div class="login-container">
+							<div class="center">
+								<h1>
+									<i class="ace-icon fa fa-leaf green"></i>
+									<span class="red">Among</span>
+									<span class="grey" id="id-text2">팀플</span>
+								</h1>
+								<h4 class="blue" id="id-company-text">&copy; 2017 SKKU 종설프 6조</h4>
+							</div>
+
+							<div class="space-6"></div>
+
+							<div class="position-relative">
+								<div id="login-box" class="login-box visible widget-box no-border">
+									<div class="widget-body">
+										<div class="widget-main">
+											<h4 class="header blue lighter bigger">
+												<i class="ace-icon fa fa-coffee green"></i>
+												로그인 정보를 기입해주세요
+											</h4>
+
+											<div class="space-6"></div>
+
+											<form>
+												<fieldset>
+													<label class="block clearfix">
+														<span class="block input-icon input-icon-right">
+															<input id="user_id" type="text" class="form-control" placeholder="아이디" required />
+															<i class="ace-icon fa fa-user"></i>
+														</span>
+													</label>
+
+													<label class="block clearfix">
+														<span class="block input-icon input-icon-right">
+															<input id="password" type="password" class="form-control" placeholder="패스워드" required />
+															<i class="ace-icon fa fa-lock"></i>
+														</span>
+													</label>
+
+													<div class="space"></div>
+
+													<div class="clearfix">
+
+														<button id="loginBtn" type="button" class="width-100 btn btn-sm btn-primary">
+															<i class="ace-icon fa fa-key"></i>
+															<span class="bigger-110">로그인</span>
+														</button>
+													</div>
+
+													<div class="space-4"></div>
+												</fieldset>
+											</form>
+
+										</div><!-- /.widget-main -->
+
+										<div class="toolbar clearfix">
+											<div class="pull-right">
+												<a href="#" data-target="#signup-box" class="user-signup-link">
+													회원가입 하러가기
+													<i class="ace-icon fa fa-arrow-right"></i>
+												</a>
+											</div>
+										</div>
+									</div><!-- /.widget-body -->
+								</div><!-- /.login-box -->
+
+								<div id="forgot-box" class="forgot-box widget-box no-border">
+									<div class="widget-body">
+										<div class="widget-main">
+											<h4 class="header red lighter bigger">
+												<i class="ace-icon fa fa-key"></i>
+												Retrieve Password
+											</h4>
+
+											<div class="space-6"></div>
+											<p>
+												Enter your email and to receive instructions
+											</p>
+
+											<form>
+												<fieldset>
+													<label class="block clearfix">
+														<span class="block input-icon input-icon-right">
+															<input type="email" class="form-control" placeholder="Email" />
+															<i class="ace-icon fa fa-envelope"></i>
+														</span>
+													</label>
+
+													<div class="clearfix">
+														<button type="button" class="width-35 pull-right btn btn-sm btn-danger">
+															<i class="ace-icon fa fa-lightbulb-o"></i>
+															<span class="bigger-110">Send Me!</span>
+														</button>
+													</div>
+												</fieldset>
+											</form>
+										</div><!-- /.widget-main -->
+
+										<div class="toolbar center">
+											<a href="#" data-target="#login-box" class="back-to-login-link">
+												Back to login
+												<i class="ace-icon fa fa-arrow-right"></i>
+											</a>
+										</div>
+									</div><!-- /.widget-body -->
+								</div><!-- /.forgot-box -->
+
+								<div id="signup-box" class="signup-box widget-box no-border">
+									<div class="widget-body">
+										<div class="widget-main">
+											<h4 class="header green lighter bigger">
+												<i class="ace-icon fa fa-users blue"></i>
+												회원가입
+											</h4>
+
+											<div class="space-6"></div>
+											<p> 아래 내용을 채워주세요: </p>
+
+											<form>
+												<fieldset>
+													<label class="block clearfix">
+														<span class="block input-icon input-icon-right">
+															<input id="register_user_id" type="text" class="form-control" placeholder="유저 아이디" />
+															<i class="ace-icon fa fa-id-badge"></i>
+														</span>
+													</label>
+													
+													<label class="block clearfix">
+														<span class="block input-icon input-icon-right">
+															<input id="register_user_name" type="text" class="form-control" placeholder="유저 이름" />
+															<i class="ace-icon fa fa-user"></i>
+														</span>
+													</label>
+													
+													<label class="block clearfix">
+														<span class="block input-icon input-icon-right">
+															<input id="register_email" type="email" class="form-control" placeholder="이메일 주소" />
+															<i class="ace-icon fa fa-envelope"></i>
+														</span>
+													</label>
+
+
+													<label class="block clearfix">
+														<span class="block input-icon input-icon-right">
+															<input id="register_password" type="password" class="form-control" placeholder="비밀번호" />
+															<i class="ace-icon fa fa-lock"></i>
+														</span>
+													</label>
+													
+
+													<label class="block clearfix">
+														<span class="block input-icon input-icon-right">
+															<input id="register_password_confirm" type="password" class="form-control" placeholder="비밀번호 확인" />
+															<i class="ace-icon fa fa-retweet"></i>
+														</span>
+													</label>
+
+													<label class="block clearfix">
+														<span class="block input-icon input-icon-right">
+															<input id="register_phone" type="text" class="form-control" placeholder="휴대전화 번호" />
+															<i class="ace-icon fa fa-phone"></i>
+														</span>
+													</label>
+													<label class="block">
+														<input type="checkbox" class="ace" />
+														<span class="lbl">
+															<a href="#">회원 약관에</a>
+															동의합니다.
+														</span>
+													</label>
+
+													<div class="space-24"></div>
+
+													<div class="clearfix">
+														<button type="reset" class="width-30 pull-left btn btn-sm">
+															<i class="ace-icon fa fa-refresh"></i>
+															<span class="bigger-110">초기화</span>
+														</button>
+
+														<button id="registerBtn" type="button" class="width-65 pull-right btn btn-sm btn-success">
+															<span class="bigger-110">회원가입</span>
+
+															<i class="ace-icon fa fa-arrow-right icon-on-right"></i>
+														</button>
+													</div>
+												</fieldset>
+											</form>
+										</div>
+
+										<div class="toolbar center">
+											<a href="#" data-target="#login-box" class="back-to-login-link">
+												<i class="ace-icon fa fa-arrow-left"></i>
+												로그인 페이지로 돌아가기
+											</a>
+										</div>
+									</div><!-- /.widget-body -->
+								</div><!-- /.signup-box -->
+							</div><!-- /.position-relative -->
+
+						</div>
+					</div><!-- /.col -->
+				</div><!-- /.row -->
+			</div><!-- /.main-content -->
+		</div><!-- /.main-container -->
+
+		<!-- basic scripts -->
+
+		<!--[if !IE]> -->
+		<script src="/js/jquery-2.1.4.min.js"></script>
+		<script src="/js/among.js"></script>
+		<!-- <![endif]-->
+
+		<!--[if IE]>
+<script src="/js/jquery-1.11.3.min.js"></script>
+<![endif]-->
+		<script type="text/javascript">
+			if('ontouchstart' in document.documentElement) document.write("<script src='/js/jquery.mobile.custom.min.js'>"+"<"+"/script>");
+		</script>
+
+		<!-- inline scripts related to this page -->
+		<script type="text/javascript">
+			
+			var swap_page = function(e) {
+				//e could be '#signup-box' or '#login-box'
+				if (typeof e !== 'string') {
+					e.preventDefault();
+				}
+				var target = $(this).data('target');
+				$('.widget-box.visible').removeClass('visible');//hide others
+				if (typeof e !== 'string') {
+					$(target).addClass('visible');//show target
+				} else {
+					$(e).addClass('visible');
+				}
+			 };
+			
+			<%- exec_code %>
+			
+			jQuery(function($) {
+			 $(document).on('click', '.toolbar a[data-target]', swap_page);
+			});
+			
+			$('#user_id').keydown(function(e) {
+				if (e.keyCode === 13) {
+					$('#password').focus();
+				}
+			});
+			
+			$('#password').keydown(function(e) {
+				if (e.keyCode === 13) {
+					$('#loginBtn').click();
+				}
+			});
+			
+			$('#loginBtn').click(function() {
+				var user_id = $('#user_id').val();
+				var password = $('#password').val();
+				if (!user_id) {
+					alert('아이디를 입력해주세요');
+					return;
+				}
+				
+				if (!password) {
+					alert('패스워드를 입력해주세요');
+					return;
+				}
+				  $.get('/user/login', {
+					  user_id: $('#user_id').val(),
+					  password: $('#password').val()
+				  }, function(res) {
+					  console.log(res);
+					  if (res.err) {
+						  alert(res.err);
+					  } else {
+						  alert(res.result);
+						  location.href = '/dashboard';
+					  }
+				  });
+			  });
+			
+			$('#registerBtn').click(function(e) {
+				var user_id = $('#register_user_id').val();
+				var user_name = $('#register_user_name').val();
+				var email = $('#register_email').val();
+				var password = $('#register_password').val();
+				var password_confirm = $('#register_password_confirm').val();
+				var phone = $('#register_phone').val();
+				
+				if (!user_id || !user_name || !email || !password || !password_confirm || !phone) {
+					alert('빈 값을 모두 채워주세요.');
+					return;
+				}
+				if (password !== password_confirm) {
+					alert('패스워드와 패스워드 확인이 다릅니다.');
+					return;
+				}
+				
+				$.put('/user/signup', {
+					user_id: user_id,
+					user_name: user_name,
+					email: email,
+					password: password,
+					phone: phone
+				}, function(res) {
+					if (res) {
+						if (res.err) {
+							alert(res.err);
+						} else {
+							alert(res.result);
+							swap_page('#login-box');
+						}
+					} else {
+						alert('네트워크 에러! 회원가입이 정상적으로 되지 않았습니다');
+					}
+				});
+			});
+			
+		</script>
+	</body>
+</html>

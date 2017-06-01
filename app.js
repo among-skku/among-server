@@ -144,6 +144,8 @@ app.get('/', routes_view.index);
 
 app.get('/login', routes_view.loginPage);
 app.get('/register', routes_view.registerPage);
+app.get('/dashboard', routes_view.dashboard);
+app.get('/dashboard/create_team', routes_view.createTeamPage);
 app.get('/calendar', routes_view.calendarPage);
 app.get('/news_feed', routes_view.newsFeedPage);
 
@@ -206,8 +208,10 @@ app.get('/team/:team_id', sessChk(true), routes_ajax.getTeamData);
 app.post('/team/:team_id', sessChk(true), routes_ajax.updateTeam);
 app.delete('/team/:team_id', sessChk(true), routes_ajax.deleteTeam);
 
-// team_invite
-//app.put('/team/invitations/:team_id', sessChk(true), routes_ajax.inviteMember);
+// user invite
+app.get('/user/invite', sessChk(true), routes_ajax.getMyInvitations);
+app.post('/user/invite', sessChk(true), routes_ajax.acceptInvitation);
+app.delete('/user/invite', sessChk(true), routes_ajax.rejectInvitation);
 
 routes_sock.init_io(io);
 global.__io = io;
