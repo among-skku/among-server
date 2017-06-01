@@ -1,5 +1,19 @@
 var async = require('async');
 
+var db = {
+	user: require(__path + 'modules/db/user'),
+	report: require(__path + 'modules/db/report'),
+	regular_schedule: require(__path + 'modules/db/regular_schedule'),
+	temporal_schedule: require(__path + 'modules/db/temporal_schedule'),
+	team_schedule: require(__path + 'modules/db/team_schedule'),
+	chat: require(__path + 'modules/db/chat'),
+	chat_data: require(__path + 'modules/db/chat_data'),
+	notice: require(__path + 'modules/db/notice'),
+	file_manager: require(__path + 'modules/db/file_manager'),
+	team: require(__path + 'modules/db/team'),
+	invitation: require(__path + 'modules/db/invitation')
+};
+
 exports.index = function(req, res){
 	res.redirect('/login');
 	//res.render('index', { title: 'Express' });
@@ -43,12 +57,36 @@ exports.createTeamPage = function(req, res) {
 };
 
 exports.teamSchedulePage = function(req, res) {
-	res.render('dashboard', {
-		contents: 'contents/team_schedule',
-		footer: 'fragment/among_footer',
-		sidebar: 'fragment/among_sidebar',
-		navbar: 'fragment/among_navbar'
+	var team_id = req.params.team_id;
+	
+	async.waterfall([
+		function(cb) {
+			db.team.findOne({
+				team_id: team_id
+			}, function(err, team_data) {
+				if (!team_data) {
+					cb('유효하지 않은 팀입니다.');
+				} else {
+					cb(err, null);
+				}
+			});
+		}
+	], function(err) {
+		if (err) {
+			res.json({
+				err: '팀을 찾을 수 없습니다.'
+			});
+		} else {
+			res.render('dashboard', {
+				contents: 'contents/team_schedule',
+				footer: 'fragment/among_footer',
+				sidebar: 'fragment/among_sidebar',
+				navbar: 'fragment/among_navbar',
+				team_id: team_id
+			});
+		}
 	});
+	
 };
 
 exports.calendarPage = function (req, res) {

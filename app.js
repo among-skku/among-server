@@ -146,7 +146,7 @@ app.get('/login', routes_view.loginPage);
 app.get('/register', routes_view.registerPage);
 app.get('/dashboard', routes_view.dashboard);
 app.get('/dashboard/create_team', routes_view.createTeamPage);
-app.get('/dashboard/team_schedule', routes_view.teamSchedulePage);
+app.get('/dashboard/team_schedule/:team_id', routes_view.teamSchedulePage);
 
 app.get('/calendar', routes_view.calendarPage);
 app.get('/news_feed', routes_view.newsFeedPage);
