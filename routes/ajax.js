@@ -1159,8 +1159,12 @@ exports.inviteMember = function(req, res) {
 		(team_data, cb) => {
 			var manager_id = team_data.manager_id;
 			var team_id = team_data.team_id;
+			var member_id = team_data.member_id;
+			
 			if (manager_id !== current_user_id) {
 				cb('조장만 초대할 수 있습니다.');
+			} else if (member_id.indexOf(user_id) !== -1) {
+				cb('이미 팀 맴버입니다.');
 			} else {
 				cb(null, team_id);
 			}
@@ -1830,10 +1834,8 @@ exports.createTeam = function (req, res) {
 	}
 	
 	var team_id = 'team_' + randString(10);
-	//var team_id = "team_mj4VfQitGc";
 	var team_name = req.body.team_name || "";
-	var manager_id = req.body.manager_id || req.session.user_id || '';
-	var member_id = req.body.member_id || ""; 
+	var manager_id = req.session.user_id || '';
 	var contents = req.body.contents || "";
 	var deleted = false;
 	
@@ -1847,7 +1849,7 @@ exports.createTeam = function (req, res) {
 		},
 		cb => {
 			db.team.findOne({
-				team_id: team_id
+				team_name: team_name
 			}, function(err, result) {
 				if (err) {
 					return cb(err);
@@ -1857,13 +1859,13 @@ exports.createTeam = function (req, res) {
 		},
 		(team_id_data, cb) => {
 			if (team_id_data) {
-				return cb('team id already exist');
+				return cb('중복된 이름의 팀 명이 존재합니다.');
 			}
 			var new_team = new db.team({				
 				team_id: team_id,
 				team_name: team_name,
 				manager_id: manager_id,
-				member_id: member_id,
+				member_id: [manager_id],
 				contents: contents,
 				deleted: deleted				
 			});
@@ -1872,7 +1874,22 @@ exports.createTeam = function (req, res) {
 				if (err) {
 					cb(err);
 				} else {
-					cb(null, '팀 생성 성공!');
+					cb(null);
+				}
+			});
+		},
+		cb => {
+			db.user.findOneAndUpdate({
+				user_id: manager_id
+			}, {
+				$addToSet: {
+					team_id: team_id
+				}
+			}, function(err, user_data) {
+				if (!user_data) {
+					cb('유효하지 않은 유저입니다.');
+				} else {
+					cb(err, '팀 생성 성공!');
 				}
 			});
 		}
@@ -2136,7 +2153,149 @@ exports.deleteTeam = function (req, res){
 	});	
 }
 
+exports.getMyInvitations = function(req, res) {
+	var user_id = req.session.user_id || false;
+	
+	async.waterfall([
+		cb => {
+			if (!user_id) {
+				cb('로그인 하셔야 합니다.');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.invitation.find({
+				user_id: user_id
+			}, function(err, invitation_data) {
+				cb(err, invitation_data);
+			})
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+};
 
+exports.acceptInvitation = function(req, res) {
+	var invitation_id  = req.body.invitation_id || false;
+	var user_id = req.session.user_id || false;
+	var team_id = '';
+	async.waterfall([
+		cb => {
+			if (!invitation_id || !user_id) {
+				cb('파라메터가 부족합니다.');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.invitation.findOneAndUpdate({
+				invitation_id: invitation_id,
+				state: 'Pending'
+			}, {
+				$set: {
+					state: 'Accept'
+				}
+			}, function(err, update_data) {
+				if (!update_data) {
+					cb('유효하지 않은 초대장입니다.');
+				} else {
+					cb(err, update_data);
+				}
+			})
+		},
+		(invit_data, cb) => {
+			team_id = invit_data.team_id;
+			db.team.findOneAndUpdate({
+				team_id: team_id,
+				deleted: false
+			}, {
+				$addToSet: {
+					member_id: user_id
+				}
+			}, function(err, team_data) {
+				if (!team_data) {
+					cb('유효하지 않은 팀입니다.');
+				} else {
+					cb(err);
+				}
+			});
+		},
+		cb => {
+			db.user.findOneAndUpdate({
+				user_id: user_id
+			}, {
+				$addToSet: {
+					team_id: team_id
+				}
+			}, function(err, user_data) {
+				if (!user_data) {
+					cb('유효하지 않은 유저입니다.');
+				} else {
+					cb(err, '성공적으로 초대를 승낙했습니다.');
+				}
+			});
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+};
+
+exports.rejectInvitation = function(req, res) {
+	var invitation_id  = req.body.invitation_id || false;
+	var user_id = req.session.user_id || false;
+	async.waterfall([
+		cb => {
+			if (!invitation_id || !user_id) {
+				cb('파라매터가 부족합니다.');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.invitation.findOneAndUpdate({
+				invitation_id: invitation_id,
+				state: 'Pending'
+			}, {
+				$set: {
+					state: 'Reject'
+				}
+			}, function(err, invit_data) {
+				if (!invit_data) {
+					cb('유효하지 않은 초대장입니다.');
+				} else {
+					cb(err, '정상적으로 초대가 거절되었습니다.');
+				}
+			});
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+};
 /*exports.inviteMember = function (req, res) {
 		
 	if (Object.keys(req.query).length) {
