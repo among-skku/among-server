@@ -1777,7 +1777,8 @@ exports.addTeamSchedule = function(req, res) {
 			});
 		} else {
 			res.json({
-				result: result
+				result: result,
+				team_schedule_id: team_schedule_id
 			});
 		}
 	});

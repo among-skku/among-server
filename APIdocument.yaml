@@ -778,7 +778,7 @@ paths:
             $ref: '#/definitions/team_Schedule'
       responses:
         '200':
-          description: 팀 일정을 추가하는 것에 성공함
+          description: 팀 일정을 추가하는 것에 성공함, team_schedule_id 를 json에 같이 보내줌
         '400':
           description: 팀 일정을 추가하는 것에 실패함
     delete:
