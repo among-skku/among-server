@@ -198,8 +198,8 @@ jQuery(function($) {
 													{
 														id: team_schedule_id,
 														title: title,
-														start: start_date_obj.toString(),
-														end: end_date_obj.toString(),
+														start: moment(start_date_obj).subtract(9, 'hours').toString(),
+														end: moment(end_date_obj).subtract(9, 'hours').toString(),
 														contents: contents,
 														place: place,
 														tag: tag,
