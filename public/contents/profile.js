@@ -10,12 +10,11 @@ jQuery(function($) {
 	//editables 
 
 	//text editable
-	$('#username')
-	.editable({
-		type: 'text',
-		name: 'username'		
-	});
-
+	// $('#username')
+	// .editable({
+	// 	type: 'text',
+	// 	name: 'username'		
+	// });
 
 
 	//select2 editable
@@ -111,7 +110,7 @@ jQuery(function($) {
 			//,format: 'yyyy-mm-dd',
 			//viewformat: 'yyyy-mm-dd'
 		}
-	})
+	});
 
 	$('#age').editable({
 		type: 'spinner',
@@ -165,10 +164,10 @@ jQuery(function($) {
 		try {
 			document.createElement('IMG').appendChild(document.createElement('B'));
 		} catch(e) {
-			Image.prototype.appendChild = function(el){}
+			Image.prototype.appendChild = function(el){};
 		}
 
-		var last_gritter
+		var last_gritter;
 		$('#avatar').editable({
 			type: 'image',
 			name: 'avatar',
@@ -209,7 +208,7 @@ jQuery(function($) {
 				//for a working upload example you can replace the contents of this function with 
 				//examples/profile-avatar-update.js
 
-				var deferred = new $.Deferred
+				var deferred = new $.Deferred;
 
 				var value = $('#avatar').next().find('input[type=hidden]:eq(0)').val();
 				if(!value || value.length == 0) {
@@ -244,7 +243,84 @@ jQuery(function($) {
 
 			success: function(response, newValue) {
 			}
-		})
+		});
+		
+		$('#timetable').editable({
+			type: 'image',
+			name: 'avatar',
+			value: null,
+			//onblur: 'ignore',  //don't reset or hide editable onblur?!
+			image: {
+				//specify ace file input plugin's options here
+				btn_choose: 'Change Avatar',
+				droppable: true,
+				maxSize: 110000,//~100Kb
+
+				//and a few extra ones here
+				name: 'avatar',//put the field name here as well, will be used inside the custom plugin
+				on_error : function(error_type) {//on_error function will be called when the selected file has a problem
+					if(last_gritter) $.gritter.remove(last_gritter);
+					if(error_type == 1) {//file format error
+						last_gritter = $.gritter.add({
+							title: 'File is not an image!',
+							text: 'Please choose a jpg|gif|png image!',
+							class_name: 'gritter-error gritter-center'
+						});
+					} else if(error_type == 2) {//file size rror
+						last_gritter = $.gritter.add({
+							title: 'File too big!',
+							text: 'Image size should not exceed 100Kb!',
+							class_name: 'gritter-error gritter-center'
+						});
+					}
+					else {//other error
+					}
+				},
+				on_success : function() {
+					$.gritter.removeAll();
+				}
+			},
+			url: function(params) {
+				// ***UPDATE AVATAR HERE*** //
+				//for a working upload example you can replace the contents of this function with 
+				//examples/profile-avatar-update.js
+
+				var deferred = new $.Deferred;
+
+				var value = $('#avatar').next().find('input[type=hidden]:eq(0)').val();
+				if(!value || value.length == 0) {
+					deferred.resolve();
+					return deferred.promise();
+				}
+
+
+				//dummy upload
+				setTimeout(function(){
+					if("FileReader" in window) {
+						//for browsers that have a thumbnail of selected image
+						var thumb = $('#avatar').next().find('img').data('thumb');
+						if(thumb) $('#avatar').get(0).src = thumb;
+					}
+
+					deferred.resolve({'status':'OK'});
+
+					if(last_gritter) $.gritter.remove(last_gritter);
+					last_gritter = $.gritter.add({
+						title: 'Avatar Updated!',
+						text: 'Uploading to server can be easily implemented. A working example is included with the template.',
+						class_name: 'gritter-info gritter-center'
+					});
+
+				 } , parseInt(Math.random() * 800 + 800))
+
+				return deferred.promise();
+
+				// ***END OF UPDATE AVATAR HERE*** //
+			},
+
+			success: function(response, newValue) {
+			}
+		});
 	}catch(e) {}
 
 	/**
@@ -410,7 +486,7 @@ jQuery(function($) {
 	})
 	.end().find('.date-picker').datepicker().next().on(ace.click_event, function(){
 		$(this).prev().focus();
-	})
+	});
 	$('.input-mask-phone').mask('(999) 999-9999');
 
 	$('#user-profile-3').find('input[type=file]').ace_file_input('show_file_list', [{type: 'image', name: $('#avatar').attr('src')}]);
@@ -427,7 +503,6 @@ jQuery(function($) {
 
 
 
-	/////////////////////////////////////
 	$(document).one('ajaxloadstart.page', function(e) {
 		//in ajax mode, remove remaining elements before leaving page
 		try {
@@ -435,4 +510,22 @@ jQuery(function($) {
 		} catch(e) {}
 		$('[class*=select2]').remove();
 	});
+});
+
+/////////////////////////////////
+
+$.get('/user', function(res) {
+	console.log(res);
+	if (res) {
+		if (res.err) {
+			alert(res.err);
+		} else {
+			var phone_number = res.result.phone;
+			var email_addr = res.result.email;
+			$('#email').text(email_addr);
+			$('#phone').text(phone_number);
+		}
+	} else {
+		alert('유저 정보를 불러오지 못했습니다.');
+	}
 });
