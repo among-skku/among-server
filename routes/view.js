@@ -42,6 +42,15 @@ exports.createTeamPage = function(req, res) {
 	});
 };
 
+exports.reportPage = function (req, res) {
+	res.render('dashboard', {
+		contents: 'contents/report',
+		footer: 'fragment/among_footer',
+		sidebar: 'fragment/among_sidebar',
+		navbar:'fragment/among_navbar',
+	});
+};
+
 exports.calendarPage = function (req, res) {
 	res.render('calendar');
 };
@@ -49,11 +58,6 @@ exports.calendarPage = function (req, res) {
 exports.newsFeedPage = function (req, res) {
 	res.render('news_feed');
 };
-<<<<<<< HEAD
 
-exports.reportPage = function (req, res) {
-	res.render('report');
-};
-=======
->>>>>>> d749e7df3678c550c9df974b699d2d9f258ed480
+
 

@@ -25,7 +25,7 @@ exports.loginUser = function(req, res) {
 	async.waterfall([
 		cb => {
 			if (!user_id || !password) {
-				return cb('아이디와 패스워드를 모두 입력해주세요.');
+				return cb('please insert id and password');
 			}
 			cb(null);
 		},
@@ -38,7 +38,7 @@ exports.loginUser = function(req, res) {
 					return cb(err);
 				}
 				if (!user_data) {
-					return cb('잘못된 아이디나 패스워드입니다.');
+					return cb('invalid id or password');
 				} 
 				req.session.regenerate(function(err) {
 					
@@ -92,7 +92,7 @@ exports.signupUser = function(req, res) {
 	async.waterfall([
 		cb => {
 			if (!user_id || !user_name || !password) {
-				cb('필수 입력값을 모두 채워주세요.');
+				cb('invalid inputs');
 			} else {
 				cb(null);
 			}
@@ -109,7 +109,7 @@ exports.signupUser = function(req, res) {
 		},
 		(user_data, cb) => {
 			if (user_data) {
-				return cb('중복된 아이디입니다.');
+				return cb('user data already exist');
 			}
 			var snapshot = new db.user({
 				user_id: user_id,
@@ -1159,12 +1159,8 @@ exports.inviteMember = function(req, res) {
 		(team_data, cb) => {
 			var manager_id = team_data.manager_id;
 			var team_id = team_data.team_id;
-			var member_id = team_data.member_id;
-			
 			if (manager_id !== current_user_id) {
 				cb('조장만 초대할 수 있습니다.');
-			} else if (member_id.indexOf(user_id) !== -1) {
-				cb('이미 팀 맴버입니다.');
 			} else {
 				cb(null, team_id);
 			}
@@ -1834,24 +1830,24 @@ exports.createTeam = function (req, res) {
 	}
 	
 	var team_id = 'team_' + randString(10);
+	//var team_id = "team_mj4VfQitGc";
 	var team_name = req.body.team_name || "";
-	var manager_id = req.session.user_id || '';
+	var manager_id = req.body.manager_id || req.session.user_id || '';
+	var member_id = req.body.member_id || ""; 
 	var contents = req.body.contents || "";
 	var deleted = false;
 	
 	async.waterfall([
 		cb => {
-			if (!team_name) {
-				cb('팀 이름을 기입해주세요.');
-			} else if (!manager_id) {
-				cb('로그인 하셔야 팀을 만들 수 있습니다.');
+			if (!team_name || !manager_id) {
+				cb('invalid inputs');
 			} else {
 				cb(null);
 			}
 		},
 		cb => {
 			db.team.findOne({
-				team_name: team_name
+				team_id: team_id
 			}, function(err, result) {
 				if (err) {
 					return cb(err);
@@ -1861,13 +1857,13 @@ exports.createTeam = function (req, res) {
 		},
 		(team_id_data, cb) => {
 			if (team_id_data) {
-				return cb('중복된 이름의 팀 명이 존재합니다.');
+				return cb('team id already exist');
 			}
 			var new_team = new db.team({				
 				team_id: team_id,
 				team_name: team_name,
 				manager_id: manager_id,
-				member_id: [manager_id],
+				member_id: member_id,
 				contents: contents,
 				deleted: deleted				
 			});
@@ -1876,22 +1872,7 @@ exports.createTeam = function (req, res) {
 				if (err) {
 					cb(err);
 				} else {
-					cb(null);
-				}
-			});
-		},
-		cb => {
-			db.user.findOneAndUpdate({
-				user_id: manager_id
-			}, {
-				$addToSet: {
-					team_id: team_id
-				}
-			}, function(err, user_data) {
-				if (!user_data) {
-					cb('유효하지 않은 유저입니다.');
-				} else {
-					cb(err, '팀 생성 성공!');
+					cb(null, '팀 생성 성공!');
 				}
 			});
 		}
@@ -2298,6 +2279,7 @@ exports.rejectInvitation = function(req, res) {
 		}
 	});
 };
+
 /*exports.inviteMember = function (req, res) {
 		
 	if (Object.keys(req.query).length) {
