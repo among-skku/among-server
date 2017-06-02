@@ -15,8 +15,11 @@ var db = {
 };
 
 exports.index = function(req, res){
-	res.redirect('/login');
-	//res.render('index', { title: 'Express' });
+	if (req.session && req.session.user_id) {
+		res.redirect('/dashboard');
+	} else {
+		res.redirect('/login');
+	}
 };
 
 exports.loginPage = function(req, res) {
@@ -37,28 +40,49 @@ exports.login = function(req, res) {
 
 
 exports.dashboard = function(req, res) {
+	var user_name = req.session.user_name || 'anonymous';
+	var team_id = req.query.team_id || '';
 	res.render('dashboard', {
 		contents: 'contents/dashboard_main',
 		footer: 'fragment/among_footer',
 		sidebar: 'fragment/among_sidebar',
-		navbar: 'fragment/among_navbar'
+		navbar: 'fragment/among_navbar',
+		user_name: user_name,
+		team_id: team_id
+	});
+};
+
+exports.teamListPage = function(req, res) {
+	var user_name = req.session.user_name || 'anonymous';
+	var team_id = req.query.team_id || '';
+	res.render('dashboard', {
+		contents: 'contents/team_list',
+		footer: 'fragment/among_footer',
+		sidebar: 'fragment/among_sidebar',
+		navbar: 'fragment/among_navbar',
+		user_name: user_name,
+		team_id: team_id,
 	});
 };
 
 exports.createTeamPage = function(req, res) {
+	var user_name = req.session.user_name || 'anonymous';
+	var team_id = req.query.team_id || '';
 	var user_id = req.session.user_id || '로그인 해주세요';
 	res.render('dashboard', {
 		contents: 'contents/create_team',
 		footer: 'fragment/among_footer',
 		sidebar: 'fragment/among_sidebar',
 		navbar: 'fragment/among_navbar',
-		user_id: user_id
+		team_id: team_id,
+		user_id: user_id,
+		user_name: user_name
 	});
 };
 
 exports.teamSchedulePage = function(req, res) {
 	var team_id = req.params.team_id;
-	
+	var user_name = req.session.user_name || 'anonymous';
 	async.waterfall([
 		function(cb) {
 			db.team.findOne({
@@ -82,7 +106,8 @@ exports.teamSchedulePage = function(req, res) {
 				footer: 'fragment/among_footer',
 				sidebar: 'fragment/among_sidebar',
 				navbar: 'fragment/among_navbar',
-				team_id: team_id
+				team_id: team_id,
+				user_name: user_name
 			});
 		}
 	});
