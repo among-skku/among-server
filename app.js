@@ -98,6 +98,26 @@ var sessChk = function(needSession) {
 	}
 };
 
+var pageSessChk = function(needSession) {
+	if (needSession) { //로그인한 상태에서만 접근 가능한 페이지
+		return function(req, res, next) {
+			if (req.session && req.session.user_id) {
+				next();
+			} else {
+				res.redirect('/login');
+			}
+		};
+	} else {
+		return function(req, res, next) { //로그인 하지 않은 상태에서만 접근 가능한 페이지
+			if (req.session && req.session.user_id) {
+				res.redirect('/dashboard');
+			} else {
+				next();
+			}
+		};
+	}
+};
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -142,11 +162,30 @@ var routes_view = require('./routes/view')
 //테스트용 API
 app.get('/', routes_view.index);
 
-app.get('/login', routes_view.loginPage);
-app.get('/register', routes_view.registerPage);
-app.get('/dashboard', routes_view.dashboard);
-app.get('/dashboard/create_team', routes_view.createTeamPage);
-app.get('/report', routes_view.reportPage);
+app.get('/login', pageSessChk(false), routes_view.loginPage);
+app.get('/register', pageSessChk(false), routes_view.registerPage);
+app.get('/dashboard', pageSessChk(true), routes_view.dashboard);
+
+app.get('/dashboard/team_list', pageSessChk(true), routes_view.teamListPage);
+app.get('/dashboard/create_team', pageSessChk(true), routes_view.createTeamPage);
+app.get('/dashboard/team_schedule', pageSessChk(true), function(req, res) {
+	var html = [
+		'<!doctype html>',
+			'<html>\n',
+				'<body>\n',
+					'<script>\n',
+						'alert("팀을 선택하셔야 합니다.");\n',
+						'location.href="/dashboard/team_list";\n',
+					'</script>\n',
+				'</body>\n',
+			'</html>'
+	].join('');
+	res.send(html);
+	//res.redirect('/dashboard/team_list');
+});
+app.get('/dashboard/team_schedule/:team_id', pageSessChk(true), routes_view.teamSchedulePage);
+
+app.get('/calendar', routes_view.calendarPage);
 app.get('/news_feed', routes_view.newsFeedPage);
 
 app.get('/report', routes_view.reportPage);
@@ -158,7 +197,7 @@ app.all('/sessChk', routes_ajax.sessChk);
 //테스트용 API
 
 app.get('/user/login', sessChk(false), routes_ajax.loginUser);
-app.get('/user/logout', sessChk(true), routes_ajax.logoutUser);
+app.get('/user/logout', routes_ajax.logoutUser);
 app.put('/user/signup', sessChk(false), routes_ajax.signupUser);
 app.get('/user', sessChk(true), routes_ajax.getUserById);
 app.post('/user', sessChk(true), routes_ajax.updateUser);
