@@ -188,6 +188,8 @@ app.get('/dashboard/team_schedule/:team_id', pageSessChk(true), routes_view.team
 app.get('/calendar', routes_view.calendarPage);
 app.get('/news_feed', routes_view.newsFeedPage);
 
+app.get('/report', routes_view.reportPage);
+
 
 
 app.all('/ajaxTest', routes_ajax.ajaxTest);
