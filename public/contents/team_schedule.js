@@ -223,25 +223,6 @@ jQuery(function($) {
 							}
 						}
 					});
-					
-					///// 날짜 선택해서 추가할거임
-					// bootbox.prompt("New Event Title:", function(title) {
-					// 	if (title !== null) {
-					// 		calendar.fullCalendar('renderEvent',
-					// 			{
-					// 				title: title,
-					// 				start: start,
-					// 				end: end,
-					// 				allDay: allDay,
-					// 				className: 'label-info'
-					// 			},
-					// 			true // make the event "stick"
-					// 		);
-					// 	}
-					// });
-
-
-					// calendar.fullCalendar('unselect');
 				}
 				,
 				eventClick: function(calEvent, jsEvent, view) {
@@ -358,4 +339,50 @@ jQuery(function($) {
 		}
 	});
 
+	//typeahead.js
+	//example taken from plugin's page at: https://twitter.github.io/typeahead.js/examples/
+
+	 $('input.typeahead').typeahead({
+		 hint: true,
+		 highlight: true,
+		 minLength: 1
+	 }, {
+		 name: 'states',
+		 displayKey: 'value',
+		 source: function(query, syncResults, asyncResults) {
+			 $.get('/user', {
+			 user_id: query
+			 }, function(res) {
+			 if (res && !res.err && res.result) {
+			 asyncResults([res.result]);
+			 } else {
+			 asyncResults([]);
+			 }
+			 });
+		 },
+		 display: function(data) {
+			 return data.user_id;
+		 },
+		 templates: {
+			 notFound: '일치하는 유저 없음',
+			 pendng: '찾는 중',
+			empty: [
+			  '<div class="empty-message">',
+				'unable to find any Best Picture winners that match the current query',
+			  '</div>'
+			].join('\n'),
+			suggestion: function(data) {
+				return '<p><strong>' + data.user_name + '</strong> – ' + data.user_id + '</p>';
+			}
+		 },
+		 // templates: {
+		 // suggestion: function(data) {
+		 // console.log(data);
+		 // return data.user_id
+		 // },
+		 // },
+		 limit: 10
+	 });
+	
+	
 });
