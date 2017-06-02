@@ -21,6 +21,9 @@ exports.login = function(req, res) {
 	res.render('login');
 };
 
+exports.profile = function(req, res){
+	res.render('profile');
+};
 
 exports.dashboard = function(req, res) {
 	res.render('dashboard', {
@@ -49,11 +52,7 @@ exports.calendarPage = function (req, res) {
 exports.newsFeedPage = function (req, res) {
 	res.render('news_feed');
 };
-<<<<<<< HEAD
 
 exports.reportPage = function (req, res) {
 	res.render('report');
 };
-=======
->>>>>>> d749e7df3678c550c9df974b699d2d9f258ed480
-
