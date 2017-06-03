@@ -59,7 +59,7 @@ exports.loginUser = function(req, res) {
 		} else {
 			res.json({
 				result: result
-			})
+			});
 		}
 	});
 };
@@ -74,7 +74,7 @@ exports.logoutUser = function(req, res) {
 	} else {
 		res.json({
 			result: '로그아웃 성공'
-		})
+		});
 	}
 };
 
@@ -159,7 +159,7 @@ exports.getUserById = function(req, res) {
 				user_id: user_id
 			}, function(err, data) {
 				cb(err, data);
-			})
+			});
 		},
 		(user_data, cb) => {
 			if (!user_data) {
@@ -214,7 +214,7 @@ exports.updateUser = function(req, res) {
 				user_id: user_id
 			}, function(err, user_data) {
 				cb(err, user_data);
-			})
+			});
 		},
 		(user_data, cb) => {
 			if (user_data) {
@@ -275,7 +275,7 @@ exports.syncSchedule = function(req, res) {
 			});
 		}
 	});
-}
+};
 
 exports.getReport = function(req, res) {
 	var team_id = req.params.team_id || false;
@@ -468,7 +468,7 @@ exports.getUserScheduleList = function(req, res) {
 								});
 							}
 							// pcb(err, reg_data); 
-						})
+						});
 					} else {
 						pcb(null);
 					}
@@ -529,7 +529,7 @@ exports.getUserSchedule = function(req, res) {
 					if (type === 'all' || type === 'regular') {
 						db.regular_schedule.find(find_query, function(err, reg_data) {
 							pcb(err, reg_data); 
-						})
+						});
 					} else {
 						pcb(null);
 					}
@@ -870,7 +870,7 @@ exports.getFileList = function(req, res) {
 };
 
 exports.uploadFile = function(req, res) {
-	var team_id = req.params.team_id || false;;
+	var team_id = req.params.team_id || false;
 	var file_id = 'file_' + randString(10);
 	var file_path = __storage_path + '/' + team_id + '/' + file_id;
 	var file_name = req.query.file_name || false;
@@ -1073,7 +1073,7 @@ exports.deleteFileName = function(req, res) {
 					if (status.isFile()) {
 						fs.unlink(real_file_path, function(unlink_err) {
 							cb(unlink_err);
-						})
+						});
 					} else {
 						console.log(real_file_path, 'is not simple file. cannot delete this');
 						cb(null);
@@ -1470,8 +1470,7 @@ exports.searchChatting = function (req, res) {
 			});
 		}
 	});	
-}
-
+};
 
 exports.getTeamChat = function (req, res) {
 		
@@ -1504,7 +1503,7 @@ exports.getTeamChat = function (req, res) {
 						item.contents = message_data.contents;
 						next(null, item);
 					}
-				})
+				});
 			}, function(err, merged_data) {
 				if (err) {
 					console.log('chat message merging failed');
@@ -1526,8 +1525,7 @@ exports.getTeamChat = function (req, res) {
 			});
 		}		
 	});	
-}
-
+};
 
 exports.addNotice = function (req, res) {
 	
@@ -1574,7 +1572,7 @@ exports.addNotice = function (req, res) {
 			});
 		}
 	});	
-}
+};
 				
 exports.getNotice = function (req, res) {
 	
@@ -1612,7 +1610,7 @@ exports.getNotice = function (req, res) {
 			});
 		}		
 	});
-}
+};
 
 exports.deleteNotice = function (req, res) {	
 	
@@ -1644,7 +1642,7 @@ exports.deleteNotice = function (req, res) {
 			});
 		}		
 	});	
-}
+};
 
 exports.getTeamSchedule = function(req, res) {
 	var team_id = req.params.team_id || false;
@@ -1682,7 +1680,8 @@ exports.getTeamSchedule = function(req, res) {
 			});
 		}
 	});
-}
+};
+
 exports.modifyTeamSchedule = function(req, res) {
 	var team_schedule_id = req.body.team_schedule_id || false;
 	var team_id = req.params.team_id || false;
@@ -1719,7 +1718,7 @@ exports.modifyTeamSchedule = function(req, res) {
 				} else {
 					cb(err, '팀 일정이 성공적으로 변경되었습니다.');
 				}
-			})
+			});
 		}
 	], function(err, result) {
 		if (err) {
@@ -1732,7 +1731,8 @@ exports.modifyTeamSchedule = function(req, res) {
 			});
 		}
 	});
-}
+};
+
 exports.addTeamSchedule = function(req, res) {
 	var team_id = req.params.team_id || false;
 	var team_schedule_id = 'team_schedule_' + randString(10);
@@ -1778,7 +1778,8 @@ exports.addTeamSchedule = function(req, res) {
 			});
 		}
 	});
-}
+};
+
 exports.deleteTeamSchedule = function(req, res) {
 	var team_id = req.params.team_id || false;
 	var team_schedule_id = req.body.team_schedule_id || false;
@@ -1809,7 +1810,7 @@ exports.deleteTeamSchedule = function(req, res) {
 				team_schedule_id: team_schedule_id
 			}, function(err) {
 				cb(err, '성공적으로 팀 스케쥴을 삭제했습니다.');
-			})
+			});
 		}
 	], function(err, result) {
 		if (err) {
@@ -1822,7 +1823,7 @@ exports.deleteTeamSchedule = function(req, res) {
 			});
 		}
 	});
-}
+};
 
 /*exports.createTeam = function (req, res) {
 	
@@ -1925,7 +1926,7 @@ exports.getTeamData = function (req, res) {
 				team_id: team_id
 			}, function (err, data) {
 				cb(err, data);
-			})
+			});
 		},
 		(team_data, cb) => {
 			if (!team_data) {
@@ -1945,7 +1946,7 @@ exports.getTeamData = function (req, res) {
 			});
 		}
 	});	
-}
+};
 
 exports.updateTeam = function (req, res) {
 	
@@ -2006,26 +2007,6 @@ exports.updateTeam = function (req, res) {
 		}		
 	});
 };
-
-/*async.mapLimit(user_info.team_id, 10, function (item, next) {
-				db.team.findOne({
-					team_id: item
-				}, function (err, team_info) {
-					if (err) {
-						team_info.msg = "Fail loading team data";
-						next(err);
-					} else {
-						next(null, team_info);
-					}
-				});
-			}, function (err, team_data) {
-				if (err) {
-					console.log('team info loading failed');
-				} else {
-					console.log(team_data);
-					cb(err, team_data);
-				}
-			});*/
 
 exports.deleteTeam = function (req, res){
 

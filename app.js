@@ -1,4 +1,3 @@
-
 /**
  * Module dependencies.
  */
@@ -38,7 +37,6 @@ var express = require('express')
   , mkdirp = require('mkdirp');
   // , redis = require('redis')
   // , sharedsession = require("express-socket.io-session");
-
 
 // var app = express();
 var port = process.env.PORT || 3000;
@@ -187,9 +185,7 @@ app.get('/dashboard/team_schedule/:team_id', pageSessChk(true), routes_view.team
 
 app.get('/calendar', routes_view.calendarPage);
 app.get('/news_feed', routes_view.newsFeedPage);
-
 app.get('/report', routes_view.reportPage);
-
 
 
 app.all('/ajaxTest', routes_ajax.ajaxTest);
