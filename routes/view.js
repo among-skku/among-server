@@ -132,6 +132,15 @@ exports.teamSchedulePage = function(req, res) {
 	
 };
 
+exports.reportPage = function (req, res) {
+	res.render('dashboard', {
+		contents: 'contents/report',
+		footer: 'fragment/among_footer',
+		sidebar: 'fragment/among_sidebar',
+		navbar:'fragment/among_navbar',
+	});
+};
+
 exports.calendarPage = function (req, res) {
 	res.render('calendar');
 };

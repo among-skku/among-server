@@ -1,4 +1,3 @@
-
 /**
  * Module dependencies.
  */
@@ -38,7 +37,6 @@ var express = require('express')
   , mkdirp = require('mkdirp');
   // , redis = require('redis')
   // , sharedsession = require("express-socket.io-session");
-
 
 // var app = express();
 var port = process.env.PORT || 3000;
@@ -189,9 +187,7 @@ app.get('/dashboard/user_profile', pageSessChk(true), routes_view.userProfilePag
 
 app.get('/calendar', routes_view.calendarPage);
 app.get('/news_feed', routes_view.newsFeedPage);
-
 app.get('/report', routes_view.reportPage);
-
 
 
 app.all('/ajaxTest', routes_ajax.ajaxTest);
@@ -201,6 +197,7 @@ app.all('/sessChk', routes_ajax.sessChk);
 app.get('/user/login', sessChk(false), routes_ajax.loginUser);
 app.get('/user/logout', routes_ajax.logoutUser);
 app.put('/user/signup', sessChk(false), routes_ajax.signupUser);
+app.get('/user/team_list', sessChk(true), routes_ajax.getTeamList);
 app.get('/user', sessChk(true), routes_ajax.getUserById);
 app.post('/user', sessChk(true), routes_ajax.updateUser);
 
@@ -244,7 +241,7 @@ app.put('/team/schedule/:team_id', sessChk(true), routes_ajax.addTeamSchedule);
 app.delete('/team/schedule/:team_id', sessChk(true), routes_ajax.deleteTeamSchedule);
 
 // team
-app.put('/team', sessChk(true), routes_ajax.createTeam);
+//app.put('/team', sessChk(true), routes_ajax.createTeam);
 app.get('/team/:team_id', sessChk(true), routes_ajax.getTeamData);
 app.post('/team/:team_id', sessChk(true), routes_ajax.updateTeam);
 app.delete('/team/:team_id', sessChk(true), routes_ajax.deleteTeam);

@@ -25,7 +25,7 @@ exports.loginUser = function(req, res) {
 	async.waterfall([
 		cb => {
 			if (!user_id || !password) {
-				return cb('아이디와 패스워드를 모두 입력해주세요.');
+				return cb('please insert id and password');
 			}
 			cb(null);
 		},
@@ -38,7 +38,7 @@ exports.loginUser = function(req, res) {
 					return cb(err);
 				}
 				if (!user_data) {
-					return cb('잘못된 아이디나 패스워드입니다.');
+					return cb('invalid id or password');
 				} 
 				req.session.regenerate(function(err) {
 					
@@ -59,7 +59,7 @@ exports.loginUser = function(req, res) {
 		} else {
 			res.json({
 				result: result
-			})
+			});
 		}
 	});
 };
@@ -74,7 +74,7 @@ exports.logoutUser = function(req, res) {
 	} else {
 		res.json({
 			result: '로그아웃 성공'
-		})
+		});
 	}
 };
 
@@ -92,7 +92,7 @@ exports.signupUser = function(req, res) {
 	async.waterfall([
 		cb => {
 			if (!user_id || !user_name || !password) {
-				cb('필수 입력값을 모두 채워주세요.');
+				cb('invalid inputs');
 			} else {
 				cb(null);
 			}
@@ -109,7 +109,7 @@ exports.signupUser = function(req, res) {
 		},
 		(user_data, cb) => {
 			if (user_data) {
-				return cb('중복된 아이디입니다.');
+				return cb('user data already exist');
 			}
 			var snapshot = new db.user({
 				user_id: user_id,
@@ -159,7 +159,7 @@ exports.getUserById = function(req, res) {
 				user_id: user_id
 			}, function(err, data) {
 				cb(err, data);
-			})
+			});
 		},
 		(user_data, cb) => {
 			if (!user_data) {
@@ -214,7 +214,7 @@ exports.updateUser = function(req, res) {
 				user_id: user_id
 			}, function(err, user_data) {
 				cb(err, user_data);
-			})
+			});
 		},
 		(user_data, cb) => {
 			if (user_data) {
@@ -275,7 +275,7 @@ exports.syncSchedule = function(req, res) {
 			});
 		}
 	});
-}
+};
 
 exports.getReport = function(req, res) {
 	var team_id = req.params.team_id || false;
@@ -468,7 +468,7 @@ exports.getUserScheduleList = function(req, res) {
 								});
 							}
 							// pcb(err, reg_data); 
-						})
+						});
 					} else {
 						pcb(null);
 					}
@@ -529,7 +529,7 @@ exports.getUserSchedule = function(req, res) {
 					if (type === 'all' || type === 'regular') {
 						db.regular_schedule.find(find_query, function(err, reg_data) {
 							pcb(err, reg_data); 
-						})
+						});
 					} else {
 						pcb(null);
 					}
@@ -870,7 +870,7 @@ exports.getFileList = function(req, res) {
 };
 
 exports.uploadFile = function(req, res) {
-	var team_id = req.params.team_id || false;;
+	var team_id = req.params.team_id || false;
 	var file_id = 'file_' + randString(10);
 	var file_path = __storage_path + '/' + team_id + '/' + file_id;
 	var file_name = req.query.file_name || false;
@@ -1073,7 +1073,7 @@ exports.deleteFileName = function(req, res) {
 					if (status.isFile()) {
 						fs.unlink(real_file_path, function(unlink_err) {
 							cb(unlink_err);
-						})
+						});
 					} else {
 						console.log(real_file_path, 'is not simple file. cannot delete this');
 						cb(null);
@@ -1159,12 +1159,8 @@ exports.inviteMember = function(req, res) {
 		(team_data, cb) => {
 			var manager_id = team_data.manager_id;
 			var team_id = team_data.team_id;
-			var member_id = team_data.member_id;
-			
 			if (manager_id !== current_user_id) {
 				cb('조장만 초대할 수 있습니다.');
-			} else if (member_id.indexOf(user_id) !== -1) {
-				cb('이미 팀 맴버입니다.');
 			} else {
 				cb(null, team_id);
 			}
@@ -1474,8 +1470,7 @@ exports.searchChatting = function (req, res) {
 			});
 		}
 	});	
-}
-
+};
 
 exports.getTeamChat = function (req, res) {
 		
@@ -1508,7 +1503,7 @@ exports.getTeamChat = function (req, res) {
 						item.contents = message_data.contents;
 						next(null, item);
 					}
-				})
+				});
 			}, function(err, merged_data) {
 				if (err) {
 					console.log('chat message merging failed');
@@ -1530,8 +1525,7 @@ exports.getTeamChat = function (req, res) {
 			});
 		}		
 	});	
-}
-
+};
 
 exports.addNotice = function (req, res) {
 	
@@ -1578,7 +1572,7 @@ exports.addNotice = function (req, res) {
 			});
 		}
 	});	
-}
+};
 				
 exports.getNotice = function (req, res) {
 	
@@ -1616,7 +1610,7 @@ exports.getNotice = function (req, res) {
 			});
 		}		
 	});
-}
+};
 
 exports.deleteNotice = function (req, res) {	
 	
@@ -1648,7 +1642,7 @@ exports.deleteNotice = function (req, res) {
 			});
 		}		
 	});	
-}
+};
 
 exports.getTeamSchedule = function(req, res) {
 	var team_id = req.params.team_id || false;
@@ -1686,7 +1680,8 @@ exports.getTeamSchedule = function(req, res) {
 			});
 		}
 	});
-}
+};
+
 exports.modifyTeamSchedule = function(req, res) {
 	var team_schedule_id = req.body.team_schedule_id || false;
 	var team_id = req.params.team_id || false;
@@ -1723,7 +1718,7 @@ exports.modifyTeamSchedule = function(req, res) {
 				} else {
 					cb(err, '팀 일정이 성공적으로 변경되었습니다.');
 				}
-			})
+			});
 		}
 	], function(err, result) {
 		if (err) {
@@ -1736,7 +1731,8 @@ exports.modifyTeamSchedule = function(req, res) {
 			});
 		}
 	});
-}
+};
+
 exports.addTeamSchedule = function(req, res) {
 	var team_id = req.params.team_id || false;
 	var team_schedule_id = 'team_schedule_' + randString(10);
@@ -1782,7 +1778,8 @@ exports.addTeamSchedule = function(req, res) {
 			});
 		}
 	});
-}
+};
+
 exports.deleteTeamSchedule = function(req, res) {
 	var team_id = req.params.team_id || false;
 	var team_schedule_id = req.body.team_schedule_id || false;
@@ -1813,7 +1810,7 @@ exports.deleteTeamSchedule = function(req, res) {
 				team_schedule_id: team_schedule_id
 			}, function(err) {
 				cb(err, '성공적으로 팀 스케쥴을 삭제했습니다.');
-			})
+			});
 		}
 	], function(err, result) {
 		if (err) {
@@ -1826,26 +1823,26 @@ exports.deleteTeamSchedule = function(req, res) {
 			});
 		}
 	});
-}
+};
 
-exports.createTeam = function (req, res) {
+/*exports.createTeam = function (req, res) {
 	
 	if (Object.keys(req.query).length) {
 		req.body = req.query;		
 	}
 	
 	var team_id = 'team_' + randString(10);
+	//var team_id = "team_mj4VfQitGc";
 	var team_name = req.body.team_name || "";
-	var manager_id = req.session.user_id || '';
+	var manager_id = req.body.manager_id || req.session.user_id || '';
+	var member_id = req.body.member_id || ""; 
 	var contents = req.body.contents || "";
 	var deleted = false;
 	
 	async.waterfall([
 		cb => {
-			if (!team_name) {
-				cb('팀 이름을 기입해주세요.');
-			} else if (!manager_id) {
-				cb('로그인 하셔야 팀을 만들 수 있습니다.');
+			if (!team_name || !manager_id) {
+				cb('invalid inputs');
 			} else {
 				cb(null);
 			}
@@ -1862,13 +1859,14 @@ exports.createTeam = function (req, res) {
 		},
 		(team_id_data, cb) => {
 			if (team_id_data) {
-				return cb('중복된 이름의 팀 명이 존재합니다.');
+				return cb('team id already exist');
 			}
+			
 			var new_team = new db.team({				
 				team_id: team_id,
 				team_name: team_name,
 				manager_id: manager_id,
-				member_id: [manager_id],
+				member_id: member_id,
 				contents: contents,
 				deleted: deleted				
 			});
@@ -1877,24 +1875,22 @@ exports.createTeam = function (req, res) {
 				if (err) {
 					cb(err);
 				} else {
-					cb(null);
+					cb(null, new_team);
 				}
-			});
+			});			
 		},
-		cb => {
-			db.user.findOneAndUpdate({
-				user_id: manager_id
-			}, {
-				$addToSet: {
-					team_id: team_id
-				}
-			}, function(err, user_data) {
-				if (!user_data) {
-					cb('유효하지 않은 유저입니다.');
-				} else {
-					cb(err, '팀 생성 성공!');
-				}
-			});
+		(new_team, cb) => {
+			async.mapLimit(new_team.member_id, 10, function (item, next) {
+				db.user.findOne({
+					user_id: item
+				}, function (err, user_data) {
+					if (err) {
+										
+					} else {
+						
+					}
+				});
+			});			
 		}
 	], function(err, result) {
 		if (err) {
@@ -1907,7 +1903,7 @@ exports.createTeam = function (req, res) {
 			});
 		}
 	});	
-}
+}*/
 
 exports.getTeamData = function (req, res) {
 	
@@ -1930,7 +1926,7 @@ exports.getTeamData = function (req, res) {
 				team_id: team_id
 			}, function (err, data) {
 				cb(err, data);
-			})
+			});
 		},
 		(team_data, cb) => {
 			if (!team_data) {
@@ -1950,7 +1946,7 @@ exports.getTeamData = function (req, res) {
 			});
 		}
 	});	
-}
+};
 
 exports.updateTeam = function (req, res) {
 	
@@ -2010,7 +2006,7 @@ exports.updateTeam = function (req, res) {
 			});
 		}		
 	});
-}
+};
 
 exports.deleteTeam = function (req, res){
 
@@ -2154,7 +2150,7 @@ exports.deleteTeam = function (req, res){
 			});
 		}
 	});	
-}
+};
 
 exports.getMyInvitations = function(req, res) {
 	var user_id = req.session.user_id || false;
@@ -2172,7 +2168,7 @@ exports.getMyInvitations = function(req, res) {
 				user_id: user_id
 			}, function(err, invitation_data) {
 				cb(err, invitation_data);
-			})
+			});
 		}
 	], function(err, result) {
 		if (err) {
@@ -2213,7 +2209,7 @@ exports.acceptInvitation = function(req, res) {
 				} else {
 					cb(err, update_data);
 				}
-			})
+			});
 		},
 		(invit_data, cb) => {
 			team_id = invit_data.team_id;
@@ -2288,6 +2284,63 @@ exports.rejectInvitation = function(req, res) {
 			});
 		}
 	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+};
+
+exports.getTeamList = function (req, res) {
+	
+	var user_id = req.session.user_id || req.body.user_id;	
+	
+	async.waterfall([
+		cb => {
+			if (!user_id) {
+				cb('로그인 하셔야 합니다.');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.user.findOne({
+				user_id: user_id
+			}, function (err, user_info) {
+				if (err) {
+					cb(err);
+				} else {
+					cb(null, user_info);
+				}
+			});
+		},
+		(user_info, cb) => {			
+			async.mapLimit(user_info.team_id, 10, function (item, next) {
+				db.team.findOne({
+					team_id: item
+				}, function (err, team_info) {
+					if (err) {
+						team_info.msg = "Fail loading team data";
+						next(err);
+					} else {
+						next(null, team_info);
+					}
+				});
+			}, function (err, team_data) {
+				if (err) {
+					console.log('team info loading failed');
+				} else {
+					console.log(team_data);
+					cb(err, team_data);
+				}
+			});
+		}
+	], function (err, result) {
 		if (err) {
 			res.json({
 				err: err
