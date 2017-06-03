@@ -199,6 +199,7 @@ app.all('/sessChk', routes_ajax.sessChk);
 app.get('/user/login', sessChk(false), routes_ajax.loginUser);
 app.get('/user/logout', routes_ajax.logoutUser);
 app.put('/user/signup', sessChk(false), routes_ajax.signupUser);
+app.get('/user/team_list', sessChk(true), routes_ajax.getTeamList);
 app.get('/user', sessChk(true), routes_ajax.getUserById);
 app.post('/user', sessChk(true), routes_ajax.updateUser);
 
@@ -242,7 +243,7 @@ app.put('/team/schedule/:team_id', sessChk(true), routes_ajax.addTeamSchedule);
 app.delete('/team/schedule/:team_id', sessChk(true), routes_ajax.deleteTeamSchedule);
 
 // team
-app.put('/team', sessChk(true), routes_ajax.createTeam);
+//app.put('/team', sessChk(true), routes_ajax.createTeam);
 app.get('/team/:team_id', sessChk(true), routes_ajax.getTeamData);
 app.post('/team/:team_id', sessChk(true), routes_ajax.updateTeam);
 app.delete('/team/:team_id', sessChk(true), routes_ajax.deleteTeam);

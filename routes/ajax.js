@@ -1824,7 +1824,7 @@ exports.deleteTeamSchedule = function(req, res) {
 	});
 }
 
-exports.createTeam = function (req, res) {
+/*exports.createTeam = function (req, res) {
 	
 	if (Object.keys(req.query).length) {
 		req.body = req.query;		
@@ -1848,7 +1848,7 @@ exports.createTeam = function (req, res) {
 		},
 		cb => {
 			db.team.findOne({
-				team_id: team_id
+				team_name: team_name
 			}, function(err, result) {
 				if (err) {
 					return cb(err);
@@ -1860,6 +1860,7 @@ exports.createTeam = function (req, res) {
 			if (team_id_data) {
 				return cb('team id already exist');
 			}
+			
 			var new_team = new db.team({				
 				team_id: team_id,
 				team_name: team_name,
@@ -1873,9 +1874,22 @@ exports.createTeam = function (req, res) {
 				if (err) {
 					cb(err);
 				} else {
-					cb(null, '팀 생성 성공!');
+					cb(null, new_team);
 				}
-			});
+			});			
+		},
+		(new_team, cb) => {
+			async.mapLimit(new_team.member_id, 10, function (item, next) {
+				db.user.findOne({
+					user_id: item
+				}, function (err, user_data) {
+					if (err) {
+										
+					} else {
+						
+					}
+				});
+			});			
 		}
 	], function(err, result) {
 		if (err) {
@@ -1888,7 +1902,7 @@ exports.createTeam = function (req, res) {
 			});
 		}
 	});	
-}
+}*/
 
 exports.getTeamData = function (req, res) {
 	
@@ -1991,7 +2005,27 @@ exports.updateTeam = function (req, res) {
 			});
 		}		
 	});
-}
+};
+
+/*async.mapLimit(user_info.team_id, 10, function (item, next) {
+				db.team.findOne({
+					team_id: item
+				}, function (err, team_info) {
+					if (err) {
+						team_info.msg = "Fail loading team data";
+						next(err);
+					} else {
+						next(null, team_info);
+					}
+				});
+			}, function (err, team_data) {
+				if (err) {
+					console.log('team info loading failed');
+				} else {
+					console.log(team_data);
+					cb(err, team_data);
+				}
+			});*/
 
 exports.deleteTeam = function (req, res){
 
@@ -2135,7 +2169,7 @@ exports.deleteTeam = function (req, res){
 			});
 		}
 	});	
-}
+};
 
 exports.getMyInvitations = function(req, res) {
 	var user_id = req.session.user_id || false;
@@ -2153,7 +2187,7 @@ exports.getMyInvitations = function(req, res) {
 				user_id: user_id
 			}, function(err, invitation_data) {
 				cb(err, invitation_data);
-			})
+			});
 		}
 	], function(err, result) {
 		if (err) {
@@ -2194,7 +2228,7 @@ exports.acceptInvitation = function(req, res) {
 				} else {
 					cb(err, update_data);
 				}
-			})
+			});
 		},
 		(invit_data, cb) => {
 			team_id = invit_data.team_id;
@@ -2281,6 +2315,62 @@ exports.rejectInvitation = function(req, res) {
 	});
 };
 
+exports.getTeamList = function (req, res) {
+	
+	var user_id = req.session.user_id || req.body.user_id;	
+	
+	async.waterfall([
+		cb => {
+			if (!user_id) {
+				cb('로그인 하셔야 합니다.');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.user.findOne({
+				user_id: user_id
+			}, function (err, user_info) {
+				if (err) {
+					cb(err);
+				} else {
+					cb(null, user_info);
+				}
+			});
+		},
+		(user_info, cb) => {			
+			async.mapLimit(user_info.team_id, 10, function (item, next) {
+				db.team.findOne({
+					team_id: item
+				}, function (err, team_info) {
+					if (err) {
+						team_info.msg = "Fail loading team data";
+						next(err);
+					} else {
+						next(null, team_info);
+					}
+				});
+			}, function (err, team_data) {
+				if (err) {
+					console.log('team info loading failed');
+				} else {
+					console.log(team_data);
+					cb(err, team_data);
+				}
+			});
+		}
+	], function (err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+};
 /*exports.inviteMember = function (req, res) {
 		
 	if (Object.keys(req.query).length) {
