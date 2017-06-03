@@ -99,27 +99,6 @@ paths:
           description: 정상적으로 회원가입 됨
         '400':
           description: 필수 입력값이 부족한 경우
-  '/user/team_list/{user_id}':
-    get:
-      tags:
-        - user
-      summary: user가 소속된 팀의 리스트를 보여줌
-      description: ''
-      operationId: userTeamList
-      produces:
-        - application/json
-      parameters:
-        - name: user_id
-          in: query
-          description: 팀 리스트를 가져올 유저 정보
-          required: true
-      responses:
-        '200':
-          description: 정상적으로 팀의 리스트를 가져옴
-        '400':
-          description: 잘못된 형식의 유저 이름
-        '404'
-          description: 유저가 발견되지 않음
   /user:
     get:
       tags:
