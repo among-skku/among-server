@@ -182,10 +182,11 @@ jQuery(function($) {
 
 											calendar.fullCalendar('renderEvent',
 												{
+													mutable: true,
 													id: team_schedule_id,
 													title: title,
-													start: moment(start_date_obj).toString(),
-													end: moment(end_date_obj).toString(),
+													start: moment(start_date_obj),
+													end: moment(end_date_obj),
 													contents: contents,
 													place: place,
 													tag: tag,
@@ -209,107 +210,225 @@ jQuery(function($) {
 						}
 					}
 				});
-			}
-			,
+			},
 			eventClick: function(calEvent, jsEvent, view) {
 
 				console.log(calEvent); //여기 데이터있음
-				// console.log(jsEvent);
-				// console.log(view);
-				//display a modal
-				var modal_html = [
-					'<div class="modal fade">',
-				  '<div class="modal-dialog">',
-				   '<div class="modal-content">',
-					'<div class="modal-header">',
-						'<button type="button" class="close" data-dismiss="modal">&times;</button>',
-						'<h4 class="modal-title">이벤트 상세 보기</h4>',
-					'</div>',
-					 '<div class="modal-body">',
-					   '<div class="">',
-						  '<label for="event_title">제목</label>',
-						  '<input id="event_title" class="bootbox-input bootbox-input-text form-control" autocomplete="off" type="text" value="' + calEvent.title + '" /><br />',
-						'<label for="event_tag">태그</label>',
-						  '<input id="event_tag" class="bootbox-input bootbox-input-text form-control" autocomplete="off" type="text" value="' + calEvent.tag + '" /><br />',
-						'<label for="event_place">제목</label>',
-						  '<input id="event_place" class="bootbox-input bootbox-input-text form-control" autocomplete="off" type="text" value="' + calEvent.place + '" /><br />',
-						  '<label for="event_contents">내용</label>',
-						  '<textarea class="bootbox-input bootbox-input-text form-control" rows="5" id="event_contents">' + calEvent.contents + '</textarea>',
-						'<input type="hidden" value="' + calEvent.id + '">',
-					   '</div>',
-					 '</div>',
-					 '<div class="modal-footer">',
-						 '<button id="modifyBtn" class="btn btn-sm btn-success"><i class="ace-icon fa fa-check"></i> 변경</button>',
-						'<button class="btn btn-sm btn-danger" data-action="delete"><i class="ace-icon fa fa-trash-o"></i> 삭제</button>',
-						'<button class="btn btn-sm" data-dismiss="modal"><i class="ace-icon fa fa-times"></i> 닫기</button>',
-					 '</div>',
-				  '</div>',
-				 '</div>',
-				'</div>'
-				].join('');
+				if (calEvent && calEvent.mutable) {
+					bootbox.dialog({
+						title: '이벤트 상세 보기',
+						message: [
+								   '<div class="bootbox-form">',
+									  '<label for="event_title">제목</label>',
+									  '<input id="event_title" class="bootbox-input bootbox-input-text form-control" autocomplete="off" type="text" value="' + calEvent.title + '" /><br />',
+									'<label for="event_tag">태그</label>',
+									  '<input id="event_tag" class="bootbox-input bootbox-input-text form-control" autocomplete="off" type="text" value="' + calEvent.tag + '" /><br />',
+									'<label for="event_place">장소</label>',
+									  '<input id="event_place" class="bootbox-input bootbox-input-text form-control" autocomplete="off" type="text" value="' + calEvent.place + '" /><br />',
+									  '<label for="event_contents">내용</label>',
+									  '<textarea class="bootbox-input bootbox-input-text form-control" rows="5" id="event_contents">' + calEvent.contents + '</textarea>',
+									'<input type="hidden" value="' + calEvent.id + '">',
+								   '</div>',
+							].join(''),
+						size: 'large',
+						closeButton: false,
+						onEscape: false,
+						buttons: {
+							confirm: {
+								label: '변경',
+								className: 'btn-success',
+								callback: function(result) {
+									calEvent.title = $("#event_title").val();
+									calEvent.tag = $("#event_tag").val();
+									calEvent.place = $("#event_place").val();
+									calEvent.contents = $("#event_contents").val();
 
-
-				var modal = $(modal_html).appendTo('body');
-				modal.find('[id=modifyBtn]').click(function(ev){
-					ev.preventDefault();
-
-					calEvent.title = $("#event_title").val();
-					calEvent.tag = $("#event_tag").val();
-					calEvent.place = $("#event_place").val();
-					calEvent.contents = $("#event_contents").val();
-
-					// console.log(calEvent.title);
-					// console.log(calEvent.tag);
-					// console.log(calEvent.place);
-					// console.log(calEvent.contents);
-
-					$.post('/team/schedule/' + window.team_id, {
-						team_schedule_id: calEvent.id,
-						title: calEvent.title,
-						tag: calEvent.tag,
-						place: calEvent.place,
-						contents: calEvent.contents
-					}, function(res) {
-						if (res) {
-							if (res.err) {
-								alert(res.err);
-							} else {
-								alert(res.result);
-								calendar.fullCalendar('updateEvent', calEvent);
-								modal.modal("hide");
+									$.post('/team/schedule/' + window.team_id, {
+										team_schedule_id: calEvent.id,
+										title: calEvent.title,
+										tag: calEvent.tag,
+										place: calEvent.place,
+										contents: calEvent.contents
+									}, function(res) {
+										if (res) {
+											if (res.err) {
+												alert(res.err);
+												return false;
+											} else {
+												alert(res.result);
+												calendar.fullCalendar('updateEvent', calEvent);
+												return true;
+												//modal.modal("hide");
+											}
+										} else {
+											alert('네트워크 에러! 일정 변경에 실패하였습니다.');
+											return false;
+										}
+									});
+								}
+							},
+							delete: {
+								label: '삭제',
+								className: 'btn-danger',
+								callback: function() {
+									var schedule_id = calEvent.id;
+									$.delete('/team/schedule/' + window.team_id, {
+										team_schedule_id: schedule_id
+									}, function(res) {
+										if (res) {
+											if (res.err) {
+												alert(res.err);
+												return false;
+											} else {
+												alert(res.result);
+												calendar.fullCalendar('removeEvents' , function(ev){
+													return (ev._id == calEvent._id);
+												});
+												return true;
+											}
+										} else {
+											alert('네트워크 에러! 일정 삭제에 실패하였습니다.');
+											return false;
+										}
+									});
+								}
+							},
+							cancel: {
+								label: '취소',
+								className: 'btn-default'
 							}
-						} else {
-							alert('네트워크 에러! 일정 변경에 실패하였습니다.');
 						}
 					});
-				});
-				modal.find('button[data-action=delete]').on('click', function() {
-					var schedule_id = calEvent.id;
-					console.log(schedule_id);
-					console.log(this);
-
-					$.delete('/team/schedule/' + window.team_id, {
-						team_schedule_id: schedule_id
-					}, function(res) {
-						if (res) {
-							if (res.err) {
-								alert(res.err);
-							} else {
-								alert(res.result);
-								calendar.fullCalendar('removeEvents' , function(ev){
-									return (ev._id == calEvent._id);
-								});
-								modal.modal("hide");
+				} else {
+					bootbox.dialog({
+						title: '이벤트 상세 보기',
+						message: [
+								   '<div class="bootbox-form">',
+									  '<label for="event_title">제목</label>',
+									  '<input id="event_title" class="bootbox-input bootbox-input-text form-control" readonly="true" autocomplete="off" type="text" value="' + calEvent.title + '" /><br />',
+		    							'<label for="evt_week_day">요일</label>',
+									  '<input id="evt_week_day" class="bootbox-input bootbox-input-text form-control" readonly="true" autocomplete="off" type="text" value="' + new moment().weekday(calEvent.week_day).format('dddd') + '" /><br />',
+									'<label for="evt_start_time">시작 시간</label>',
+									  '<input id="evt_start_time" class="bootbox-input bootbox-input-text form-control" readonly="true" autocomplete="off" type="time" value="' + calEvent.start.format('HH:mm') + '" /><br />',
+									'<label for="evt_end_time">종료 시간</label>',
+						    			'<input id="evt_end_time" class="bootbox-input bootbox-input-text form-control" readonly="true" autocomplete="off" type="time" value="' + calEvent.end.format('HH:mm') + '" /><br />',
+									'<label for="event_place">장소</label>',
+									  '<input id="event_place" class="bootbox-input bootbox-input-text form-control" readonly="true" autocomplete="off" type="text" value="' + calEvent.place + '" /><br />',
+									  '<label for="event_contents">내용</label>',
+									  '<textarea class="bootbox-input bootbox-input-text form-control" readonly="true" rows="5" id="event_contents">' + calEvent.contents + '</textarea>',
+									'<input type="hidden" value="' + calEvent.id + '">',
+								   '</div>',
+							].join(''),
+						size: 'large',
+						closeButton: false,
+						onEscape: false,
+						buttons: {
+							cancel: {
+								label: '닫기',
+								className: 'btn-default'
 							}
-						} else {
-							alert('네트워크 에러! 일정 삭제에 실패하였습니다.');
 						}
 					});
-				});
+				}
+				
+				// //////////////////////////////////////
+				// //display a modal
+				// var modal_html = [
+				// 	'<div class="modal fade">',
+				//   '<div class="modal-dialog">',
+				//    '<div class="modal-content">',
+				// 	'<div class="modal-header">',
+				// 		'<button type="button" class="close" data-dismiss="modal">&times;</button>',
+				// 		'<h4 class="modal-title">이벤트 상세 보기</h4>',
+				// 	'</div>',
+				// 	 '<div class="modal-body">',
+				// 	   '<div class="">',
+				// 		  '<label for="event_title">제목</label>',
+				// 		  '<input id="event_title" class="bootbox-input bootbox-input-text form-control" autocomplete="off" type="text" value="' + calEvent.title + '" /><br />',
+				// 		'<label for="event_tag">태그</label>',
+				// 		  '<input id="event_tag" class="bootbox-input bootbox-input-text form-control" autocomplete="off" type="text" value="' + calEvent.tag + '" /><br />',
+				// 		'<label for="event_place">제목</label>',
+				// 		  '<input id="event_place" class="bootbox-input bootbox-input-text form-control" autocomplete="off" type="text" value="' + calEvent.place + '" /><br />',
+				// 		  '<label for="event_contents">내용</label>',
+				// 		  '<textarea class="bootbox-input bootbox-input-text form-control" rows="5" id="event_contents">' + calEvent.contents + '</textarea>',
+				// 		'<input type="hidden" value="' + calEvent.id + '">',
+				// 	   '</div>',
+				// 	 '</div>',
+				// 	 '<div class="modal-footer">',
+				// 		 '<button id="modifyBtn" class="btn btn-sm btn-success"><i class="ace-icon fa fa-check"></i> 변경</button>',
+				// 		'<button class="btn btn-sm btn-danger" data-action="delete"><i class="ace-icon fa fa-trash-o"></i> 삭제</button>',
+				// 		'<button class="btn btn-sm" data-dismiss="modal"><i class="ace-icon fa fa-times"></i> 닫기</button>',
+				// 	 '</div>',
+				//   '</div>',
+				//  '</div>',
+				// '</div>'
+				// ].join('');
 
-				modal.modal('show').on('hidden', function(){
-					modal.remove();
-				});
+
+				// var modal = $(modal_html).appendTo('body');
+				// modal.find('[id=modifyBtn]').click(function(ev){
+				// 	ev.preventDefault();
+
+				// 	calEvent.title = $("#event_title").val();
+				// 	calEvent.tag = $("#event_tag").val();
+				// 	calEvent.place = $("#event_place").val();
+				// 	calEvent.contents = $("#event_contents").val();
+
+				// 	// console.log(calEvent.title);
+				// 	// console.log(calEvent.tag);
+				// 	// console.log(calEvent.place);
+				// 	// console.log(calEvent.contents);
+
+				// 	$.post('/team/schedule/' + window.team_id, {
+				// 		team_schedule_id: calEvent.id,
+				// 		title: calEvent.title,
+				// 		tag: calEvent.tag,
+				// 		place: calEvent.place,
+				// 		contents: calEvent.contents
+				// 	}, function(res) {
+				// 		if (res) {
+				// 			if (res.err) {
+				// 				alert(res.err);
+				// 			} else {
+				// 				alert(res.result);
+				// 				calendar.fullCalendar('updateEvent', calEvent);
+				// 				modal.modal("hide");
+				// 			}
+				// 		} else {
+				// 			alert('네트워크 에러! 일정 변경에 실패하였습니다.');
+				// 		}
+				// 	});
+				// });
+				// modal.find('button[data-action=delete]').on('click', function() {
+				// 	var schedule_id = calEvent.id;
+
+				// 	$.delete('/team/schedule/' + window.team_id, {
+				// 		team_schedule_id: schedule_id
+				// 	}, function(res) {
+				// 		if (res) {
+				// 			if (res.err) {
+				// 				alert(res.err);
+				// 			} else {
+				// 				alert(res.result);
+				// 				calendar.fullCalendar('removeEvents' , function(ev){
+				// 					return (ev._id == calEvent._id);
+				// 				});
+				// 				modal.modal("hide");
+				// 			}
+				// 		} else {
+				// 			alert('네트워크 에러! 일정 삭제에 실패하였습니다.');
+				// 		}
+				// 	});
+				// });
+
+				// modal.modal('show', function() {
+				// 	console.log('왜 내눈앞에 나타나~');
+				// });
+				// modal.modal('show').on('hidden', function(){
+				// // modal.on('hidden', function(){
+				// 	console.log('modal 지움!');
+				// 	modal.remove();
+				// });
 
 
 				//console.log(calEvent.id);
@@ -330,8 +449,7 @@ jQuery(function($) {
 		// events for every monday and wednesday.
 		
 		var events = [];
-		console.log('start:', start);
-		console.log('end:', end);
+
 		for (loop = start._d.getTime();
 			 loop <= end._d.getTime();
 			 loop = loop + (24 * 60 * 60 * 1000)) {
@@ -354,10 +472,10 @@ jQuery(function($) {
 							var end_moment = new moment(test_date).hour(end_hour).minute(end_min);
 							var day = sc_data.day;
 							if (test_date.weekday() == day) {
-								//console.log('Debug!!', sc_data.title, 'time:', start_moment.format('YYYY-MM-DD HH:mm'), '~', end_moment.format('YYYY-MM-DD HH:mm'));
 								events.push({
+									mutable: false,
 									id: sc_data.schedule_id,
-									//title: sc_data.title,
+									week_day: day,
 									title: user_name + '의 ' + sc_data.title,
 									start: start_moment,
 									end: end_moment,
@@ -365,35 +483,12 @@ jQuery(function($) {
 									place: sc_data.place,
 									tag: sc_data.tag
 								});
-								// id: item.team_schedule_id,
-								// title: item.title,
-								// start: new Date(item.start_date),
-								// end: new Date(item.end_date),
-								// contents: item.contents,
-								// place: item.place,
-								// tag: item.tag,
-								// className: 'label-info'
 							}
 						}
 					});
 					
 				});
 			}
-			// if (test_date.weekday() === 0) {
-			// 	// we're in Moday, create the event
-			// 	events.push({
-			// 		title: 'I hate mondays - Garfield',
-			// 		start: test_date
-			// 	});
-			// }
-
-			// if (test_date.weekday() === 2) {
-			// 	// we're in Wednesday, create the Wednesday event
-			// 	events.push({
-			// 		title: 'It\'s the middle of the week!',
-			// 		start: test_date
-			// 	});
-			// }
 		} // for loop
 
 		// return events generated
@@ -415,6 +510,7 @@ jQuery(function($) {
 		window.team_sc = [];
 		result.team_schedule.result.map(function(item) {
 			window.team_sc.push({
+				mutable: true,
 				id: item.team_schedule_id,
 				title: item.title,
 				start: new Date(item.start_date),
@@ -427,7 +523,20 @@ jQuery(function($) {
 		});
 		window.user_sc = result.user_schedule.result;
 		init_calendar(window.team_sc);
-		$('#calendar').fullCalendar('addEventSource', weekly_event_source);
+		
+		window.show_member_schedule = $('#show_member_schedule');
+		
+		if (show_member_schedule.is(':checked')) {
+			$('#calendar').fullCalendar('addEventSource', weekly_event_source);
+		}
+		
+		show_member_schedule.change(function(e) {
+			if (this.checked) {
+				$('#calendar').fullCalendar('addEventSource', weekly_event_source);
+			} else {
+				$('#calendar').fullCalendar('removeEventSource', weekly_event_source);
+			}
+		});
 	});
 	/*
 	$.get('/team/schedule/' + window.team_id, function(res) {
@@ -505,12 +614,6 @@ jQuery(function($) {
 				return '<p><strong>' + data.user_name + '</strong> – ' + data.user_id + '<br /><small>(' + data.email + ')</small></p>';
 			}
 		 },
-		 // templates: {
-		 // suggestion: function(data) {
-		 // console.log(data);
-		 // return data.user_id
-		 // },
-		 // },
 		 limit: 10
 	 });
 	
