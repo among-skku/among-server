@@ -915,8 +915,6 @@ exports.uploadFile = function(req, res) {
 	var contents = req.query.contents || '';
 	var uploader = req.session.user_id || false;
 	var upload_time = new Date();
-	
-	console.log('req.file:', req.file);
 
 	async.waterfall([
 		cb => {
