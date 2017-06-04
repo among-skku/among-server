@@ -198,8 +198,8 @@ jQuery(function($) {
 													{
 														id: team_schedule_id,
 														title: title,
-														start: start_date_obj.toString(),
-														end: end_date_obj.toString(),
+														start: moment(start_date_obj).subtract(9, 'hours').toString(),
+														end: moment(end_date_obj).subtract(9, 'hours').toString(),
 														contents: contents,
 														place: place,
 														tag: tag,
@@ -223,67 +223,102 @@ jQuery(function($) {
 							}
 						}
 					});
-					
-					///// 날짜 선택해서 추가할거임
-					// bootbox.prompt("New Event Title:", function(title) {
-					// 	if (title !== null) {
-					// 		calendar.fullCalendar('renderEvent',
-					// 			{
-					// 				title: title,
-					// 				start: start,
-					// 				end: end,
-					// 				allDay: allDay,
-					// 				className: 'label-info'
-					// 			},
-					// 			true // make the event "stick"
-					// 		);
-					// 	}
-					// });
-
-
-					// calendar.fullCalendar('unselect');
 				}
 				,
 				eventClick: function(calEvent, jsEvent, view) {
 
-					console.log(calEvent);
-					console.log(jsEvent);
-					console.log(view);
+					console.log(calEvent); //여기 데이터있음
+					// console.log(jsEvent);
+					// console.log(view);
 					//display a modal
-					var modal = 
-					'<div class="modal fade">\
-					  <div class="modal-dialog">\
-					   <div class="modal-content">\
-						 <div class="modal-body">\
-						   <button type="button" class="close" data-dismiss="modal" style="margin-top:-10px;">&times;</button>\
-						   <form class="no-margin">\
-							  <label>Change event name &nbsp;</label>\
-							  <input class="middle" autocomplete="off" type="text" value="' + calEvent.title + '" />\
-							 <button type="submit" class="btn btn-sm btn-success"><i class="ace-icon fa fa-check"></i> Save</button>\
-						   </form>\
-						 </div>\
-						 <div class="modal-footer">\
-							<button type="button" class="btn btn-sm btn-danger" data-action="delete"><i class="ace-icon fa fa-trash-o"></i> Delete Event</button>\
-							<button type="button" class="btn btn-sm" data-dismiss="modal"><i class="ace-icon fa fa-times"></i> Cancel</button>\
-						 </div>\
-					  </div>\
-					 </div>\
-					</div>';
+					var modal_html = [
+						'<div class="modal fade">',
+					  '<div class="modal-dialog">',
+					   '<div class="modal-content">',
+						'<div class="modal-header">',
+      					    '<button type="button" class="close" data-dismiss="modal">&times;</button>',
+							'<h4 class="modal-title">이벤트 상세 보기</h4>',
+      					'</div>',
+						 '<div class="modal-body">',
+						   '<div class="">',
+							  '<label for="event_title">제목</label>',
+							  '<input id="event_title" class="bootbox-input bootbox-input-text form-control" autocomplete="off" type="text" value="' + calEvent.title + '" /><br />',
+							'<label for="event_tag">태그</label>',
+							  '<input id="event_tag" class="bootbox-input bootbox-input-text form-control" autocomplete="off" type="text" value="' + calEvent.tag + '" /><br />',
+							'<label for="event_place">제목</label>',
+							  '<input id="event_place" class="bootbox-input bootbox-input-text form-control" autocomplete="off" type="text" value="' + calEvent.place + '" /><br />',
+							  '<label for="event_contents">내용</label>',
+							  '<textarea class="bootbox-input bootbox-input-text form-control" rows="5" id="event_contents">' + calEvent.contents + '</textarea>',
+							'<input type="hidden" value="' + calEvent.id + '">',
+						   '</div>',
+						 '</div>',
+						 '<div class="modal-footer">',
+							 '<button id="modifyBtn" class="btn btn-sm btn-success"><i class="ace-icon fa fa-check"></i> 변경</button>',
+							'<button class="btn btn-sm btn-danger" data-action="delete"><i class="ace-icon fa fa-trash-o"></i> 삭제</button>',
+							'<button class="btn btn-sm" data-dismiss="modal"><i class="ace-icon fa fa-times"></i> 닫기</button>',
+						 '</div>',
+					  '</div>',
+					 '</div>',
+					'</div>'
+					].join('');
+					
 
-
-					var modal = $(modal).appendTo('body');
-					modal.find('form').on('submit', function(ev){
+					var modal = $(modal_html).appendTo('body');
+					modal.find('[id=modifyBtn]').click(function(ev){
 						ev.preventDefault();
 
-						calEvent.title = $(this).find("input[type=text]").val();
-						calendar.fullCalendar('updateEvent', calEvent);
-						modal.modal("hide");
+						calEvent.title = $("#event_title").val();
+						calEvent.tag = $("#event_tag").val();
+						calEvent.place = $("#event_place").val();
+						calEvent.contents = $("#event_contents").val();
+						
+						// console.log(calEvent.title);
+						// console.log(calEvent.tag);
+						// console.log(calEvent.place);
+						// console.log(calEvent.contents);
+						
+						$.post('/team/schedule/' + window.team_id, {
+							team_schedule_id: calEvent.id,
+							title: calEvent.title,
+							tag: calEvent.tag,
+							place: calEvent.place,
+							contents: calEvent.contents
+						}, function(res) {
+							if (res) {
+								if (res.err) {
+									alert(res.err);
+								} else {
+									alert(res.result);
+									calendar.fullCalendar('updateEvent', calEvent);
+									modal.modal("hide");
+								}
+							} else {
+								alert('네트워크 에러! 일정 변경에 실패하였습니다.');
+							}
+						});
 					});
 					modal.find('button[data-action=delete]').on('click', function() {
-						calendar.fullCalendar('removeEvents' , function(ev){
-							return (ev._id == calEvent._id);
-						})
-						modal.modal("hide");
+						var schedule_id = calEvent.id;
+						console.log(schedule_id);
+						console.log(this);
+						
+						$.delete('/team/schedule/' + window.team_id, {
+							team_schedule_id: schedule_id
+						}, function(res) {
+							if (res) {
+								if (res.err) {
+									alert(res.err);
+								} else {
+									alert(res.result);
+									calendar.fullCalendar('removeEvents' , function(ev){
+										return (ev._id == calEvent._id);
+									});
+									modal.modal("hide");
+								}
+							} else {
+								alert('네트워크 에러! 일정 삭제에 실패하였습니다.');
+							}
+						});
 					});
 
 					modal.modal('show').on('hidden', function(){
@@ -304,6 +339,78 @@ jQuery(function($) {
 		}
 	});
 
-
-
-})
+	//typeahead.js
+	//example taken from plugin's page at: https://twitter.github.io/typeahead.js/examples/
+	var invite_btn = $('#invite_btn');
+	var invite_user_form = $('#invite_user_form');
+	 invite_user_form.typeahead({
+		 hint: true,
+		 highlight: true,
+		 minLength: 1
+	 }, {
+		 name: 'states',
+		 displayKey: 'value',
+		 source: function(query, syncResults, asyncResults) {
+			 $.get('/user', {
+			 	user_id: query
+			 }, function(res) {
+				 if (res && !res.err && res.result) {
+					 asyncResults([res.result]);
+				 } else {
+					 asyncResults([]);
+				 }
+			 });
+		 },
+		 display: function(data) {
+			 invite_btn.removeClass('disabled');
+			 return data.user_id;
+		 },
+		 templates: {
+			 notFound: function() {
+				 invite_btn.addClass('disabled');
+				return '일치하는 유저 없음'; 
+			 },
+			 pendng: '찾는 중',
+			empty: [
+			  '<div class="empty-message">',
+				'unable to find any Best Picture winners that match the current query',
+			  '</div>'
+			].join('\n'),
+			suggestion: function(data) {
+				return '<p><strong>' + data.user_name + '</strong> – ' + data.user_id + '<br /><small>(' + data.email + ')</small></p>';
+			}
+		 },
+		 // templates: {
+		 // suggestion: function(data) {
+		 // console.log(data);
+		 // return data.user_id
+		 // },
+		 // },
+		 limit: 10
+	 });
+	
+	invite_btn.click(function(e) {
+		var dom = $(this);
+		if (dom.hasClass('disabled')) {
+			//Disabled되었을 경우 동작안함
+			return;
+		} else {
+			var user_id = invite_user_form.val();
+			// console.log(user_id);
+			$.put('/team/invitations/' + window.team_id, {
+				user_id: user_id
+			}, function(res) {
+				if (res) {
+					if (res.err) {
+						alert(res.err);
+					} else {
+						alert(res.result);
+						invite_btn.addClass('disabled');
+					}
+				} else {
+					alert('네트워크 에러! 팀원 초대가 실패했습니다.');
+				}
+			});
+		}
+	});
+});

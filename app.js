@@ -183,6 +183,8 @@ app.get('/dashboard/team_schedule', pageSessChk(true), function(req, res) {
 });
 app.get('/dashboard/team_schedule/:team_id', pageSessChk(true), routes_view.teamSchedulePage);
 
+app.get('/dashboard/user_profile', pageSessChk(true), routes_view.userProfilePage);
+
 app.get('/calendar', routes_view.calendarPage);
 app.get('/news_feed', routes_view.newsFeedPage);
 app.get('/report', routes_view.reportPage);
