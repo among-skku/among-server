@@ -341,8 +341,9 @@ jQuery(function($) {
 
 	//typeahead.js
 	//example taken from plugin's page at: https://twitter.github.io/typeahead.js/examples/
-
-	 $('input.typeahead').typeahead({
+	var invite_btn = $('#invite_btn');
+	var invite_user_form = $('#invite_user_form');
+	 invite_user_form.typeahead({
 		 hint: true,
 		 highlight: true,
 		 minLength: 1
@@ -351,20 +352,24 @@ jQuery(function($) {
 		 displayKey: 'value',
 		 source: function(query, syncResults, asyncResults) {
 			 $.get('/user', {
-			 user_id: query
+			 	user_id: query
 			 }, function(res) {
-			 if (res && !res.err && res.result) {
-			 asyncResults([res.result]);
-			 } else {
-			 asyncResults([]);
-			 }
+				 if (res && !res.err && res.result) {
+					 asyncResults([res.result]);
+				 } else {
+					 asyncResults([]);
+				 }
 			 });
 		 },
 		 display: function(data) {
+			 invite_btn.removeClass('disabled');
 			 return data.user_id;
 		 },
 		 templates: {
-			 notFound: '일치하는 유저 없음',
+			 notFound: function() {
+				 invite_btn.addClass('disabled');
+				return '일치하는 유저 없음'; 
+			 },
 			 pendng: '찾는 중',
 			empty: [
 			  '<div class="empty-message">',
@@ -372,7 +377,7 @@ jQuery(function($) {
 			  '</div>'
 			].join('\n'),
 			suggestion: function(data) {
-				return '<p><strong>' + data.user_name + '</strong> – ' + data.user_id + '</p>';
+				return '<p><strong>' + data.user_name + '</strong> – ' + data.user_id + '<br /><small>(' + data.email + ')</small></p>';
 			}
 		 },
 		 // templates: {
@@ -384,5 +389,28 @@ jQuery(function($) {
 		 limit: 10
 	 });
 	
-	
+	invite_btn.click(function(e) {
+		var dom = $(this);
+		if (dom.hasClass('disabled')) {
+			//Disabled되었을 경우 동작안함
+			return;
+		} else {
+			var user_id = invite_user_form.val();
+			// console.log(user_id);
+			$.put('/team/invitations/' + window.team_id, {
+				user_id: user_id
+			}, function(res) {
+				if (res) {
+					if (res.err) {
+						alert(res.err);
+					} else {
+						alert(res.result);
+						invite_btn.addClass('disabled');
+					}
+				} else {
+					alert('네트워크 에러! 팀원 초대가 실패했습니다.');
+				}
+			});
+		}
+	});
 });
