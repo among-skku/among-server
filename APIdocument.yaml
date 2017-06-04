@@ -118,7 +118,7 @@ paths:
           description: 정상적으로 팀의 리스트를 가져옴
         '400':
           description: 잘못된 형식의 유저 이름
-        '404'
+        '404':
           description: 유저가 발견되지 않음
   /user:
     get:
