@@ -1,5 +1,33 @@
 jQuery(function($) {
 	$(document).ready(function(){
+		
+		$.get('/user/invite', function (res) {
+			if (res && res.result && res.result.length > 0) {
+				var user_invitation_str = JSON.stringify(res.result);
+				var user_invitation = JSON.parse(user_invitation_str);
+				
+				var modal_html = [];
+				
+				for (var i=0; i<user_invitation.length; i++) {
+					if (user_invitation[i].state == 'Pending') {
+						modal_html += ['<div class = "alert alert-success">',
+									'"팀 초대장"',
+									'<button class= "btn btn-xs btn-danger pull-right" id="reject_invitation">',
+										'<i class="ace-icon fa fa-times">',
+										'</i>',
+										'<span class="bigger-110">I don\'t accept</span>',
+									'</button>',
+									'<button class="btn btn-xs btn-success pull-right" id="accept_invitation">',
+										'<span class="bigger-110">I accept</span>',
+										'<i class="ace-icon fa fa-arrow-right icon-on-right">',
+										'</i>',
+									'</button>',
+								'</div>'].join('');
+					}
+				}
+			}
+		});
+		
 		$.get('/user/team_list', function(res) {
 			if (res && res.result && res.result.length > 0) {
 			//alert(Object.values(res.result));
@@ -23,9 +51,7 @@ jQuery(function($) {
 											'</div>',
 											'<div class="widget-body">',
 												'<div class="widget-main">',
-													'<p>',
-														'LLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.',
-													'</p>',
+													'<p>',team_data[i].contents,'</p>',
 													'<hr />',
 													'<div class="price">',
 														'$15',
@@ -33,9 +59,9 @@ jQuery(function($) {
 													'</div>',
 												'</div>',
 												'<div>',
-													'<a href="#" class="btn btn-block btn-primary">',
-														'<i class="ace-icon fa fa-shopping-cart bigger-110"></i>',
-														'<span>팀으로 이동</span>',
+													'<a href="team_schedule/',team_data[i].team_id, '\"',' class="btn btn-block btn-primary">',							   
+														'<i class="ace-icon fa fa-shopping-cart bigger-110"></i>',			   
+														'<span>팀으로 이동</span>',								   							
 													'</a>',
 												'</div>',
 											'</div>',

@@ -1926,7 +1926,6 @@ exports.createTeam = function (req, res) {
 		}
 	});	
 };
-
 exports.getTeamData = function (req, res) {
 	
 	if (Object.keys(req.query).length) {
