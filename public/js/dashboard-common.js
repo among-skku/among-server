@@ -12,3 +12,6 @@ $('#logoutBtn').click(function(e) {
 		}
 	});
 });
+if (typeof moment !== 'undefined') {
+	moment.locale('ko');
+}

@@ -1,3 +1,8 @@
+<style>
+	.fc-content + .fc-bg {
+		border: solid rgba(50, 50, 250, 0.7) 2px;
+	}
+</style>
 <div class="ace-settings-container" id="ace-settings-container">
 							<div class="btn btn-app btn-xs btn-warning ace-settings-btn" id="ace-settings-btn">
 								<i class="ace-icon fa fa-cog bigger-130"></i>
@@ -82,6 +87,10 @@
 									<div class="col-sm-9">
 										<div class="space"></div>
 
+											<small class="muted smaller-90">팀원 개인일정 보이기:</small>
+											<input id="show_member_schedule" checked="" type="checkbox" class="ace ace-switch ace-switch-5" />
+											<span class="lbl middle"></span>
+										<hr>
 										<div id="calendar"></div>
 									</div>
 
