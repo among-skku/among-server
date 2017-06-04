@@ -1947,6 +1947,7 @@ exports.createTeam = function (req, res) {
 			});
 		},
 		(team_id_data, cb) => {
+
 			if (team_id_data) {
 				return cb('중복된 이름의 팀 명이 존재합니다.');
 			}
@@ -1993,7 +1994,7 @@ exports.createTeam = function (req, res) {
 			});
 		}
 	});	
-}
+};
 
 exports.getTeamData = function (req, res) {
 	
