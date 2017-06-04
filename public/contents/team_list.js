@@ -6,12 +6,12 @@ jQuery(function($) {
 				var user_invitation_str = JSON.stringify(res.result);
 				var user_invitation = JSON.parse(user_invitation_str);
 				
-				var modal_html = [];
+				var invitation_html = [];
 				
 				for (var i=0; i<user_invitation.length; i++) {
 					if (user_invitation[i].state == 'Pending') {
-						modal_html += ['<div class = "alert alert-success">',
-									'"팀 초대장"',
+						invitation_html += ['<div class = "alert alert-success">',
+									'"팀 초대장"',user_invitation[i].team_id,
 									'<button class= "btn btn-xs btn-danger pull-right" id="reject_invitation">',
 										'<i class="ace-icon fa fa-times">',
 										'</i>',
@@ -25,21 +25,24 @@ jQuery(function($) {
 								'</div>'].join('');
 					}
 				}
+				
+				$("#print_invitation").html(invitation_html);
 			}
 		});
 		
 		$.get('/user/team_list', function(res) {
+			
+			var modal_html = [];
 			if (res && res.result && res.result.length > 0) {
-			//alert(Object.values(res.result));
-			//alert(whichIsVisible()[0]);
+			
 				var team_data_str = JSON.stringify(res.result);
 				var team_data = JSON.parse(team_data_str);
-				//alert("Data: " +  team_data.length + "\nStatus: " + team_data_str);
+				
+				
 				
 				/*for (var i=0; i<team_data.length; i++)
-					alert("i: "+i+" team[i]: " + team_data[i].team_id);*/
+					alert("i: "+i+" team[i]: " + team_data[i].team_id);*/				
 				
-				var modal_html = [];
 				
 				for (var i=0; i<team_data.length; i++) {
 					//alert("key: "+i+"   team[key]: "+team_data[i].team_name);
@@ -69,8 +72,12 @@ jQuery(function($) {
 									'</div>'].join('');				
 				}
 				//alert(modal_html);
-				$("#print_team").html(modal_html);
-			}			
+				
+			} else {
+				alert('참여하는 팀 없음');
+				//modal_html = '<p>현재 잠여하고 있는 팀이 없습니다.</p>'.join[''];
+			}	
+			$("#print_team").html(modal_html);
 		});		
 	});	
 });

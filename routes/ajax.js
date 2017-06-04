@@ -1172,7 +1172,8 @@ exports.getTeamInvitation = function(req, res) {
 };
 
 exports.inviteMember = function(req, res) {
-	var team_id = req.params.team_id || false;
+	//var team_id = req.params.team_id || false;
+	var team_id = req.body.team_id || false;
 	var user_id = req.body.user_id || false;
 	var current_user_id = req.session.user_id || false;
 	var invitation_id = 'invitation_' + randString(10);
