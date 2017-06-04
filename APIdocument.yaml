@@ -110,7 +110,8 @@ paths:
         - application/json
       parameters:
         - name: user_id
-          in: query
+          in: path
+          type: string
           description: 팀 리스트를 가져올 유저 정보
           required: true
       responses:
