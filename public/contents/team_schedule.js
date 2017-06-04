@@ -112,6 +112,7 @@ jQuery(function($) {
 
 			}
 			,
+			timezone: 'Asia/Seoul',
 			selectable: true,
 			selectHelper: true,
 			select: function(start, end, allDay) {
@@ -183,8 +184,8 @@ jQuery(function($) {
 												{
 													id: team_schedule_id,
 													title: title,
-													start: moment(start_date_obj).subtract(9, 'hours').toString(),
-													end: moment(end_date_obj).subtract(9, 'hours').toString(),
+													start: moment(start_date_obj).toString(),
+													end: moment(end_date_obj).toString(),
 													contents: contents,
 													place: place,
 													tag: tag,
@@ -327,37 +328,111 @@ jQuery(function($) {
 	var weekly_event_source = function(start, end, timezone, callback) {
 		// When requested, dynamically generate virtual
 		// events for every monday and wednesday.
+		
 		var events = [];
+		console.log('start:', start);
+		console.log('end:', end);
 		for (loop = start._d.getTime();
 			 loop <= end._d.getTime();
 			 loop = loop + (24 * 60 * 60 * 1000)) {
 
 			var test_date = moment(new Date(loop));
 
-			if (test_date.weekday() === 0) {
-				// we're in Moday, create the event
-				events.push({
-					title: 'I hate mondays - Garfield',
-					start: test_date
+			if (window.user_sc) {
+				window.user_sc.map(function(user_sc_item) {
+					// console.log(user_sc_item);
+					var user_id = user_sc_item.user_id;
+					var user_name = user_sc_item.user_name;
+					user_sc_item.regular_schedule.map(function(sc_data) {
+						if (typeof sc_data.day === 'string') {
+							var start_hour = sc_data.start_time.split(':')[0];
+							var start_min = sc_data.start_time.split(':')[1];
+							var end_hour = sc_data.end_time.split(':')[0];
+							var end_min = sc_data.end_time.split(':')[1];
+							
+							var start_moment = new moment(test_date).hour(start_hour).minute(start_min);
+							var end_moment = new moment(test_date).hour(end_hour).minute(end_min);
+							var day = sc_data.day;
+							if (test_date.weekday() == day) {
+								//console.log('Debug!!', sc_data.title, 'time:', start_moment.format('YYYY-MM-DD HH:mm'), '~', end_moment.format('YYYY-MM-DD HH:mm'));
+								events.push({
+									id: sc_data.schedule_id,
+									//title: sc_data.title,
+									title: user_name + '의 ' + sc_data.title,
+									start: start_moment,
+									end: end_moment,
+									contents: sc_data.contents,
+									place: sc_data.place,
+									tag: sc_data.tag
+								});
+								// id: item.team_schedule_id,
+								// title: item.title,
+								// start: new Date(item.start_date),
+								// end: new Date(item.end_date),
+								// contents: item.contents,
+								// place: item.place,
+								// tag: item.tag,
+								// className: 'label-info'
+							}
+						}
+					});
+					
 				});
 			}
+			// if (test_date.weekday() === 0) {
+			// 	// we're in Moday, create the event
+			// 	events.push({
+			// 		title: 'I hate mondays - Garfield',
+			// 		start: test_date
+			// 	});
+			// }
 
-			if (test_date.weekday() === 2) {
-				// we're in Wednesday, create the Wednesday event
-				events.push({
-					title: 'It\'s the middle of the week!',
-					start: test_date
-				});
-			}
+			// if (test_date.weekday() === 2) {
+			// 	// we're in Wednesday, create the Wednesday event
+			// 	events.push({
+			// 		title: 'It\'s the middle of the week!',
+			// 		start: test_date
+			// 	});
+			// }
 		} // for loop
 
 		// return events generated
 		callback( events );
 	};
 	
+	async.parallel({
+		team_schedule: function(cb) {
+			$.get('/team/schedule/' + window.team_id, function(res) {
+				cb(null, res);
+			});
+		},
+		user_schedule: function(cb) {
+			$.get('/team/user_schedule/' + window.team_id, function(res) {
+				cb(null, res);
+			});
+		}
+	}, function(err, result) {
+		window.team_sc = [];
+		result.team_schedule.result.map(function(item) {
+			window.team_sc.push({
+				id: item.team_schedule_id,
+				title: item.title,
+				start: new Date(item.start_date),
+				end: new Date(item.end_date),
+				contents: item.contents,
+				place: item.place,
+				tag: item.tag,
+				className: 'label-info'
+			});
+		});
+		window.user_sc = result.user_schedule.result;
+		init_calendar(window.team_sc);
+		$('#calendar').fullCalendar('addEventSource', weekly_event_source);
+	});
+	/*
 	$.get('/team/schedule/' + window.team_id, function(res) {
 
-		if (res && res.result && res.result.length > 0) {
+		if (res && res.result) {
 			var result = res.result;
 			var events = [];
 			result.map(function(item) {
@@ -387,6 +462,7 @@ jQuery(function($) {
 			//////
 		}
 	});
+	*/
 
 	//typeahead.js
 	//example taken from plugin's page at: https://twitter.github.io/typeahead.js/examples/
