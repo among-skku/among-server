@@ -823,6 +823,26 @@ paths:
           description: 팀 일정을 삭제하는 것에 실패함
         '404':
           description: 사용자가 존재하지않는 일정을 삭제하려고 시도하는 경우
+  '/team/user_schedule/{team_id}':
+    get:
+      tags:
+        - schedule
+      summary: 팀원 일정 조회
+      description: ''
+      operationId: getTeamMemberSchedule
+      produces:
+        - application/json
+      parameters:
+        - name: team_id
+          in: path
+          required: true
+          type: string
+          description: 팀 아이디
+      responses:
+        '200':
+          description: 팀 일정을 추가하는 것에 성공함
+        '400':
+          description: 팀 일정을 추가하는 것에 실패함
   '/team/report/{team_id}':
     get:
       tags:
