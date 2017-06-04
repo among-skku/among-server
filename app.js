@@ -239,7 +239,7 @@ app.put('/team/schedule/:team_id', sessChk(true), routes_ajax.addTeamSchedule);
 app.delete('/team/schedule/:team_id', sessChk(true), routes_ajax.deleteTeamSchedule);
 
 // team
-//app.put('/team', sessChk(true), routes_ajax.createTeam);
+app.put('/team', sessChk(true), routes_ajax.createTeam);
 app.get('/team/:team_id', sessChk(true), routes_ajax.getTeamData);
 app.post('/team/:team_id', sessChk(true), routes_ajax.updateTeam);
 app.delete('/team/:team_id', sessChk(true), routes_ajax.deleteTeam);

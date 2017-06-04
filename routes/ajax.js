@@ -1825,7 +1825,7 @@ exports.deleteTeamSchedule = function(req, res) {
 	});
 };
 
-/*exports.createTeam = function (req, res) {
+exports.createTeam = function (req, res) {
 	
 	if (Object.keys(req.query).length) {
 		req.body = req.query;		
@@ -1858,7 +1858,7 @@ exports.deleteTeamSchedule = function(req, res) {
 			});
 		},
 		(team_id_data, cb) => {
-			if (team_id_data) {
+			if (!team_id_data) {
 				return cb('team id already exist');
 			}
 			
@@ -1881,16 +1881,38 @@ exports.deleteTeamSchedule = function(req, res) {
 		},
 		(new_team, cb) => {
 			async.mapLimit(new_team.member_id, 10, function (item, next) {
+				console.log("1.: " + new_team.member_id);
+				console.log("2.: " + item);
+				
 				db.user.findOne({
 					user_id: item
 				}, function (err, user_data) {
 					if (err) {
-										
+						cb(err);
 					} else {
-						
+						console.log("userData: "+user_data);
+						var team_arr = user_data.team_id;
+						team_arr.push(team_id);
+						db.user.update({
+							user_id: item
+						}, {
+							$set: {team_id: team_arr}
+						}, function (err, result) {
+							if (err) {
+								cb(err);
+							} else {
+								cb(null, '해당 user의 team_id Arr에 팀 추가 성공');
+							}
+						});						
 					}
 				});
-			});			
+			}, function (err, success) {
+					if (err) {
+						console.log(err);
+					} else {
+						cb(err, success);
+					}
+				});			
 		}
 	], function(err, result) {
 		if (err) {
@@ -1903,7 +1925,7 @@ exports.deleteTeamSchedule = function(req, res) {
 			});
 		}
 	});	
-}*/
+};
 
 exports.getTeamData = function (req, res) {
 	
