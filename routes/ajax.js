@@ -390,21 +390,41 @@ exports.addSchedule = function(req, res) {
 					cb(err, '비정기 일정이 저장되었습니다.');
 				});
 			} else {//regular schedule
-				var snapshot = new db.regular_schedule({
-					user_id: user_id,
-					schedule_id: schedule_id,
-					place: place,
-					title: title,
-					contents: contents,
-					start_date: str2date(start_date),
-					end_date: str2date(end_date),
-					start_time: start_time,
-					end_time: end_time,
-					day: day
-				});
-				snapshot.save(function(err) {
+				
+				db.user.update({
+					user_id: user_id
+				}, {
+					$addToSet: {
+						regular_schedule: {
+							schedule_id: schedule_id,
+							place: place,
+							title: title,
+							contents: contents,
+							start_date: str2date(start_date),
+							end_date: str2date(end_date),
+							start_time: start_time,
+							end_time: end_time,
+							day: day
+						}
+					}
+				}, function(err) {
 					cb(err, '정기 일정이 저장되었습니다.');
 				});
+				// var snapshot = new db.regular_schedule({
+				// 	user_id: user_id,
+				// 	schedule_id: schedule_id,
+				// 	place: place,
+				// 	title: title,
+				// 	contents: contents,
+				// 	start_date: str2date(start_date),
+				// 	end_date: str2date(end_date),
+				// 	start_time: start_time,
+				// 	end_time: end_time,
+				// 	day: day
+				// });
+				// snapshot.save(function(err) {
+				// 	cb(err, '정기 일정이 저장되었습니다.');
+				// });
 			}
 		}
 	], function(err, result) {
@@ -457,20 +477,36 @@ exports.getUserScheduleList = function(req, res) {
 				},
 				regular: function(pcb) {
 					if (type === 'all' || type === 'regular') {
-						db.regular_schedule.find({
+						db.user.findOne({
 							user_id: user_id
-						}, function(err, reg_data) {
+						}, {
+							regular_schedule: 1
+						}, function(err, user_data) {
 							if (err) {
 								pcb(err);
 							} else {
-								async.map(reg_data, function(item, next) {
+								var reg_data = user_data.regular_schedule;
+								async.map(reg_data, function(item ,next) {
 									next(null, item.schedule_id);
 								}, function(merr, mdata) {
 									pcb(merr, mdata);
 								});
 							}
-							// pcb(err, reg_data); 
 						});
+						
+						// db.regular_schedule.find({
+						// 	user_id: user_id
+						// }, function(err, reg_data) {
+						// 	if (err) {
+						// 		pcb(err);
+						// 	} else {
+						// 		async.map(reg_data, function(item, next) {
+						// 			next(null, item.schedule_id);
+						// 		}, function(merr, mdata) {
+						// 			pcb(merr, mdata);
+						// 		});
+						// 	}
+						// });
 					} else {
 						pcb(null);
 					}
@@ -529,9 +565,27 @@ exports.getUserSchedule = function(req, res) {
 				},
 				regular: function(pcb) {
 					if (type === 'all' || type === 'regular') {
-						db.regular_schedule.find(find_query, function(err, reg_data) {
-							pcb(err, reg_data); 
+						db.user.findOne({
+							user_id: user_id
+						}, {
+							regular_schedule: 1
+						}, function(err, user_data) {
+							if (err) {
+								pcb(err);
+							} else {
+								var reg_data = user_data.regular_schedule;
+								if (schedule_id) {
+									reg_data = reg_data.filter(function(item) {
+										return item === schedule_id;
+									});
+								}
+								pcb(err, reg_data);
+							}
 						});
+						
+						// db.regular_schedule.find(find_query, function(err, reg_data) {
+						// 	pcb(err, reg_data); 
+						// });
 					} else {
 						pcb(null);
 					}
@@ -586,23 +640,24 @@ exports.modifyUserSchedule = function(req, res) {
 			if (end_date) write_data.end_date = end_date;
 			
 			if (type === 'regular') {
-				if (start_time) write_data.start_time = start_time;
-				if (end_time) write_data.end_time = end_time;
-				if (day) write_data.day = day;
+				cb('정규 일정의 경우 개별적인 변경이 지원되지 않습니다.');
+				// if (start_time) write_data.start_time = start_time;
+				// if (end_time) write_data.end_time = end_time;
+				// if (day) write_data.day = day;
 				
-				db.regular_schedule.findOneAndUpdate({
-					schedule_id: schedule_id
-				}, {
-					$set: write_data
-				}, function(err, data) {
-					if (err) {
-						cb(err, data);
-					} else if (!data) {
-						cb('유효하지 않은 스케쥴 아이디입니다.');
-					} else {
-						cb(null, '정규일정이 정상적으로 변경되었습니다.');
-					}
-				});
+				// db.regular_schedule.findOneAndUpdate({
+				// 	schedule_id: schedule_id
+				// }, {
+				// 	$set: write_data
+				// }, function(err, data) {
+				// 	if (err) {
+				// 		cb(err, data);
+				// 	} else if (!data) {
+				// 		cb('유효하지 않은 스케쥴 아이디입니다.');
+				// 	} else {
+				// 		cb(null, '정규일정이 정상적으로 변경되었습니다.');
+				// 	}
+				// });
 			} else { // if type === 'temporal'
 				db.temporal_schedule.findOneAndUpdate({
 					schedule_id: schedule_id
@@ -634,6 +689,7 @@ exports.modifyUserSchedule = function(req, res) {
 };
 
 exports.deleteUserSchedule = function(req, res) {
+	var user_id = req.session.user_id || false;
 	var type = req.body.type || false;
 	var schedule_id = req.body.schedule_id || false;
 	
@@ -641,6 +697,7 @@ exports.deleteUserSchedule = function(req, res) {
 		cb => {
 			if (!type || !schedule_id) cb('insufficient parameters');
 			else if (type !== 'temporal' && type !== 'regular') cb('invalid type param');
+			else if (!user_id) cb('로그인 하셔야 합니다.');
 			else cb(null);
 		},
 		cb => {
@@ -659,19 +716,31 @@ exports.deleteUserSchedule = function(req, res) {
 					}
 				});
 			} else { //type === 'regular'
-				db.regular_schedule.findOne({
-					schedule_id: schedule_id
-				}, function(err, data) {
-					if (err) cb(err);
-					else if (!data) cb('유효하지 않은 정기 스케쥴입니다.');
-					else {
-						db.regular_schedule.remove({
+				db.user.update({
+					user_id: user_id
+				}, {
+					$pull: {
+						regular_schedule: {
 							schedule_id: schedule_id
-						}, function(err) {
-							cb(err, '성공적으로 정기 일정 삭제');
-						});
+						}
 					}
+				}, function(err) {
+					cb(err, '성공적으로 정기 일정을 삭제했습니다.');
 				});
+				
+				// db.regular_schedule.findOne({
+				// 	schedule_id: schedule_id
+				// }, function(err, data) {
+				// 	if (err) cb(err);
+				// 	else if (!data) cb('유효하지 않은 정기 스케쥴입니다.');
+				// 	else {
+				// 		db.regular_schedule.remove({
+				// 			schedule_id: schedule_id
+				// 		}, function(err) {
+				// 			cb(err, '성공적으로 정기 일정 삭제');
+				// 		});
+				// 	}
+				// });
 			}
 		}
 	], function(err, result) {
@@ -2373,23 +2442,77 @@ exports.getTeamList = function (req, res) {
 		}
 	});
 };
-/*exports.inviteMember = function (req, res) {
-		
-	if (Object.keys(req.query).length) {
-		req.body = req.query;		
-	}
-	
-	var team_id = req.params.team_id || '';
-	var user_id = req.body.user_id || false;
-	
-	// user에서 team_id  추가, invitation에 생성 과정 고민!!, team에 member_id 추가
+
+exports.getTeamMemberSchedule = function(req, res) {
+	var team_id = req.params.team_id || false;
 	
 	async.waterfall([
 		cb => {
-			
+			if (!team_id) {
+				cb('잘못된 요청입니다.');				
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			db.team.aggregate([
+				{
+					$match: {
+						team_id: team_id
+					}
+				},
+				{
+					$unwind: '$member_id'
+				},
+				{
+					$lookup: {
+						from: 'regular_schedules',
+						localField: 'member_id',
+						foreignField: 'user_id',
+						as: 'data'
+						
+					}
+				},
+				{
+					$match: {
+						data: {
+							$ne: []
+						}
+					}
+				},
+				{
+					$unwind: '$data'
+				},
+				{
+					$group: {
+						_id: null,
+						sched: {
+							$push: "$data"
+						}
+					}
+				},
+				{
+					$project: {
+						_id: 0,
+						data: '$sched'
+					}
+				}
+			], function(err, data) {
+				cb(err, data);
+			});
 		}
-	])	
-}*/
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	})
+};
 
 exports.ajaxTest = function(req, res) {
 	var msg = {
