@@ -249,6 +249,8 @@ app.get('/user/invite', sessChk(true), routes_ajax.getMyInvitations);
 app.post('/user/invite', sessChk(true), routes_ajax.acceptInvitation);
 app.delete('/user/invite', sessChk(true), routes_ajax.rejectInvitation);
 
+app.post('/user/schedule_image', sessChk(true), multer_upload.single('upload'), routes_ajax.uploadTimetable);
+
 routes_sock.init_io(io);
 global.__io = io;
 

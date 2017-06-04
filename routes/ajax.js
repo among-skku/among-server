@@ -12,7 +12,8 @@ var db = {
 	notice: require(__path + 'modules/db/notice'),
 	file_manager: require(__path + 'modules/db/file_manager'),
 	team: require(__path + 'modules/db/team'),
-	invitation: require(__path + 'modules/db/invitation')
+	invitation: require(__path + 'modules/db/invitation'),
+	timetable_image: require(__path + 'modules/db/timetable_image')
 };
 
 exports.loginUser = function(req, res) {
@@ -2373,6 +2374,82 @@ exports.getTeamList = function (req, res) {
 		}
 	});
 };
+
+exports.uploadTimetable = function(req, res) {
+	console.log("!!!!!!!!!!!!");
+	var user_id = req.session.user_id || false;
+	var file_id = 'file_' + randString(10);
+	var file_path = __storage_path + '/' + user_id + '/' + file_id;
+	var file_name = req.query.file_name || false;
+	var contents = req.query.contents || '';
+	var uploader = req.session.user_id || false;
+	var upload_time = new Date();
+	
+	console.log('req.file:', req.file);
+
+	async.waterfall([
+		cb => {
+			console.log("file_name: " + file_name + " user_id: " + user_id);
+			if (!file_name || !user_id) {
+				// cb(req.body);
+				cb('insufficient parameters');
+			} else if (typeof req.file === 'undefined') {
+				cb('file is not uploaded');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			if (fs.existsSync(__storage_path + '/' + user_id)) {
+				cb(null);
+			} else {
+				mkdirp(__storage_path + '/' + user_id, function(err) {
+					cb(err);
+				});
+			}
+		},
+		cb => {
+			async.parallel([
+				nj => {
+					var snapshot = new db.timetable_image({
+						user_id: user_id,
+						file_id: file_id,
+						file_path: file_path,
+						file_name: file_name,
+						contents: contents,
+						uploader: uploader,
+						upload_time: upload_time
+					});
+
+					snapshot.save(function(err) {
+						nj(err);
+					});
+					
+				},
+				nj => {
+					var tmp_path = req.file.path;
+					fs.rename(tmp_path, file_path, function(_err) {
+						//fs.chmod(target_path, 0755);	// 755 is wrong. 0755 or '755' are correct.
+						nj(_err);
+					});
+				}
+			], function(err) {
+				cb(err, '파일이 정상적으로 업로드 되었습니다.');
+			});
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+};
+
 /*exports.inviteMember = function (req, res) {
 		
 	if (Object.keys(req.query).length) {
