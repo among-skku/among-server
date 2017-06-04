@@ -9,14 +9,20 @@ jQuery(function($) {
 
 	//editables 
 
-	//text editable
-	// $('#username')
-	// .editable({
-	// 	type: 'text',
-	// 	name: 'username'		
-	// });
+	// $('#user-status').click(function(res){
+	// 	if (res){
+	// 		var target = $(this).find('input[type=radio]');
+	// 		var which = parseInt(target.val());
+	// 		console.log(which);
 
 
+	// 	}
+	
+	$('#user-status').click(function(event){
+		var which = event.target.className;
+		console.log(which);
+		//event.target.className
+	});
 	//select2 editable
 	var countries = [];
 	$.each({ "CA": "Canada", "IN": "India", "NL": "Netherlands", "TR": "Turkey", "US": "United States"}, function(k, v) {
@@ -175,13 +181,13 @@ jQuery(function($) {
 			//onblur: 'ignore',  //don't reset or hide editable onblur?!
 			image: {
 				//specify ace file input plugin's options here
-				btn_choose: 'Change Avatar',
+				btn_choose: 'Change Avatar', // 보여질 글귀 
 				droppable: true,
-				maxSize: 110000,//~100Kb
-
+				maxSize: 110000000,//~100Mb
 				//and a few extra ones here
 				name: 'avatar',//put the field name here as well, will be used inside the custom plugin
 				on_error : function(error_type) {//on_error function will be called when the selected file has a problem
+					console.log(last_gritter);
 					if(last_gritter) $.gritter.remove(last_gritter);
 					if(error_type == 1) {//file format error
 						last_gritter = $.gritter.add({
@@ -189,7 +195,9 @@ jQuery(function($) {
 							text: 'Please choose a jpg|gif|png image!',
 							class_name: 'gritter-error gritter-center'
 						});
-					} else if(error_type == 2) {//file size rror
+					} else if(error_type == 2) {
+						//file size rror 
+						//gritter undefined error
 						last_gritter = $.gritter.add({
 							title: 'File too big!',
 							text: 'Image size should not exceed 100Kb!',
@@ -203,11 +211,35 @@ jQuery(function($) {
 					$.gritter.removeAll();
 				}
 			},
+			params:{
+				param1:'test',
+				profile:avatar
+				   },
 			url: function(params) {
 				// ***UPDATE AVATAR HERE*** //
 				//for a working upload example you can replace the contents of this function with 
 				//examples/profile-avatar-update.js
-
+				
+				
+				//체크 전송 버튼 클릭시 실행되는 부분 
+				console.log('avatar test');
+				console.log(params.profile);//image 얻어오는 방법
+				
+				//user_id 얻어오기 
+				var user_id=1;
+				//해야하는 것 img를 app.js쪽으로 보내기
+				
+				/*$.ajax({
+				  type: "POST",
+				  url: '/user/file/'+user_id+'/upload',
+				  data: {user_id:1},
+				  success: function(res){
+					  console.log(res);
+					  console.log('data 보냄');
+				  }
+				}); */
+				
+				
 				var deferred = new $.Deferred;
 
 				var value = $('#avatar').next().find('input[type=hidden]:eq(0)').val();
@@ -222,6 +254,28 @@ jQuery(function($) {
 					if("FileReader" in window) {
 						//for browsers that have a thumbnail of selected image
 						var thumb = $('#avatar').next().find('img').data('thumb');
+						
+							
+						var formData = new FormData(); 
+						formData.append("thumb", thumb); 
+						//formData.append("path", $("textarea[name=test3]").text()); 
+						
+						//console.log(thumb);
+						$.ajax({
+						  type: "POST",
+						  url: '/user/file/upload',
+						  data: formData,
+							processData:false,
+							contentType:false,
+						//file:thumb,
+						  success: function(res){
+							  console.log(res);
+							  console.log('data 보냄');
+						  }
+						}); 
+						
+					
+						
 						if(thumb) $('#avatar').get(0).src = thumb;
 					}
 
@@ -234,14 +288,16 @@ jQuery(function($) {
 						class_name: 'gritter-info gritter-center'
 					});
 
-				 } , parseInt(Math.random() * 800 + 800))
+				 } , parseInt(Math.random() * 800 + 800));
 
 				return deferred.promise();
 
 				// ***END OF UPDATE AVATAR HERE*** //
 			},
-
 			success: function(response, newValue) {
+				//console.log(respone);
+				//console.log(newValue);
+				
 			}
 		});
 		
@@ -284,10 +340,11 @@ jQuery(function($) {
 				// ***UPDATE AVATAR HERE*** //
 				//for a working upload example you can replace the contents of this function with 
 				//examples/profile-avatar-update.js
-
+				//console.log(params);
 				var deferred = new $.Deferred;
-
 				var value = $('#avatar').next().find('input[type=hidden]:eq(0)').val();
+				//console.log($('#avatar'));
+				//console.log(value);
 				if(!value || value.length == 0) {
 					deferred.resolve();
 					return deferred.promise();
@@ -310,15 +367,16 @@ jQuery(function($) {
 						text: 'Uploading to server can be easily implemented. A working example is included with the template.',
 						class_name: 'gritter-info gritter-center'
 					});
-
-				 } , parseInt(Math.random() * 800 + 800))
+				 } , parseInt(Math.random() * 800 + 800));
 
 				return deferred.promise();
 
 				// ***END OF UPDATE AVATAR HERE*** //
+				//$http.post();
 			},
-
 			success: function(response, newValue) {
+				console.log(newValue);
+				//alert(newValue);
 			}
 		});
 	}catch(e) {}
@@ -336,6 +394,7 @@ jQuery(function($) {
 		})
 	}
 	*/
+	
 
 	//another option is using modals
 	$('#avatar2').on('click', function(){

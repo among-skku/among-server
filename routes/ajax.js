@@ -939,6 +939,68 @@ exports.getFileList = function(req, res) {
 		}
 	});
 };
+exports.uploadAvatar = function(req, res) {
+	var user_id = req.session.user_id || false;
+	var file_path = __storage_path + '/avatar/' + user_id;
+	
+	console.log('req.file:', req.file);
+	console.log('file_path:',file_path);
+
+	async.waterfall([
+		cb => {
+			if (!user_id) {
+				// cb(req.body);
+				cb('insufficient parameters');
+			} else if (typeof req.file === 'undefined') {
+				cb('file is not uploaded');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			if (fs.existsSync(__storage_path + '/avatar')) {
+				cb(null);
+			} else {
+				mkdirp(__storage_path + '/avatar', function(err) {
+					cb(err);
+				});
+			}
+		},
+		cb => {
+			async.parallel([
+				nj => {
+					var snapshot = new db.users({
+						avatar_path: file_path
+					});
+
+					snapshot.save(function(err) {
+						nj(err);
+					});
+					
+				},
+				nj => {
+					var tmp_path = req.file.path;
+					fs.rename(tmp_path, file_path, function(_err) {
+						//fs.chmod(target_path, 0755);	// 755 is wrong. 0755 or '755' are correct.
+						nj(_err);
+					});
+				}
+			], function(err) {
+				cb(err, '파일이 정상적으로 업로드 되었습니다.');
+			});
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+};
 
 exports.uploadFile = function(req, res) {
 	var team_id = req.params.team_id || false;

@@ -200,6 +200,8 @@ app.put('/user/signup', sessChk(false), routes_ajax.signupUser);
 app.get('/user/team_list', sessChk(true), routes_ajax.getTeamList);
 app.get('/user', sessChk(true), routes_ajax.getUserById);
 app.post('/user', sessChk(true), routes_ajax.updateUser);
+//user의 profile을 upload 
+app.post('/user/file/upload',sessChk(true),multer_upload.single('upload'),routes_ajax.uploadAvatar);
 
 app.get('/team/report/:team_id', sessChk(true), routes_ajax.getReport);
 app.post('/team/report/:team_id', sessChk(true), routes_ajax.modifyReport);
@@ -212,6 +214,7 @@ app.get('/user/schedule', sessChk(true), routes_ajax.getUserSchedule);
 app.put('/user/schedule', sessChk(true), routes_ajax.addSchedule);
 app.post('/user/schedule', sessChk(true), routes_ajax.modifyUserSchedule);
 app.delete('/user/schedule', sessChk(true), routes_ajax.deleteUserSchedule);
+
 
 app.get('/team/file/:team_id/list', sessChk(true), routes_ajax.getFileList);
 app.get('/team/file/:team_id', sessChk(true), routes_ajax.downloadFile);

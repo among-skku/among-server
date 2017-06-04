@@ -130,21 +130,21 @@
 						<div class="space-4"></div>
 
 						<div class="width-80 label label-info label-xlg arrowed-in arrowed-in-right">
-							<div class="inline position-relative">
+							<div class="inline position-relative"> 
 								<a href="#" class="user-title-label dropdown-toggle" data-toggle="dropdown">
 									<i class="ace-icon fa fa-circle light-green"></i>
 									&nbsp;
-									<span class="white">Alex M. Doe</span>
+									<span class="white"><%= user_name %></span>
 								</a>
 
-								<ul class="align-left dropdown-menu dropdown-caret dropdown-lighter">
-									<li class="dropdown-header"> Change Status </li>
+								<ul id="user-status" class="align-left dropdown-menu dropdown-caret dropdown-lighter">
+									<li class="dropdown-header"> 상태 바꾸기 </li>
 
 									<li>
 										<a href="#">
 											<i class="ace-icon fa fa-circle green"></i>
 &nbsp;
-											<span class="green">Available</span>
+											<span class="green">온라인</span>
 										</a>
 									</li>
 
@@ -152,7 +152,7 @@
 										<a href="#">
 											<i class="ace-icon fa fa-circle red"></i>
 &nbsp;
-											<span class="red">Busy</span>
+											<span class="red">바쁨</span>
 										</a>
 									</li>
 
@@ -160,7 +160,7 @@
 										<a href="#">
 											<i class="ace-icon fa fa-circle grey"></i>
 &nbsp;
-											<span class="grey">Invisible</span>
+											<span class="grey">오프라인</span>
 										</a>
 									</li>
 								</ul>
@@ -886,7 +886,7 @@
 								</button>
 							</div>
 						</div><!-- /#feed -->
-
+<!-- 
 						<div id="friends" class="tab-pane">
 							<div class="profile-users clearfix">
 								<div class="itemdiv memberdiv">
@@ -1286,7 +1286,7 @@
 								</li>
 							</ul>
 						</div><!-- /#friends -->
-
+ -->
 						<div id="pictures" class="tab-pane">
 							<ul class="ace-thumbnails">
 								<li>
