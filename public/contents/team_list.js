@@ -26,12 +26,12 @@ jQuery(function($) {
 				if (user_invitation[index].state === 'Pending') {
 					invitation_html += ['<div class = "alert alert-success">',
 									'팀',user_invitation[index].team_id,'에서 초대가 도착하였습니다.',
-									'<button class= "btn btn-xs btn-danger pull-right" id="reject_invitation">',
+									'<button class= "btn btn-xs btn-danger pull-right\" id="reject_invitation_',index,'\">',
 										'<i class="ace-icon fa fa-times">',
 										'</i>',
 										'<span class="bigger-110">I don\'t accept</span>',
 									'</button>',
-									'<button class="btn btn-xs btn-success pull-right" id="accept_invitation">',
+									'<button class="btn btn-xs btn-success pull-right" id="accept_invitation_',index,'\">',
 										'<span class="bigger-110">I accept</span>',
 										'<i class="ace-icon fa fa-arrow-right icon-on-right">',
 										'</i>',
@@ -41,6 +41,34 @@ jQuery(function($) {
 			});
 			
 			$("#print_invitation").html(invitation_html);
+			
+			///////////////////////////////////////////////////Numbering 문제 해결 필요
+			// 초대 버튼 연결 성공
+			$("#accept_invitation_0").click(function(e) {
+				$.post('/user/invite', {
+					invitation_id: user_invitation[0].invitation_id
+				}, function (res) {
+					if (res.err) {
+						alert(res.err);
+					} else {
+						alert(res.result);
+					}
+				});
+			});
+			
+			// 거절 버튼 연결 성공
+			$("#reject_invitation_1").click(function(e) {
+				$.delete('/user/invite', {
+					invitation_id: user_invitation[1].invitation_id
+				}, function (res) {
+					if (res.err) {
+						alert(res.err);
+					} else {
+						alert(res.result);
+					}
+				});
+			});
+			
 		} else {
 			console.log('1 not@@@');
 		}
