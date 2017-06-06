@@ -227,6 +227,43 @@ paths:
       responses:
         '200':
           description: '성공적으로 초대를 거절함'
+  /user/portal/sync:
+    post:
+      tags:
+        - user_schedule
+      summary: 성균관대학교 포털을 이용한 동기화 요청
+      description: ''
+      operationId: syncPortal
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: query
+          description: 'skku portal 아이디'
+          required: true
+          type: string
+        - name: pw
+          in: query
+          description: 'skku portal password'
+          required: true
+          type: string
+      responses:
+        default:
+          description: 정상적으로 데이터를 불러옴
+
+  /user/calendar/sync:
+    get:
+      tags:
+        - user_schedule
+      summary: 유저 캘린더를 통한 정기일정 동기화 요청
+      description: ''
+      operationId: syncCalendar
+      produces:
+        - application/json
+      parameters: []
+      responses:
+        default:
+          description: 정상적으로 동기화가 됨
 
   /user/schedule/list:
     get:

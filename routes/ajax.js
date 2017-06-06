@@ -1,5 +1,6 @@
 var async = require('async');
 var fs = require('fs');
+var execFile = require('child_process').execFile;
 var mkdirp = require('mkdirp');
 var db = {
 	user: require(__path + 'modules/db/user'),
@@ -247,26 +248,56 @@ exports.updateUser = function(req, res) {
 	});
 };
 
-exports.syncSchedule = function(req, res) {
-	var sync_target = req.query.sync_target || false;
-	
+exports.syncCalendar = function(req, res) {
+	var user_id = req.session.user_id || false;
+	var json_path = __storage_path + '/time_tables/' + user_id + '.json';
+	console.log('json_path:', json_path);
 	async.waterfall([
 		cb => {
-			if (!sync_target) {
-				cb('invalid parameters');
+			if (!user_id) {
+				cb('You should be logged in');
+			} else {
+				cb(null);
 			}
 		},
 		cb => {
-			if (sync_target === 'calendar') {
-				cb(null, 'calendar 동기화 사부작사부작');
-				console.log('synchronization to calendar schedule');
-			} else if (sync_target === 'skku_portal') {
-				cb(null, 'skku_portal 동기화 사부작 사부작.');
-				console.log('synchronization to skku_portal schedule');
-			} else {
-				cb('options is not supported');
+			//you should produce json file here!
+			cb(null); //meaninglessly proceed the sequences
+		},
+		cb => {
+			
+			fs.stat(json_path, function(err, stats) {
+				if (err) {
+					if (err.code === 'ENOENT') {
+						cb('시간표 파싱이 제대로 이루어지지 않았습니다.');
+					} else {
+						cb(err);
+					}
+				} else {
+					if (stats && stats.isFile()) {
+						cb(null);
+					} else {
+						cb('시간표 파싱이 정상적으로 이루어지지 않았습니다.');
+					}
+				}
+			});
+		}, 
+		cb => {
+			fs.readFile(json_path, 'utf8', function(err, file_data) {
+				console.log('raw_file_data:', file_data);
+				cb(null, file_data);
+			});
+		},
+		(file_data, cb) => {
+			var parsed_obj = {};
+			try {
+				parsed_obj = JSON.parse(file_data);
+			} catch (e) {
+				return cb(e);
 			}
-		}], function(err, result) {
+			cb(null, parsed_obj);
+		}
+	], function(err, result) {
 		if (err) {
 			res.json({
 				err: err
@@ -2268,6 +2299,74 @@ exports.deleteTeam = function (req, res){
 			});
 		}
 	});	
+};
+
+exports.syncPortal = function(req, res) {
+	var user_id = req.session.user_id || false;
+	var id = req.body.id || false;
+	var pw = req.body.pw || false;
+		
+	async.waterfall([
+		cb => {
+			if (!user_id || !id || !pw) {
+				cb('정상적인 요청이 아닙니다.');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			if (typeof __crawler_path === 'undefined') {
+				cb('포털 크롤링을 사용할 수 없도록 설정되어있습니다.');
+			} else {
+				fs.stat(__crawler_path, function(err, stat) {
+					if (err) {
+						cb('크롤러 파일을 찾을 수 없습니다.');
+					} else {
+						if (stat && stat.isFile()) {
+							cb(null);
+						} else {
+							cb('정상적인 크롤러 파일이 아닙니다.');
+						}
+					}
+				});
+			}
+		},
+		cb => {
+			execFile(__crawler_path, [id, pw], function(err, stdout, stderr) {
+				if (err) {
+					cb(err);
+				} else {
+					var output = stderr;
+					if (/Fail/.test(output)) {
+						cb('크롤링에 실패했습니다. 아이디 혹은 패스워드가 틀렸거나 포털 서버상태가 좋지 않습니다.');
+					} else {
+						var json_data = {};
+						try {
+							json_data = JSON.parse(output);
+						} catch (e) {
+							return cb('올바른 JSON 형식이 아닙니다.');
+						}
+						cb(null, json_data);
+					}
+				}
+			});
+		},
+		(json_data, cb) => {
+			
+			//여기서 뭔가해야함!
+			cb(null, json_data);
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
 };
 
 exports.getMyInvitations = function(req, res) {
