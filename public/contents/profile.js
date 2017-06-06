@@ -569,9 +569,61 @@ jQuery(function($) {
 		} catch(e) {}
 		$('[class*=select2]').remove();
 	});
+	
+	$('#portalSyncBtn').click(function() {
+		var dialog = bootbox.dialog({
+			title: 'SKKU 포털 시간표 동기화',
+			message: [
+				'<form class="bootbox-form">',
+					'아이디',
+					'<input id="portal_id" class="bootbox-input bootbox-input-text form-control" autocomplete="off" type="text">',
+					'패스워드',
+					'<input id="portal_pw" class="bootbox-input bootbox-input-text form-control" autocomplete="off" type="password">',
+				'</form>'
+					 ].join(''),
+			size: 'large',
+			closeButton: false,
+			onEscape: false,
+			buttons: {
+				confirm: {
+					label: '요청',
+					className: 'btn-success',
+					callback: function(result) {
+						var id = $('#portal_id').val();
+						var pw = $('#portal_pw').val();
+						
+						$.post('/user/portal/sync', {
+							id: id,
+							pw: id
+						}, function(res) {
+							if (res) {
+								if (res.err) {
+									alert(res.err);
+									return false;
+								} else {
+									alert(res.result);
+									console.log(res.result);
+									return true;
+								}
+							} else {
+								alert('네트워크 에러. 정상적으로 처리되지 않았습니다.');
+								return false;
+							}
+						});
+					}
+				},
+				cancel: {
+					label: '취소',
+					className: 'btn-danger'
+				}
+			}
+		});
+	});
 });
 
 /////////////////////////////////
+
+
 
 $.get('/user', function(res) {
 	console.log(res);
