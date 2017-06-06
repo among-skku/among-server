@@ -22,6 +22,23 @@ global.str2date = function(str) {
 	}
 };
 
+global.yoil2int = function(yoil) {
+	if (yoil === '일')
+		return '0';
+	if (yoil === '월')
+		return '1';
+	if (yoil === '화')
+		return '2';
+	if (yoil === '수')
+		return '3';
+	if (yoil === '목')
+		return '4';
+	if (yoil === '금')
+		return '5';
+	if (yoil === '토')
+		return '6';
+};
+
 
 var express = require('express')
   , app = express()

@@ -2314,8 +2314,7 @@ exports.syncPortal = function(req, res) {
 		splitted.pop();
 		cwd = splitted.join('/');
 	}
-		console.log(id);
-		console.log(pw);
+
 	async.waterfall([
 		cb => {
 			if (!user_id || !id || !pw) {
@@ -2345,7 +2344,7 @@ exports.syncPortal = function(req, res) {
 			execFile(__crawler_path, [id, pw], {
 				cwd: cwd
 			}, function(err, stdout, stderr) {
-				console.log('err', err)
+				console.log('err', err);
 				console.log('stdout', stdout);
 				console.log('stderr', stderr);
 				if (err) {
@@ -2368,9 +2367,59 @@ exports.syncPortal = function(req, res) {
 			});
 		},
 		(json_data, cb) => {
+			//debuggingg
+			//json_data = {"GEDB003":{"name":"선형대수학","place":"[32255] 제2과학관32동 2층 송천강의실","time":["금09:00-10:15","금10:30-11:45"]},"CSE3024":{"name":"인공지능","place":"[400118] 반도체관 1층 첨단강의실","time":["화12:00-13:15","목13:30-14:45"]},"ICE3037":{"name":"종합설계프로젝트","place":"[26310] 제2공학관26동 3층 일반강의실","time":["금15:00-16:15","금16:30-17:45"]},"SWE3008":{"name":"컴퓨터그래픽스개론","place":"[26310] 제2공학관26동 3층 일반강의실","time":["화09:00-10:15","목10:30-11:45"]},"SSE3054":{"name":"멀티코어시스템","place":"[400112] 반도체관 1층 첨단강의실","time":["월10:30-11:45","수09:00-10:15"]},"GEDB007":{"name":"이산수학","place":"[23217] 제1공학관23동 2층 첨단e+강의실","time":["화16:30-17:45","목15:00-16:15"]}};
 			
-			//여기서 뭔가해야함!
-			cb(null, json_data);
+			var regular_schedule = [];
+			Object.keys(json_data).map(function(key) {
+				var obj = json_data[key];
+				var title = obj.name;
+				var place = obj.place;
+				var user_id = user_id;
+				var contents = user_id + '의 ' + title + ' 수업';
+				var start_date = new Date(0);
+				var end_date = new Date(0);
+				var times = obj.time;
+				
+				times.map(function(time_string) {
+					var schedule_id = 'schedule_id_' + randString(10);
+					var yoil = time_string.substr(0, 1);
+					var time2time = time_string.substr(1);
+					var start_time = time2time.split('-')[0];
+					var end_time = time2time.split('-')[1];
+					yoil = yoil2int(yoil);
+					
+					regular_schedule.push({
+						user_id: user_id,
+						schedule_id: schedule_id,
+						place: place,
+						title: title,
+						contents: contents,
+						start_date: start_date,
+						end_date: end_date,
+						start_time: start_time,
+						end_time: end_time,
+						day: yoil
+					});
+				});				
+			});
+			
+			db.user.findOneAndUpdate({
+				user_id: user_id
+			}, {
+				$set: {
+					regular_schedule: regular_schedule
+				}
+			}, function(err, data) {
+				if (err) {
+					cb(err);
+				} else if (!data) {
+					cb('없는 유저입니다.');
+				} else {
+					cb(null, '정상적으로 동기화가 완료되었습니다.');
+				}
+			});
+
 		}
 	], function(err, result) {
 		if (err) {
