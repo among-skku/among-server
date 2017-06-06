@@ -20,7 +20,8 @@ Create file on path */workspace/among-server/config.json*
 		"__mongodb_host": "mongodb://localhost:27017/among",
 		"__storage_path": "./storage",
 		"__temp_path": "./tmp",
-		"__crawler_path": "crawler_executable path"
+		"__crawler_path": "crawler_executable/path/filename",
+		"__crawler_cwd": "crawler_executable/path/"
 	}
 
 ### Server starting command
@@ -28,6 +29,11 @@ Create file on path */workspace/among-server/config.json*
     
 	$ npm install
 	$ npm start
+
+### Server staring with forever as background service
+
+    $ node among.js start -d
+    
 	
 ### 출처
 
