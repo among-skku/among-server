@@ -594,7 +594,7 @@ jQuery(function($) {
 						
 						$.post('/user/portal/sync', {
 							id: id,
-							pw: id
+							pw: pw
 						}, function(res) {
 							if (res) {
 								if (res.err) {

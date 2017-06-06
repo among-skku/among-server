@@ -2306,6 +2306,16 @@ exports.syncPortal = function(req, res) {
 	var id = req.body.id || false;
 	var pw = req.body.pw || false;
 		
+	var cwd = '';
+	if (typeof __crawler_cwd !== 'undefined') {
+		cwd = __crawler_cwd;
+	} else {
+		var splitted = __crawler_path.split('/');
+		splitted.pop();
+		cwd = splitted.join('/');
+	}
+		console.log(id);
+		console.log(pw);
 	async.waterfall([
 		cb => {
 			if (!user_id || !id || !pw) {
@@ -2332,12 +2342,18 @@ exports.syncPortal = function(req, res) {
 			}
 		},
 		cb => {
-			execFile(__crawler_path, [id, pw], function(err, stdout, stderr) {
+			execFile(__crawler_path, [id, pw], {
+				cwd: cwd
+			}, function(err, stdout, stderr) {
+				console.log('err', err)
+				console.log('stdout', stdout);
+				console.log('stderr', stderr);
 				if (err) {
 					cb(err);
 				} else {
 					var output = stderr;
 					if (/Fail/.test(output)) {
+						console.log(stdout);
 						cb('크롤링에 실패했습니다. 아이디 혹은 패스워드가 틀렸거나 포털 서버상태가 좋지 않습니다.');
 					} else {
 						var json_data = {};
