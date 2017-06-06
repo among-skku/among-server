@@ -251,7 +251,7 @@ exports.updateUser = function(req, res) {
 exports.syncCalendar = function(req, res) {
 	var user_id = req.session.user_id || false;
 	var json_path = __storage_path + '/time_tables/' + user_id + '.json';
-	console.log('json_path:', json_path);
+	
 	async.waterfall([
 		cb => {
 			if (!user_id) {
@@ -261,8 +261,8 @@ exports.syncCalendar = function(req, res) {
 			}
 		},
 		cb => {
-			//you should produce json file here!
-			cb(null); //meaninglessly proceed the sequences
+			//여기서 openCV 모듈을 붙여서 /storage/time_tables/[유저아이디].json 파일을 만들어내면 됩니다!!
+			cb(null);
 		},
 		cb => {
 			
@@ -284,7 +284,6 @@ exports.syncCalendar = function(req, res) {
 		}, 
 		cb => {
 			fs.readFile(json_path, 'utf8', function(err, file_data) {
-				console.log('raw_file_data:', file_data);
 				cb(null, file_data);
 			});
 		},
@@ -296,6 +295,57 @@ exports.syncCalendar = function(req, res) {
 				return cb(e);
 			}
 			cb(null, parsed_obj);
+		},
+		(json, cb) => {
+			var regular_schedule = [];
+			if (!json.result) {
+				return cb('이미지 프로세싱에 실패했습니다.');
+			}
+			var data = json.data;
+			data.map(function(item) {
+				var yoil = item.day;
+				yoil = yoil2int(yoil);
+				var times = item.time;
+				var place = '-';
+				var title = '정기일정';
+				var contents = user_id + '의 정기 일정';
+				var start_date = new Date(0);
+				var end_date = new Date(0);
+				times.map(function(time_str) {
+					var schedule_id = 'schedule_id_' + randString(10);
+					var start_time = time_str.split(' ~ ')[0];
+					var end_time = time_str.split(' ~ ')[1];
+					
+					regular_schedule.push({
+						user_id: user_id,
+						schedule_id: schedule_id,
+						place: place,
+						title: title,
+						contents: contents,
+						start_date: start_date,
+						end_date: end_date,
+						start_time: start_time,
+						end_time: end_time,
+						day: yoil
+					});
+				});
+			});
+			
+			db.user.findOneAndUpdate({
+				user_id: user_id
+			}, {
+				$set: {
+					regular_schedule: regular_schedule
+				}
+			}, function(err, data) {
+				if (err) {
+					cb(err);
+				} else if (!data) {
+					cb('없는 유저입니다.');
+				} else {
+					cb(null, '정상적으로 동기화가 완료되었습니다.');
+				}
+			});
 		}
 	], function(err, result) {
 		if (err) {
@@ -2367,8 +2417,6 @@ exports.syncPortal = function(req, res) {
 			});
 		},
 		(json_data, cb) => {
-			//debuggingg
-			//json_data = {"GEDB003":{"name":"선형대수학","place":"[32255] 제2과학관32동 2층 송천강의실","time":["금09:00-10:15","금10:30-11:45"]},"CSE3024":{"name":"인공지능","place":"[400118] 반도체관 1층 첨단강의실","time":["화12:00-13:15","목13:30-14:45"]},"ICE3037":{"name":"종합설계프로젝트","place":"[26310] 제2공학관26동 3층 일반강의실","time":["금15:00-16:15","금16:30-17:45"]},"SWE3008":{"name":"컴퓨터그래픽스개론","place":"[26310] 제2공학관26동 3층 일반강의실","time":["화09:00-10:15","목10:30-11:45"]},"SSE3054":{"name":"멀티코어시스템","place":"[400112] 반도체관 1층 첨단강의실","time":["월10:30-11:45","수09:00-10:15"]},"GEDB007":{"name":"이산수학","place":"[23217] 제1공학관23동 2층 첨단e+강의실","time":["화16:30-17:45","목15:00-16:15"]}};
 			
 			var regular_schedule = [];
 			Object.keys(json_data).map(function(key) {

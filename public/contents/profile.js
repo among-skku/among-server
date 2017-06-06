@@ -614,7 +614,41 @@ jQuery(function($) {
 				},
 				cancel: {
 					label: '취소',
-					className: 'btn-danger'
+					className: 'btn-default'
+				}
+			}
+		});
+	});
+	
+	$('#calendarSyncBtn').click(function() {
+		bootbox.confirm({
+			message: "업로드한 시간표 이미지를 파싱하여, 정기 일정과 동기화 하시겠습니까?",
+			buttons: {
+				confirm: {
+					label: '예',
+					className: 'btn-success'
+				},
+				cancel: {
+					label: '아니오',
+					className: 'btn-default'
+				}
+			},
+			callback: function (result) {
+				if (result) {
+					$.get('/user/calendar/sync', function(res) {
+						if (res) {
+							if (res.err) {
+								alert(res.err);
+								return false;
+							} else {
+								alert(res.result);
+								return true;
+							}
+						} else {
+							alert('네트워크 에러. 요청에 실패했습니다.');
+							return false;
+						}
+					});
 				}
 			}
 		});
