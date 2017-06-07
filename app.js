@@ -40,18 +40,18 @@ global.yoil2int = function(yoil) {
 };
 
 
-var express = require('express')
-  , app = express()
-  , server = require('http').Server(app)
-  , io = require('socket.io')(server)
-  , mongoose = require('mongoose')
-  , bodyParser = require('body-parser')
-  , fs = require('fs')
-  , path = require('path')
-  , session = require('express-session')
-  , cookieParser = require('cookie-parser')
-  , multer = require('multer')
-  , mkdirp = require('mkdirp');
+var express = require('express');
+var app = express();
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+var mongoose = require('mongoose');
+var bodyParser = require('body-parser');
+var fs = require('fs');
+var path = require('path');
+var session = require('express-session');
+var cookieParser = require('cookie-parser');
+var multer = require('multer');
+var mkdirp = require('mkdirp');
   // , redis = require('redis')
   // , sharedsession = require("express-socket.io-session");
 
@@ -69,14 +69,24 @@ if (fs.existsSync(__path + 'config.json')) {
 
 __storage_path = __path + __storage_path;
 __temp_path = __path + __temp_path;
+__time_table_path = __storage_path + '/time_tables/';
 
 var multer_upload = multer({dest: __temp_path });
 console.log('__temp_path:', __temp_path);
+console.log('__storage_path:', __storage_path);
+console.log('__time_table_path:', __time_table_path);
 
+if (!fs.existsSync(__time_table_path)) {
+	mkdirp(__time_table_path, function(err) {
+		if (err) {
+			console.error('creating time table storage directory failed!', err);
+		}
+	});
+}
 if (!fs.existsSync(__temp_path)) {
 	mkdirp(__temp_path, function(err) {
 		if (err) {
-			console.log('creating temp directory failed!', err);
+			console.error('creating temp directory failed!', err);
 		}
 	});
 }
@@ -169,9 +179,9 @@ db_conn.once('open', function() {
 	console.log('mongodb connection established successfully');
 });
 
-var routes_view = require('./routes/view')
-  , routes_ajax = require('./routes/ajax')
-  , routes_sock = require('./routes/socket');
+var routes_view = require('./routes/view');
+var routes_ajax = require('./routes/ajax');
+var routes_sock = require('./routes/socket');
 
 
 //테스트용 API
@@ -199,6 +209,9 @@ app.get('/dashboard/team_schedule', pageSessChk(true), function(req, res) {
 	//res.redirect('/dashboard/team_list');
 });
 app.get('/dashboard/team_schedule/:team_id', pageSessChk(true), routes_view.teamSchedulePage);
+
+app.get('/dashboard/user_profile', pageSessChk(true), routes_view.userProfilePage);
+
 
 app.get('/calendar', routes_view.calendarPage);
 app.get('/news_feed', routes_view.newsFeedPage);

@@ -35,7 +35,7 @@
 
 <ul class="nav nav-list">
 	<li class="<% if (contents === 'contents/team_list') {%>active<%}%>">
-		<a href="/dashboard/team_list">
+		<a href="/dashboard/team_list<% if (team_id) {%>?team_id=<%= team_id %><%}%>">
 			<i class="menu-icon fa fa-tachometer"></i>
 			<span class="menu-text"> 팀 리스트 </span>
 		</a>
@@ -45,7 +45,7 @@
 	</li>
 
 	<li class="<% if (contents === 'contents/create_team') {%>active<%}%>">
-		<a href="/dashboard/create_team">
+		<a href="/dashboard/create_team<% if (team_id) {%>?team_id=<%= team_id %><%}%>">
 			<i class="menu-icon fa fa-desktop"></i>
 			<span class="menu-text">
 				팀 만들기
@@ -123,7 +123,7 @@
 	</li>
 
 	<li class="<% if (contents === 'contents/profile') {%>active<%}%>">
-		<a href="/dashboard/user_profile">
+		<a href="/dashboard/user_profile<% if (team_id) {%>?team_id=<%= team_id %><%}%>">
 			<i class="menu-icon fa fa-list-alt"></i>
 			<span class="menu-text"> 개인설정 </span>
 		</a>

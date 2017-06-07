@@ -80,6 +80,21 @@ exports.createTeamPage = function(req, res) {
 	});
 };
 
+exports.userProfilePage = function(req,res){
+	var user_name = req.session.user_name || 'anonymous';
+	var team_id = req.query.team_id || '';
+	var user_id = req.session.user_id || '로그인 해주세요';
+	res.render('dashboard', {
+		contents: 'contents/profile',
+		footer: 'fragment/among_footer',
+		sidebar: 'fragment/among_sidebar',
+		navbar: 'fragment/among_navbar',
+		team_id: team_id,
+		user_id: user_id,
+		user_name: user_name
+	});	
+};
+
 exports.teamSchedulePage = function(req, res) {
 	var team_id = req.params.team_id;
 	var user_name = req.session.user_name || 'anonymous';
@@ -115,11 +130,13 @@ exports.teamSchedulePage = function(req, res) {
 };
 
 exports.reportPage = function (req, res) {
+	var user_name = req.session.user_name || 'anonymous';
 	res.render('dashboard', {
 		contents: 'contents/report',
 		footer: 'fragment/among_footer',
 		sidebar: 'fragment/among_sidebar',
 		navbar:'fragment/among_navbar',
+		user_name: user_name
 	});
 };
 
