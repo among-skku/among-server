@@ -301,192 +301,70 @@ jQuery(function($) {
 			}
 		});
 		
-		$('#timetable').editable({
-			type: 'image',
-			name: 'avatar',
-			value: null,
-			//onblur: 'ignore',  //don't reset or hide editable onblur?!
-			image: {
-				//specify ace file input plugin's options here
-				btn_choose: 'Change Avatar',
-				droppable: true,
-				maxSize: 110000,//~100Kb
-
-				//and a few extra ones here
-				name: 'avatar',//put the field name here as well, will be used inside the custom plugin
-				on_error : function(error_type) {//on_error function will be called when the selected file has a problem
-					if(last_gritter) $.gritter.remove(last_gritter);
-					if(error_type == 1) {//file format error
-						last_gritter = $.gritter.add({
-							title: 'File is not an image!',
-							text: 'Please choose a jpg|gif|png image!',
-							class_name: 'gritter-error gritter-center'
-						});
-					} else if(error_type == 2) {//file size rror
-						last_gritter = $.gritter.add({
-							title: 'File too big!',
-							text: 'Image size should not exceed 100Kb!',
-							class_name: 'gritter-error gritter-center'
-						});
-					}
-					else {//other error
-					}
-				},
-				on_success : function() {
-					$.gritter.removeAll();
-				}
-			},
-			url: function(params) {
-				// ***UPDATE AVATAR HERE*** //
-				//for a working upload example you can replace the contents of this function with 
-				//examples/profile-avatar-update.js
-				//console.log(params);
-				var deferred = new $.Deferred;
-				var value = $('#avatar').next().find('input[type=hidden]:eq(0)').val();
-				//console.log($('#avatar'));
-				//console.log(value);
-				if(!value || value.length == 0) {
-					deferred.resolve();
-					return deferred.promise();
-				}
-
-
-				//dummy upload
-				setTimeout(function(){
-					if("FileReader" in window) {
-						//for browsers that have a thumbnail of selected image
-						var thumb = $('#avatar').next().find('img').data('thumb');
-						if(thumb) $('#avatar').get(0).src = thumb;
-					}
-
-					deferred.resolve({'status':'OK'});
-
-					if(last_gritter) $.gritter.remove(last_gritter);
-					last_gritter = $.gritter.add({
-						title: 'Avatar Updated!',
-						text: 'Uploading to server can be easily implemented. A working example is included with the template.',
-						class_name: 'gritter-info gritter-center'
-					});
-				 } , parseInt(Math.random() * 800 + 800));
-
-				return deferred.promise();
-
-				// ***END OF UPDATE AVATAR HERE*** //
-				//$http.post();
-			},
-			success: function(response, newValue) {
-				console.log(newValue);
-				//alert(newValue);
-			}
-		});
 	}catch(e) {}
 
-	/**
-	//let's display edit mode by default?
-	var blank_image = true;//somehow you determine if image is initially blank or not, or you just want to display file input at first
-	if(blank_image) {
-		$('#avatar').editable('show').on('hidden', function(e, reason) {
-			if(reason == 'onblur') {
-				$('#avatar').editable('show');
-				return;
-			}
-			$('#avatar').off('hidden');
-		})
-	}
-	*/
+	var int2yoil = function(v) {
+		if (v == '0')
+			return '일';
+		if (v == '1')
+			return '월';
+		if (v == '2')
+			return '화';
+		if (v == '3')
+			return '수';
+		if (v == '4')
+			return '목';
+		if (v == '5')
+			return '금';
+		if (v == '6')
+			return '토';
+	};
 	
+	$.get('/user/schedule', {
+		type: 'regular'
+	}, function(res) {
+		var reg_schedule_html = [];
+		if (res) {
+			if (res.err) {
+				console.error(res.err);
+			} else {
+				// console.log(res.result);
+				// console.log(JSON.stringify(res.result, null, 4));
+				if (res.result && res.result.regular) {
+					var raw_data = res.result.regular;
+					raw_data.map(function(item, index) {
+						reg_schedule_html.push([
+							'<div class="profile-activity clearfix">',
+								'<div>',
+									'<a class="user" href="#"> ', int2yoil(item.day) ,')  </a>',
+									item.start_time ,'~', item.end_time, '&nbsp;&nbsp;[', item.title, ']',
+								'</div>',
+								// '<div class="tools action-buttons" invitation_id="' + item.invitation_id + '">',
+								// 	'<a href="#" class="blue">',
+								// 		'<i class="ace-icon fa fa-pencil bigger-125"></i>',
+								// 	'</a>',
+								// 	'<a href="#" class="red">',
+								// 		'<i class="ace-icon fa fa-times bigger-125"></i>',
+								// 	'</a>',
+								// '</div>',
+							'</div>'
+						].join(''));
+					});
 
-	//another option is using modals
-	$('#avatar2').on('click', function(){
-		var modal = 
-		'<div class="modal fade">\
-		  <div class="modal-dialog">\
-		   <div class="modal-content">\
-			<div class="modal-header">\
-				<button type="button" class="close" data-dismiss="modal">&times;</button>\
-				<h4 class="blue">Change Avatar</h4>\
-			</div>\
-			\
-			<form class="no-margin">\
-			 <div class="modal-body">\
-				<div class="space-4"></div>\
-				<div style="width:75%;margin-left:12%;"><input type="file" name="file-input" /></div>\
-			 </div>\
-			\
-			 <div class="modal-footer center">\
-				<button type="submit" class="btn btn-sm btn-success"><i class="ace-icon fa fa-check"></i> Submit</button>\
-				<button type="button" class="btn btn-sm" data-dismiss="modal"><i class="ace-icon fa fa-times"></i> Cancel</button>\
-			 </div>\
-			</form>\
-		  </div>\
-		 </div>\
-		</div>';
-
-
-		var modal = $(modal);
-		modal.modal("show").on("hidden", function(){
-			modal.remove();
-		});
-
-		var working = false;
-
-		var form = modal.find('form:eq(0)');
-		var file = form.find('input[type=file]').eq(0);
-		file.ace_file_input({
-			style:'well',
-			btn_choose:'Click to choose new avatar',
-			btn_change:null,
-			no_icon:'ace-icon fa fa-picture-o',
-			thumbnail:'small',
-			before_remove: function() {
-				//don't remove/reset files while being uploaded
-				return !working;
-			},
-			allowExt: ['jpg', 'jpeg', 'png', 'gif'],
-			allowMime: ['image/jpg', 'image/jpeg', 'image/png', 'image/gif']
-		});
-
-		form.on('submit', function(){
-			if(!file.data('ace_input_files')) return false;
-
-			file.ace_file_input('disable');
-			form.find('button').attr('disabled', 'disabled');
-			form.find('.modal-body').append("<div class='center'><i class='ace-icon fa fa-spinner fa-spin bigger-150 orange'></i></div>");
-
-			var deferred = new $.Deferred;
-			working = true;
-			deferred.done(function() {
-				form.find('button').removeAttr('disabled');
-				form.find('input[type=file]').ace_file_input('enable');
-				form.find('.modal-body > :last-child').remove();
-
-				modal.modal("hide");
-
-				var thumb = file.next().find('img').data('thumb');
-				if(thumb) $('#avatar2').get(0).src = thumb;
-
-				working = false;
-			});
-
-
-			setTimeout(function(){
-				deferred.resolve();
-			} , parseInt(Math.random() * 800 + 800));
-
-			return false;
-		});
-
+					$('#regular_schedule_container').html(reg_schedule_html.join('')).ace_scroll({
+						height: '250px',
+						mouseWheelLock: true,
+						alwaysVisible : true
+					});
+				} else {
+				}
+			}
+		} else {
+			console.error('개인 정기일정 불러오기 실패');
+		}
 	});
-
-
-
-	//////////////////////////////
-	$('#profile-feed-1').ace_scroll({
-		height: '250px',
-		mouseWheelLock: true,
-		alwaysVisible : true
-	});
-
+	
+	
 	$('a[ data-original-title]').tooltip();
 
 	$('.easy-pie-chart.percentage').each(function(){
@@ -503,8 +381,6 @@ jQuery(function($) {
 		size: size
 	}).css('color', barColor);
 	});
-
-	///////////////////////////////////////////
 
 	//right & left position
 	//show the user info on right or left depending on its position
@@ -653,24 +529,117 @@ jQuery(function($) {
 			}
 		});
 	});
-});
-
-/////////////////////////////////
 
 
-
-$.get('/user', function(res) {
-	console.log(res);
-	if (res) {
-		if (res.err) {
-			alert(res.err);
-		} else {
-			var phone_number = res.result.phone;
-			var email_addr = res.result.email;
-			$('#email').text(email_addr);
-			$('#phone').text(phone_number);
+	$('#calendar_file').ace_file_input({
+		style: 'well',
+		btn_choose: 'Drop files here or click to choose',
+		btn_change: null,
+		no_icon: 'ace-icon fa fa-cloud-upload',
+		droppable: true,
+		thumbnail: 'small', //large | fit
+		//,icon_remove:null//set null, to hide remove/reset button
+		/**,before_change:function(files, dropped) {
+			//Check an example below
+			//or examples/file-upload.html
+			return true;
+		}*/
+		/**,before_remove : function() {
+			return true;
+		}*/
+		preview_error : function(filename, error_code) {
+			//name of the file that failed
+			//error_code values
+			//1 = 'FILE_LOAD_FAILED',
+			//2 = 'IMAGE_LOAD_FAILED',
+			//3 = 'THUMBNAIL_FAILED'
+			//alert(error_code);
 		}
-	} else {
-		alert('유저 정보를 불러오지 못했습니다.');
-	}
+
+	}).on('change', function(){
+		var files = $(this).data('ace_input_files');
+		var method = $(this).data('ace_input_method'); // 'select' or 'drop' 
+		console.log(files);
+		console.log($(this));
+	});
+
+
+	var set_only_img = function() {
+		var whitelist_ext, whitelist_mime;
+		var btn_choose;
+		var no_icon;
+		btn_choose = "이미지를 업로드 하세요";
+		no_icon = "ace-icon fa fa-picture-o";
+
+		whitelist_ext = ["jpeg", "jpg", "png", "gif" , "bmp"];
+		whitelist_mime = ["image/jpg", "image/jpeg", "image/png", "image/gif", "image/bmp"];
+		
+		var file_input = $('#calendar_file');
+		file_input
+		.ace_file_input('update_settings',
+		{
+			'btn_choose': btn_choose,
+			'no_icon': no_icon,
+			'allowExt': whitelist_ext,
+			'allowMime': whitelist_mime
+		});
+		file_input.ace_file_input('reset_input');
+
+		file_input
+		.off('file.error.ace')
+		.on('file.error.ace', function(e, info) {
+		});
+	};
+	set_only_img();
+	
+	$('#calendarSubmitBtn').click(function(e) {
+		var files = $('#calendar_file').data('ace_input_files');
+		if (!files) {
+			alert('파일을 선택해주세요!');
+			return;
+		}
+		
+		var formData = new FormData();
+		formData.append("upload", files[0]);
+		// formData.append('param1', '123123');
+		$.ajax({
+			url: '/user/schedule_image', 
+			data: formData, 
+			processData: false,
+			contentType: false, 
+			type: 'POST', 
+			success: function(res){
+				if (res) {
+					if (res.err) {
+						alert(res.err);
+					} else {
+						alert(res.result);
+						$('#calendar_file').ace_file_input('reset_input');
+						var prev_dom = $('#calendarImg');
+						location.reload();
+					}
+				} else {
+					alert('시간표 업로드 실패');
+				}
+			} 
+		});
+	});
+	
+	$.get('/user', function(res) {
+		if (res) {
+			if (res.err) {
+				alert(res.err);
+			} else {
+				var phone_number = res.result.phone;
+				var email_addr = res.result.email;
+				$('#email').text(email_addr);
+				$('#phone').text(phone_number);
+			}
+		} else {
+			alert('유저 정보를 불러오지 못했습니다.');
+		}
+	});
 });
+
+
+

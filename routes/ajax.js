@@ -1313,8 +1313,7 @@ exports.getTeamInvitation = function(req, res) {
 };
 
 exports.inviteMember = function(req, res) {
-	//var team_id = req.params.team_id || false;
-	var team_id = req.body.team_id || false;
+	var team_id = req.params.team_id || false;
 	var user_id = req.body.user_id || false;
 	var current_user_id = req.session.user_id || false;
 	var invitation_id = 'invitation_' + randString(10);
@@ -2495,39 +2494,40 @@ exports.getMyInvitations = function(req, res) {
 			}
 		},
 		cb => {
-			db.invitation.find({
-				user_id: user_id
-			}, function(err, invitation_data) {
-				cb(err, invitation_data);
-			});
-		},
-		(invitation_data, cb) => {
-			// Error 처리 문제 -> Error가 있을 때 중지
-			async.mapLimit(invitation_data, 10, function (item, next) {
-				db.team.findOne({
-					team_id: item.team_id
-				}, function (err, team_data) {
-					if (err) {
-						item.team_name = "Fail loading data";
-						item.contents = "Fail loading data";
-						next(err);
-					} else {
-						item.team_name = team_data.team_name;
-						item.contents = team_data.contents;
-						console.log('머지중: ' + item.team_name);
-						console.log('머지중: ' + item.contents);
-						console.log('머지 후: ' + item);
-						next(null, item);
+			db.invitation.aggregate([
+				{
+					$match: {
+						user_id: user_id,
+						state: 'Pending'
 					}
-				});
-			}, function (err, merged_data) {
-				if (err) {
-					console.log('team data merging failed');
-				} else {
-					console.log(merged_data);
-					cb(err, merged_data);
+				},
+				{
+				   $lookup: {
+					   from: 'teams',
+					   localField: 'team_id',
+					   foreignField: 'team_id',
+					   as: 'team_data'
+				   }
+				},
+				{
+					$project: {
+						_id: 0,
+						invitation_id: 1,
+						team_id: 1,
+						team_data: { $arrayElemAt: [ "$team_data", 0 ] },
+					}
+				},
+				{
+					$project: {
+						invitation_id: 1,
+						team_id: 1,
+						team_name: '$team_data.team_name',
+						team_contents: '$team_data.contents'
+					}
 				}
-			});			
+			], function(err, data) {
+				cb(err, data);
+			});
 		}
 	], function(err, result) {
 		if (err) {
@@ -2694,7 +2694,7 @@ exports.getTeamList = function (req, res) {
 				if (err) {
 					console.log('team info loading failed');
 				} else {
-					console.log(team_data);
+					// console.log(team_data);
 					cb(err, team_data);
 				}
 			});
@@ -2796,66 +2796,23 @@ exports.getTeamMemberSchedule = function(req, res) {
 	});
 };
 
-exports.uploadTimetable = function(req, res) {
-	
+exports.uploadTimetable = function(req, res) {	
 	var user_id = req.session.user_id || false;
-	var file_id = 'file_' + randString(10);
-	var file_path = __storage_path + '/' + user_id + '/' + file_id;
-	var file_name = req.query.file_name || false;
-	var contents = req.query.contents || '';
-	var uploader = req.session.user_id || false;
-	var upload_time = new Date();
-	
-	console.log('req.file:', req.file);
+	var file_path = __time_table_path + '/' + user_id;
 
 	async.waterfall([
 		cb => {
-			console.log("file_name: " + file_name + " user_id: " + user_id);
-			if (!file_name || !user_id) {
-				// cb(req.body);
-				cb('insufficient parameters');
-			} else if (typeof req.file === 'undefined') {
-				cb('file is not uploaded');
+			if (!user_id) {
+				cb('로그인 하셔야 합니다.');
 			} else {
 				cb(null);
 			}
 		},
 		cb => {
-			if (fs.existsSync(__storage_path + '/' + user_id)) {
-				cb(null);
-			} else {
-				mkdirp(__storage_path + '/' + user_id, function(err) {
-					cb(err);
-				});
-			}
-		},
-		cb => {
-			async.parallel([
-				nj => {
-					var snapshot = new db.timetable_image({
-						user_id: user_id,
-						file_id: file_id,
-						file_path: file_path,
-						file_name: file_name,
-						contents: contents,
-						uploader: uploader,
-						upload_time: upload_time
-					});
-
-					snapshot.save(function(err) {
-						nj(err);
-					});
-					
-				},
-				nj => {
-					var tmp_path = req.file.path;
-					fs.rename(tmp_path, file_path, function(_err) {
-						//fs.chmod(target_path, 0755);	// 755 is wrong. 0755 or '755' are correct.
-						nj(_err);
-					});
-				}
-			], function(err) {
-				cb(err, '파일이 정상적으로 업로드 되었습니다.');
+			var tmp_path = req.file.path;
+			fs.rename(tmp_path, file_path, function(_err) {
+				//fs.chmod(target_path, 0755);	// 755 is wrong. 0755 or '755' are correct.
+				cb(_err, '파일이 정상적으로 업로드 되었습니다.');
 			});
 		}
 	], function(err, result) {

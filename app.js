@@ -187,6 +187,7 @@ var routes_sock = require('./routes/socket');
 //테스트용 API
 app.get('/', routes_view.index);
 
+app.get('/userCalendar', routes_view.userCalendarImage);
 app.get('/login', pageSessChk(false), routes_view.loginPage);
 app.get('/register', pageSessChk(false), routes_view.registerPage);
 app.get('/dashboard', pageSessChk(true), routes_view.dashboard);
