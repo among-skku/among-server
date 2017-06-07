@@ -342,24 +342,26 @@ console.log('__openCV_bin_path:', __openCV_bin_path);
 				var contents = user_id + '의 정기 일정';
 				var start_date = new Date(0);
 				var end_date = new Date(0);
-				times.map(function(time_str) {
-					var schedule_id = 'schedule_id_' + randString(10);
-					var start_time = time_str.split(' ~ ')[0];
-					var end_time = time_str.split(' ~ ')[1];
-					
-					regular_schedule.push({
-						user_id: user_id,
-						schedule_id: schedule_id,
-						place: place,
-						title: title,
-						contents: contents,
-						start_date: start_date,
-						end_date: end_date,
-						start_time: start_time,
-						end_time: end_time,
-						day: yoil
+				if (times && times.length > 0) {
+					times.map(function(time_str) {
+						var schedule_id = 'schedule_id_' + randString(10);
+						var start_time = time_str.split(' ~ ')[0];
+						var end_time = time_str.split(' ~ ')[1];
+
+						regular_schedule.push({
+							user_id: user_id,
+							schedule_id: schedule_id,
+							place: place,
+							title: title,
+							contents: contents,
+							start_date: start_date,
+							end_date: end_date,
+							start_time: start_time,
+							end_time: end_time,
+							day: yoil
+						});
 					});
-				});
+				}
 			});
 			
 			db.user.findOneAndUpdate({

@@ -479,6 +479,7 @@ jQuery(function($) {
 								} else {
 									alert(res.result);
 									console.log(res.result);
+									location.reload();
 									return true;
 								}
 							} else {
@@ -518,6 +519,7 @@ jQuery(function($) {
 								return false;
 							} else {
 								alert(res.result);
+								location.reload();
 								return true;
 							}
 						} else {
