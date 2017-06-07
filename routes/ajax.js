@@ -253,7 +253,13 @@ exports.syncCalendar = function(req, res) {
 	var user_id = req.session.user_id || false;
 	var json_path = __storage_path + '/time_tables/' + user_id + '.json';
 	var img_path = __storage_path + '/time_tables/' + user_id;
+	var img_name = user_id;
 	var cwd = __storage_path + '/time_tables/';
+console.log('json_path:', json_path);
+console.log('img_path:', img_path);
+console.log('cwd:', cwd);
+console.log('__openCV_bin_path:', __openCV_bin_path);
+
 	async.waterfall([
 		cb => {
 			if (!user_id) {
@@ -276,7 +282,7 @@ exports.syncCalendar = function(req, res) {
 		},
 		cb => {
 			//여기서 openCV 모듈을 붙여서 /storage/time_tables/[유저아이디].json 파일을 만들어내면 됩니다!!
-			execFile(__openCV_bin_path, [img_path], {
+			execFile(__openCV_bin_path, [img_name], {
 				cwd: cwd
 			}, function(err, stdout, stderr) {
 				console.log('err', err);
