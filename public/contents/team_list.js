@@ -7,7 +7,7 @@ jQuery(function($) {
 			var team_list_html = [];
 			
 			team_list.map( function (item, index) {
-				team_list_html.push(['<div class="col-xs-6 col-sm-3 pricing-box">',
+				team_list_html.push(['<div class="col-xs-6 col-sm-3 pricing-box joined_team_list">',
 										'<div class="widget-box widget-color-blue">',
 											'<div class="widget-header">',
 												'<h5 class="widget-title bigger lighter">',item.team_name,'</h5>',
@@ -31,6 +31,7 @@ jQuery(function($) {
 									'</div>'].join(''));		
 			});
 			console.log('team_list_html',team_list_html);
+			$('.joined_team_list').remove();
 			$("#print_invitation").append(team_list_html.join(''));
 		} else {
 			console.log('참여한 팀 정보가 없습니다.');

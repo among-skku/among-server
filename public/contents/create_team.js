@@ -450,7 +450,9 @@ $('#createTeamBtn').click(function(e) {
 			if (res.err) {
 				alert(res.err);
 			} else {
+				var team_id = res.team_id;
 				alert(res.result);
+				location.href = '/dashboard/team_schedule/' + team_id;
 			}
 		} else {
 			alert('네트워크 에러! 팀 만들기에 실패했습니다.');

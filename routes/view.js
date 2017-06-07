@@ -42,57 +42,210 @@ exports.login = function(req, res) {
 exports.dashboard = function(req, res) {
 	var user_name = req.session.user_name || 'anonymous';
 	var team_id = req.query.team_id || '';
-	res.render('dashboard', {
-		contents: 'contents/dashboard_main',
-		footer: 'fragment/among_footer',
-		sidebar: 'fragment/among_sidebar',
-		navbar: 'fragment/among_navbar',
-		user_name: user_name,
-		team_id: team_id
+	async.waterfall([
+		cb => {
+			if (!team_id) {
+				cb('No team id');
+			} else {
+				db.team.findOne({
+					team_id: team_id
+				}, function(err, team_data) {
+					if (err) {
+						cb(err);
+					} else {
+						cb(err, team_data.team_name);
+					}
+				});
+			}
+		}
+	], function(err, team_name) {
+		if (err) {
+			res.render('dashboard', {
+				contents: 'contents/dashboard_main',
+				footer: 'fragment/among_footer',
+				sidebar: 'fragment/among_sidebar',
+				navbar: 'fragment/among_navbar',
+				user_name: user_name,
+				team_id: team_id
+			});
+		} else {
+			res.render('dashboard', {
+				contents: 'contents/dashboard_main',
+				footer: 'fragment/among_footer',
+				sidebar: 'fragment/among_sidebar',
+				navbar: 'fragment/among_navbar',
+				user_name: user_name,
+				team_id: team_id,
+				team_name: team_name
+			});
+		}
 	});
 };
 
 exports.teamListPage = function(req, res) {
 	var user_name = req.session.user_name || 'anonymous';
 	var team_id = req.query.team_id || '';
-	res.render('dashboard', {
-		contents: 'contents/team_list',
-		footer: 'fragment/among_footer',
-		sidebar: 'fragment/among_sidebar',
-		navbar: 'fragment/among_navbar',
-		user_name: user_name,
-		team_id: team_id,
+	async.waterfall([
+		cb => {
+			if (!team_id) {
+				cb('No team id');
+			} else {
+				db.team.findOne({
+					team_id: team_id
+				}, function(err, team_data) {
+					if (err) {
+						cb(err);
+					} else {
+						cb(err, team_data.team_name);
+					}
+				});
+			}
+		}
+	], function(err, team_name) {
+		if (err) {
+			res.render('dashboard', {
+				contents: 'contents/team_list',
+				footer: 'fragment/among_footer',
+				sidebar: 'fragment/among_sidebar',
+				navbar: 'fragment/among_navbar',
+				user_name: user_name,
+				team_id: team_id,
+			});
+		} else {
+			res.render('dashboard', {
+				contents: 'contents/team_list',
+				footer: 'fragment/among_footer',
+				sidebar: 'fragment/among_sidebar',
+				navbar: 'fragment/among_navbar',
+				user_name: user_name,
+				team_id: team_id,
+				team_name: team_name
+			});
+		}
 	});
+	///////
+	// res.render('dashboard', {
+	// 	contents: 'contents/team_list',
+	// 	footer: 'fragment/among_footer',
+	// 	sidebar: 'fragment/among_sidebar',
+	// 	navbar: 'fragment/among_navbar',
+	// 	user_name: user_name,
+	// 	team_id: team_id,
+	// });
 };
 
 exports.createTeamPage = function(req, res) {
 	var user_name = req.session.user_name || 'anonymous';
 	var team_id = req.query.team_id || '';
 	var user_id = req.session.user_id || '로그인 해주세요';
-	res.render('dashboard', {
-		contents: 'contents/create_team',
-		footer: 'fragment/among_footer',
-		sidebar: 'fragment/among_sidebar',
-		navbar: 'fragment/among_navbar',
-		team_id: team_id,
-		user_id: user_id,
-		user_name: user_name
+	async.waterfall([
+		cb => {
+			if (!team_id) {
+				cb('No team id');
+			} else {
+				db.team.findOne({
+					team_id: team_id
+				}, function(err, team_data) {
+					if (err) {
+						cb(err);
+					} else {
+						cb(err, team_data.team_name);
+					}
+				});
+			}
+		}
+	], function(err, team_name) {
+		if (err) {
+			res.render('dashboard', {
+				contents: 'contents/create_team',
+				footer: 'fragment/among_footer',
+				sidebar: 'fragment/among_sidebar',
+				navbar: 'fragment/among_navbar',
+				team_id: team_id,
+				user_id: user_id,
+				user_name: user_name
+			});
+		} else {
+			res.render('dashboard', {
+				contents: 'contents/create_team',
+				footer: 'fragment/among_footer',
+				sidebar: 'fragment/among_sidebar',
+				navbar: 'fragment/among_navbar',
+				team_id: team_id,
+				user_id: user_id,
+				user_name: user_name,
+				team_name: team_name
+			});
+		}
 	});
+	
+	/////////
+	// res.render('dashboard', {
+	// 	contents: 'contents/create_team',
+	// 	footer: 'fragment/among_footer',
+	// 	sidebar: 'fragment/among_sidebar',
+	// 	navbar: 'fragment/among_navbar',
+	// 	team_id: team_id,
+	// 	user_id: user_id,
+	// 	user_name: user_name
+	// });
 };
 
 exports.userProfilePage = function(req,res){
 	var user_name = req.session.user_name || 'anonymous';
 	var team_id = req.query.team_id || '';
 	var user_id = req.session.user_id || '로그인 해주세요';
-	res.render('dashboard', {
-		contents: 'contents/profile',
-		footer: 'fragment/among_footer',
-		sidebar: 'fragment/among_sidebar',
-		navbar: 'fragment/among_navbar',
-		team_id: team_id,
-		user_id: user_id,
-		user_name: user_name
-	});	
+	async.waterfall([
+		cb => {
+			if (!team_id) {
+				cb('No team id');
+			} else {
+				db.team.findOne({
+					team_id: team_id
+				}, function(err, team_data) {
+					if (err) {
+						cb(err);
+					} else {
+						cb(err, team_data.team_name);
+					}
+				});
+			}
+		}
+	], function(err, team_name) {
+		if (err) {
+			res.render('dashboard', {
+				contents: 'contents/profile',
+				footer: 'fragment/among_footer',
+				sidebar: 'fragment/among_sidebar',
+				navbar: 'fragment/among_navbar',
+				team_id: team_id,
+				user_id: user_id,
+				user_name: user_name
+			});	
+		} else {
+			res.render('dashboard', {
+				contents: 'contents/profile',
+				footer: 'fragment/among_footer',
+				sidebar: 'fragment/among_sidebar',
+				navbar: 'fragment/among_navbar',
+				team_id: team_id,
+				user_id: user_id,
+				user_name: user_name,
+				team_name: team_name
+			});	
+		}
+	});
+	
+	/////////
+	// res.render('dashboard', {
+	// 	contents: 'contents/profile',
+	// 	footer: 'fragment/among_footer',
+	// 	sidebar: 'fragment/among_sidebar',
+	// 	navbar: 'fragment/among_navbar',
+	// 	team_id: team_id,
+	// 	user_id: user_id,
+	// 	user_name: user_name
+	// });	
 };
 
 exports.teamSchedulePage = function(req, res) {
@@ -106,11 +259,11 @@ exports.teamSchedulePage = function(req, res) {
 				if (!team_data) {
 					cb('유효하지 않은 팀입니다.');
 				} else {
-					cb(err, null);
+					cb(err, team_data.team_name);
 				}
 			});
 		}
-	], function(err) {
+	], function(err, team_name) {
 		if (err) {
 			res.json({
 				err: '팀을 찾을 수 없습니다.'
@@ -122,7 +275,8 @@ exports.teamSchedulePage = function(req, res) {
 				sidebar: 'fragment/among_sidebar',
 				navbar: 'fragment/among_navbar',
 				team_id: team_id,
-				user_name: user_name
+				user_name: user_name,
+				team_name: team_name
 			});
 		}
 	});

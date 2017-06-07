@@ -2099,7 +2099,8 @@ exports.createTeam = function (req, res) {
 			});
 		} else {
 			res.json({
-				result: result
+				result: result,
+				team_id: team_id
 			});
 		}
 	});	
