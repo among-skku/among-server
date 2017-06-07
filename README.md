@@ -30,6 +30,10 @@ Create file on path */workspace/among-server/config.json*
 	$ npm install
 	$ npm start
 
+### Forever module installation
+
+	$ npm install -g forever
+	
 ### Server staring with forever as background service
 
     $ node among.js start -d

@@ -68,10 +68,10 @@
 
 <div class="page-header">
 	<h1>
-		User Profile Page
+		사용자 개인설정 페이지
 		<small>
 			<i class="ace-icon fa fa-angle-double-right"></i>
-			3 styles with inline editable feature
+			사용자 개인의 에브리타임 시간표 이미지를 업로드하거나, 개인 정기 일정을 확인할 수 있습니다.
 		</small>
 	</h1>
 </div><!-- /.page-header -->
@@ -88,32 +88,6 @@
 				<i class="ace-icon fa fa-umbrella bigger-120 blue"></i>
 				Click on the image below or on profile fields to edit them ...
 			</div>
-
-			<div class="pull-right">
-				<span class="green middle bolder">Choose profile: &nbsp;</span>
-
-				<div class="btn-toolbar inline middle no-margin">
-					<div data-toggle="buttons" class="btn-group no-margin">
-						<label class="btn btn-sm btn-yellow active">
-							<span class="bigger-110">1</span>
-
-							<input type="radio" value="1" />
-						</label>
-
-						<label class="btn btn-sm btn-yellow">
-							<span class="bigger-110">2</span>
-
-							<input type="radio" value="2" />
-						</label>
-
-						<label class="btn btn-sm btn-yellow">
-							<span class="bigger-110">3</span>
-
-							<input type="radio" value="3" />
-						</label>
-					</div>
-				</div>
-			</div>
 		</div>
 
 		<div class="hr dotted"></div>
@@ -128,7 +102,6 @@
 		<div>
 			<div id="user-profile-1" class="user-profile row">
 				<div class="col-xs-12 col-sm-3 center">
-					<!--profile image-->
 					<div>
 						<span class="profile-picture">
 							<img id="avatar" class="editable img-responsive" alt="Alex's Avatar" src="/images/avatars/profile-pic.jpg" />
@@ -144,49 +117,22 @@
 									<span class="white"><%= user_name %></span>
 								</a>
 
-								<ul id="user-status" class="align-left dropdown-menu dropdown-caret dropdown-lighter">
-									<li class="dropdown-header"> 상태 바꾸기 </li>
-
-									<li>
-										<a href="#">
-											<i class="ace-icon fa fa-circle green"></i>
-&nbsp;
-											<span class="green">온라인</span>
-										</a>
-									</li>
-
-									<li>
-										<a href="#">
-											<i class="ace-icon fa fa-circle red"></i>
-&nbsp;
-											<span class="red">바쁨</span>
-										</a>
-									</li>
-
-									<li>
-										<a href="#">
-											<i class="ace-icon fa fa-circle grey"></i>
-&nbsp;
-											<span class="grey">오프라인</span>
-										</a>
-									</li>
-								</ul>
 							</div>
 						</div>
 					</div>
-					<!-- timetable image
-						should make it click and upload img.
-					-->
-					<div class="space space-4"></div>
-					<div>
-						<span class="profile-picture">
-							<img id="timetable" class="editable img-responsive" alt="Alex's Avatar" src="/images/avatars/profile-pic.jpg" />
-						</span>
+					<h4 class="widget-title">에브리타임 PC버전 이미지 업로드</h4>
 
+					<div class="widget-main">
+						<div class="form-group">
+							<div class="col-xs-12">
+								<input multiple="" type="file" id="calendar_file" />
+							</div>
+							<div id="calendarSubmitBtn" class="btn btn-success">
+								업로드
+							</div>
+						</div>
 					</div>
-					
 				</div>
-
 				<div class="col-xs-12 col-sm-9">
 					
 
@@ -221,27 +167,18 @@
 
 					<div class="space-20"></div>
 
-					<div class="widget-box transparent">
+					<div class="widget-box transparent" id="regular_schedule_widget_box">
 						<div class="widget-header widget-header-small">
 							<h4 class="widget-title blue smaller">
 								<i class="ace-icon fa fa-rss orange"></i>
-								Time Table
+								정기 일정
 							</h4>
-
-							<div class="widget-toolbar action-buttons">
-								<a href="#" data-action="reload">
-									<i class="ace-icon fa fa-refresh blue"></i>
-								</a>
-&nbsp;
-								<a href="#" class="pink">
-									<i class="ace-icon fa fa-trash-o"></i>
-								</a>
-							</div>
 						</div>
 
 						<div class="widget-body">
 							<div class="widget-main padding-8">
-								<div id="profile-feed-1" class="profile-feed">
+								<div id="regular_schedule_container" class="profile-feed">
+									<!-- 
 									<div class="profile-activity clearfix">
 										<div>
 											<a class="user" href="#"> 월)  </a>
@@ -258,105 +195,7 @@
 											</a>
 										</div>
 									</div>
-									<div class="profile-activity clearfix">
-										<div>
-											<a class="user" href="#"> 화)  </a>
-											9:00~10:30, 13:30~14:45
-										</div>
-
-										<div class="tools action-buttons">
-											<a href="#" class="blue">
-												<i class="ace-icon fa fa-pencil bigger-125"></i>
-											</a>
-
-											<a href="#" class="red">
-												<i class="ace-icon fa fa-times bigger-125"></i>
-											</a>
-										</div>
-									</div>
-									<div class="profile-activity clearfix">
-										<div>
-											<a class="user" href="#"> 수)  </a>
-											9:00~10:30, 13:30~14:45
-										</div>
-
-										<div class="tools action-buttons">
-											<a href="#" class="blue">
-												<i class="ace-icon fa fa-pencil bigger-125"></i>
-											</a>
-
-											<a href="#" class="red">
-												<i class="ace-icon fa fa-times bigger-125"></i>
-											</a>
-										</div>
-									</div>
-									<div class="profile-activity clearfix">
-										<div>
-											<a class="user" href="#"> 목)  </a>
-											9:00~10:30, 13:30~14:45
-										</div>
-
-										<div class="tools action-buttons">
-											<a href="#" class="blue">
-												<i class="ace-icon fa fa-pencil bigger-125"></i>
-											</a>
-
-											<a href="#" class="red">
-												<i class="ace-icon fa fa-times bigger-125"></i>
-											</a>
-										</div>
-									</div>
-									<div class="profile-activity clearfix">
-										<div>
-											<a class="user" href="#"> 금)  </a>
-											9:00~10:30, 13:30~14:45
-										</div>
-
-										<div class="tools action-buttons">
-											<a href="#" class="blue">
-												<i class="ace-icon fa fa-pencil bigger-125"></i>
-											</a>
-
-											<a href="#" class="red">
-												<i class="ace-icon fa fa-times bigger-125"></i>
-											</a>
-										</div>
-									</div>
-									<div class="profile-activity clearfix">
-										<div>
-											<a class="user" href="#"> 토)  </a>
-											9:00~10:30, 13:30~14:45
-										</div>
-
-										<div class="tools action-buttons">
-											<a href="#" class="blue">
-												<i class="ace-icon fa fa-pencil bigger-125"></i>
-											</a>
-
-											<a href="#" class="red">
-												<i class="ace-icon fa fa-times bigger-125"></i>
-											</a>
-										</div>
-									</div>
-									<div class="profile-activity clearfix">
-										<div>
-											<a class="user" href="#"> 일)  </a>
-											9:00~10:30, 13:30~14:45
-										</div>
-
-										<div class="tools action-buttons">
-											<a href="#" class="blue">
-												<i class="ace-icon fa fa-pencil bigger-125"></i>
-											</a>
-
-											<a href="#" class="red">
-												<i class="ace-icon fa fa-times bigger-125"></i>
-											</a>
-										</div>
-									</div>
-<!--///////////////////////////////-->
-
-
+-->
 								</div>
 							</div>
 						</div>
@@ -366,15 +205,12 @@
 
 					<div class="space-6"></div>
 
-					<div class="center">
-						<button type="button" class="btn btn-sm btn-primary btn-white btn-round">
-							<i class="ace-icon fa fa-rss bigger-150 middle orange2"></i>
-							<span class="bigger-110">View more activities</span>
-
-							<i class="icon-on-right ace-icon fa fa-arrow-right"></i>
-						</button>
-					</div>
 				</div>
+			</div>
+			<hr>
+			<h3 class="center"> 업로드 된 시간표 이미지 </h3>
+			<div class="row center">
+				<img src="/userCalendar" alt="유저 시간표 이미지" style="max-width: 600px; height: auto;"/>
 			</div>
 		</div>
 
@@ -893,407 +729,7 @@
 								</button>
 							</div>
 						</div><!-- /#feed -->
-<!-- 
-						<div id="friends" class="tab-pane">
-							<div class="profile-users clearfix">
-								<div class="itemdiv memberdiv">
-									<div class="inline pos-rel">
-										<div class="user">
-											<a href="#">
-												<img src="/images/avatars/avatar4.png" alt="Bob Doe's avatar" />
-											</a>
-										</div>
 
-										<div class="body">
-											<div class="name">
-												<a href="#">
-													<span class="user-status status-online"></span>
-													Bob Doe
-												</a>
-											</div>
-										</div>
-
-										<div class="popover">
-											<div class="arrow"></div>
-
-											<div class="popover-content">
-												<div class="bolder">Content Editor</div>
-
-												<div class="time">
-													<i class="ace-icon fa fa-clock-o middle bigger-120 orange"></i>
-													<span class="green"> 20 mins ago </span>
-												</div>
-
-												<div class="hr dotted hr-8"></div>
-
-												<div class="tools action-buttons">
-													<a href="#">
-														<i class="ace-icon fa fa-facebook-square blue bigger-150"></i>
-													</a>
-
-													<a href="#">
-														<i class="ace-icon fa fa-twitter-square light-blue bigger-150"></i>
-													</a>
-
-													<a href="#">
-														<i class="ace-icon fa fa-google-plus-square red bigger-150"></i>
-													</a>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-
-								<div class="itemdiv memberdiv">
-									<div class="inline pos-rel">
-										<div class="user">
-											<a href="#">
-												<img src="/images/avatars/avatar1.png" alt="Rose Doe's avatar" />
-											</a>
-										</div>
-
-										<div class="body">
-											<div class="name">
-												<a href="#">
-													<span class="user-status status-offline"></span>
-													Rose Doe
-												</a>
-											</div>
-										</div>
-
-										<div class="popover">
-											<div class="arrow"></div>
-
-											<div class="popover-content">
-												<div class="bolder">Graphic Designer</div>
-
-												<div class="time">
-													<i class="ace-icon fa fa-clock-o middle bigger-120 grey"></i>
-													<span class="grey"> 30 min ago </span>
-												</div>
-
-												<div class="hr dotted hr-8"></div>
-
-												<div class="tools action-buttons">
-													<a href="#">
-														<i class="ace-icon fa fa-facebook-square blue bigger-150"></i>
-													</a>
-
-													<a href="#">
-														<i class="ace-icon fa fa-twitter-square light-blue bigger-150"></i>
-													</a>
-
-													<a href="#">
-														<i class="ace-icon fa fa-google-plus-square red bigger-150"></i>
-													</a>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-
-								<div class="itemdiv memberdiv">
-									<div class="inline pos-rel">
-										<div class="user">
-											<a href="#">
-												<img src="/images/avatars/avatar.png" alt="Jim Doe's avatar" />
-											</a>
-										</div>
-
-										<div class="body">
-											<div class="name">
-												<a href="#">
-													<span class="user-status status-busy"></span>
-													Jim Doe
-												</a>
-											</div>
-										</div>
-
-										<div class="popover">
-											<div class="arrow"></div>
-
-											<div class="popover-content">
-												<div class="bolder">SEO &amp; Advertising</div>
-
-												<div class="time">
-													<i class="ace-icon fa fa-clock-o middle bigger-120 red"></i>
-													<span class="grey"> 1 hour ago </span>
-												</div>
-
-												<div class="hr dotted hr-8"></div>
-
-												<div class="tools action-buttons">
-													<a href="#">
-														<i class="ace-icon fa fa-facebook-square blue bigger-150"></i>
-													</a>
-
-													<a href="#">
-														<i class="ace-icon fa fa-twitter-square light-blue bigger-150"></i>
-													</a>
-
-													<a href="#">
-														<i class="ace-icon fa fa-google-plus-square red bigger-150"></i>
-													</a>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-
-								<div class="itemdiv memberdiv">
-									<div class="inline pos-rel">
-										<div class="user">
-											<a href="#">
-												<img src="/images/avatars/avatar5.png" alt="Alex Doe's avatar" />
-											</a>
-										</div>
-
-										<div class="body">
-											<div class="name">
-												<a href="#">
-													<span class="user-status status-idle"></span>
-													Alex Doe
-												</a>
-											</div>
-										</div>
-
-										<div class="popover">
-											<div class="arrow"></div>
-
-											<div class="popover-content">
-												<div class="bolder">Marketing</div>
-
-												<div class="time">
-													<i class="ace-icon fa fa-clock-o middle bigger-120 orange"></i>
-													<span class=""> 40 minutes idle </span>
-												</div>
-
-												<div class="hr dotted hr-8"></div>
-
-												<div class="tools action-buttons">
-													<a href="#">
-														<i class="ace-icon fa fa-facebook-square blue bigger-150"></i>
-													</a>
-
-													<a href="#">
-														<i class="ace-icon fa fa-twitter-square light-blue bigger-150"></i>
-													</a>
-
-													<a href="#">
-														<i class="ace-icon fa fa-google-plus-square red bigger-150"></i>
-													</a>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-
-								<div class="itemdiv memberdiv">
-									<div class="inline pos-rel">
-										<div class="user">
-											<a href="#">
-												<img src="/images/avatars/avatar2.png" alt="Phil Doe's avatar" />
-											</a>
-										</div>
-
-										<div class="body">
-											<div class="name">
-												<a href="#">
-													<span class="user-status status-online"></span>
-													Phil Doe
-												</a>
-											</div>
-										</div>
-
-										<div class="popover">
-											<div class="arrow"></div>
-
-											<div class="popover-content">
-												<div class="bolder">Public Relations</div>
-
-												<div class="time">
-													<i class="ace-icon fa fa-clock-o middle bigger-120 orange"></i>
-													<span class="green"> 2 hours ago </span>
-												</div>
-
-												<div class="hr dotted hr-8"></div>
-
-												<div class="tools action-buttons">
-													<a href="#">
-														<i class="ace-icon fa fa-facebook-square blue bigger-150"></i>
-													</a>
-
-													<a href="#">
-														<i class="ace-icon fa fa-twitter-square light-blue bigger-150"></i>
-													</a>
-
-													<a href="#">
-														<i class="ace-icon fa fa-google-plus-square red bigger-150"></i>
-													</a>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-
-								<div class="itemdiv memberdiv">
-									<div class="inline pos-rel">
-										<div class="user">
-											<a href="#">
-												<img src="/images/avatars/avatar3.png" alt="Susan Doe's avatar" />
-											</a>
-										</div>
-
-										<div class="body">
-											<div class="name">
-												<a href="#">
-													<span class="user-status status-online"></span>
-													Susan Doe
-												</a>
-											</div>
-										</div>
-
-										<div class="popover">
-											<div class="arrow"></div>
-
-											<div class="popover-content">
-												<div class="bolder">HR Management</div>
-
-												<div class="time">
-													<i class="ace-icon fa fa-clock-o middle bigger-120 orange"></i>
-													<span class="green"> 20 mins ago </span>
-												</div>
-
-												<div class="hr dotted hr-8"></div>
-
-												<div class="tools action-buttons">
-													<a href="#">
-														<i class="ace-icon fa fa-facebook-square blue bigger-150"></i>
-													</a>
-
-													<a href="#">
-														<i class="ace-icon fa fa-twitter-square light-blue bigger-150"></i>
-													</a>
-
-													<a href="#">
-														<i class="ace-icon fa fa-google-plus-square red bigger-150"></i>
-													</a>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-
-								<div class="itemdiv memberdiv">
-									<div class="inline pos-rel">
-										<div class="user">
-											<a href="#">
-												<img src="/images/avatars/avatar1.png" alt="Jennifer Doe's avatar" />
-											</a>
-										</div>
-
-										<div class="body">
-											<div class="name">
-												<a href="#">
-													<span class="user-status status-offline"></span>
-													Jennifer Doe
-												</a>
-											</div>
-										</div>
-
-										<div class="popover">
-											<div class="arrow"></div>
-
-											<div class="popover-content">
-												<div class="bolder">Graphic Designer</div>
-
-												<div class="time">
-													<i class="ace-icon fa fa-clock-o middle bigger-120 grey"></i>
-													<span class="grey"> 2 hours ago </span>
-												</div>
-
-												<div class="hr dotted hr-8"></div>
-
-												<div class="tools action-buttons">
-													<a href="#">
-														<i class="ace-icon fa fa-facebook-square blue bigger-150"></i>
-													</a>
-
-													<a href="#">
-														<i class="ace-icon fa fa-twitter-square light-blue bigger-150"></i>
-													</a>
-
-													<a href="#">
-														<i class="ace-icon fa fa-google-plus-square red bigger-150"></i>
-													</a>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-
-								<div class="itemdiv memberdiv">
-									<div class="inline pos-rel">
-										<div class="user">
-											<a href="#">
-												<img src="/images/avatars/avatar3.png" alt="Alexa Doe's avatar" />
-											</a>
-										</div>
-
-										<div class="body">
-											<div class="name">
-												<a href="#">
-													<span class="user-status status-offline"></span>
-													Alexa Doe
-												</a>
-											</div>
-										</div>
-
-										<div class="popover">
-											<div class="arrow"></div>
-
-											<div class="popover-content">
-												<div class="bolder">Accounting</div>
-
-												<div class="time">
-													<i class="ace-icon fa fa-clock-o middle bigger-120 grey"></i>
-													<span class="grey"> 4 hours ago </span>
-												</div>
-
-												<div class="hr dotted hr-8"></div>
-
-												<div class="tools action-buttons">
-													<a href="#">
-														<i class="ace-icon fa fa-facebook-square blue bigger-150"></i>
-													</a>
-
-													<a href="#">
-														<i class="ace-icon fa fa-twitter-square light-blue bigger-150"></i>
-													</a>
-
-													<a href="#">
-														<i class="ace-icon fa fa-google-plus-square red bigger-150"></i>
-													</a>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-
-							<div class="hr hr10 hr-double"></div>
-
-							<ul class="pager pull-right">
-								<li class="previous disabled">
-									<a href="#">&larr; Prev</a>
-								</li>
-
-								<li class="next">
-									<a href="#">Next &rarr;</a>
-								</li>
-							</ul>
-						</div><!-- /#friends -->
- -->
 						<div id="pictures" class="tab-pane">
 							<ul class="ace-thumbnails">
 								<li>

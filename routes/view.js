@@ -1,5 +1,5 @@
 var async = require('async');
-
+var fs = require('fs');
 var db = {
 	user: require(__path + 'modules/db/user'),
 	report: require(__path + 'modules/db/report'),
@@ -138,6 +138,24 @@ exports.reportPage = function (req, res) {
 		navbar:'fragment/among_navbar',
 		user_name: user_name
 	});
+};
+
+exports.userCalendarImage = function (req, res) {
+	var user_id = req.session.user_id || '';
+	var default_img_path = __path + 'public/images/uploadme.png';
+	var img_path = '';
+	if (user_id) {
+		img_path = __time_table_path + user_id;
+		if (!fs.existsSync(img_path)) {
+			img_path = default_img_path;
+		}
+	} else {
+		img_path = default_img_path;
+	}
+	console.log('image_path:', img_path);
+	var img = fs.readFileSync(img_path);
+	res.writeHead(200, {'Content-Type': 'image/png' });
+	res.end(img, 'binary');
 };
 
 exports.calendarPage = function (req, res) {

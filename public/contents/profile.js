@@ -301,84 +301,6 @@ jQuery(function($) {
 			}
 		});
 		
-		$('#timetable').editable({
-			type: 'image',
-			name: 'avatar',
-			value: null,
-			//onblur: 'ignore',  //don't reset or hide editable onblur?!
-			image: {
-				//specify ace file input plugin's options here
-				btn_choose: 'Change Avatar',
-				droppable: true,
-				maxSize: 110000,//~100Kb
-
-				//and a few extra ones here
-				name: 'avatar',//put the field name here as well, will be used inside the custom plugin
-				on_error : function(error_type) {//on_error function will be called when the selected file has a problem
-					if(last_gritter) $.gritter.remove(last_gritter);
-					if(error_type == 1) {//file format error
-						last_gritter = $.gritter.add({
-							title: 'File is not an image!',
-							text: 'Please choose a jpg|gif|png image!',
-							class_name: 'gritter-error gritter-center'
-						});
-					} else if(error_type == 2) {//file size rror
-						last_gritter = $.gritter.add({
-							title: 'File too big!',
-							text: 'Image size should not exceed 100Kb!',
-							class_name: 'gritter-error gritter-center'
-						});
-					}
-					else {//other error
-					}
-				},
-				on_success : function() {
-					$.gritter.removeAll();
-				}
-			},
-			url: function(params) {
-				// ***UPDATE AVATAR HERE*** //
-				//for a working upload example you can replace the contents of this function with 
-				//examples/profile-avatar-update.js
-				//console.log(params);
-				var deferred = new $.Deferred;
-				var value = $('#avatar').next().find('input[type=hidden]:eq(0)').val();
-				//console.log($('#avatar'));
-				//console.log(value);
-				if(!value || value.length == 0) {
-					deferred.resolve();
-					return deferred.promise();
-				}
-
-
-				//dummy upload
-				setTimeout(function(){
-					if("FileReader" in window) {
-						//for browsers that have a thumbnail of selected image
-						var thumb = $('#avatar').next().find('img').data('thumb');
-						if(thumb) $('#avatar').get(0).src = thumb;
-					}
-
-					deferred.resolve({'status':'OK'});
-
-					if(last_gritter) $.gritter.remove(last_gritter);
-					last_gritter = $.gritter.add({
-						title: 'Avatar Updated!',
-						text: 'Uploading to server can be easily implemented. A working example is included with the template.',
-						class_name: 'gritter-info gritter-center'
-					});
-				 } , parseInt(Math.random() * 800 + 800));
-
-				return deferred.promise();
-
-				// ***END OF UPDATE AVATAR HERE*** //
-				//$http.post();
-			},
-			success: function(response, newValue) {
-				console.log(newValue);
-				//alert(newValue);
-			}
-		});
 	}catch(e) {}
 
 	/**
@@ -480,13 +402,72 @@ jQuery(function($) {
 
 
 
-	//////////////////////////////
-	$('#profile-feed-1').ace_scroll({
-		height: '250px',
-		mouseWheelLock: true,
-		alwaysVisible : true
-	});
+	//////////////////////////////a
+	var int2yoil = function(v) {
+		if (v == '0')
+			return '일';
+		if (v == '1')
+			return '월';
+		if (v == '2')
+			return '화';
+		if (v == '3')
+			return '수';
+		if (v == '4')
+			return '목';
+		if (v == '5')
+			return '금';
+		if (v == '6')
+			return '토';
+	};
+	
+	$.get('/user/schedule', {
+		type: 'regular'
+	}, function(res) {
+		var reg_schedule_html = [];
+		if (res) {
+			if (res.err) {
+				console.error(res.err);
+			} else {
+				// console.log(res.result);
+				// console.log(JSON.stringify(res.result, null, 4));
+				if (res.result && res.result.regular) {
+					var raw_data = res.result.regular;
+					raw_data.map(function(item, index) {
+						reg_schedule_html.push([
+							'<div class="profile-activity clearfix">',
+								'<div>',
+									'<a class="user" href="#"> ', int2yoil(item.day) ,')  </a>',
+									item.start_time ,'~', item.end_time, '&nbsp;&nbsp;[', item.title, ']',
+								'</div>',
+								// '<div class="tools action-buttons" invitation_id="' + item.invitation_id + '">',
+								// 	'<a href="#" class="blue">',
+								// 		'<i class="ace-icon fa fa-pencil bigger-125"></i>',
+								// 	'</a>',
+								// 	'<a href="#" class="red">',
+								// 		'<i class="ace-icon fa fa-times bigger-125"></i>',
+								// 	'</a>',
+								// '</div>',
+							'</div>'
+						].join(''));
+					});
 
+					$('#regular_schedule_container').html(reg_schedule_html.join('')).ace_scroll({
+						height: '250px',
+						mouseWheelLock: true,
+						alwaysVisible : true
+					});
+				} else {
+				}
+			}
+		} else {
+			console.error('개인 정기일정 불러오기 실패');
+		}
+	});
+	
+		
+///////////////////
+	
+	
 	$('a[ data-original-title]').tooltip();
 
 	$('.easy-pie-chart.percentage').each(function(){
@@ -653,14 +634,120 @@ jQuery(function($) {
 			}
 		});
 	});
+	/////////////////////////// 파일 업로드 부분
+	// $('#id-input-file-2').ace_file_input({
+	// 	no_file:'No File ...',
+	// 	btn_choose:'Choose',
+	// 	btn_change:'Change',
+	// 	droppable:false,
+	// 	onchange:null,
+	// 	thumbnail:false //| true | large
+	// 	//whitelist:'gif|png|jpg|jpeg'
+	// 	//blacklist:'exe|php'
+	// 	//onchange:''
+	// 	//
+	// });
+	//pre-show a file name, for example a previously selected file
+	//$('#id-input-file-1').ace_file_input('show_file_list', ['myfile.txt'])
+
+
+	$('#calendar_file').ace_file_input({
+		style: 'well',
+		btn_choose: 'Drop files here or click to choose',
+		btn_change: null,
+		no_icon: 'ace-icon fa fa-cloud-upload',
+		droppable: true,
+		thumbnail: 'small', //large | fit
+		//,icon_remove:null//set null, to hide remove/reset button
+		/**,before_change:function(files, dropped) {
+			//Check an example below
+			//or examples/file-upload.html
+			return true;
+		}*/
+		/**,before_remove : function() {
+			return true;
+		}*/
+		preview_error : function(filename, error_code) {
+			//name of the file that failed
+			//error_code values
+			//1 = 'FILE_LOAD_FAILED',
+			//2 = 'IMAGE_LOAD_FAILED',
+			//3 = 'THUMBNAIL_FAILED'
+			//alert(error_code);
+		}
+
+	}).on('change', function(){
+		var files = $(this).data('ace_input_files');
+		var method = $(this).data('ace_input_method'); // 'select' or 'drop' 
+		console.log(files);
+		console.log($(this));
+	});
+
+
+	var set_only_img = function() {
+		var whitelist_ext, whitelist_mime;
+		var btn_choose;
+		var no_icon;
+		btn_choose = "이미지를 업로드 하세요";
+		no_icon = "ace-icon fa fa-picture-o";
+
+		whitelist_ext = ["jpeg", "jpg", "png", "gif" , "bmp"];
+		whitelist_mime = ["image/jpg", "image/jpeg", "image/png", "image/gif", "image/bmp"];
+		
+		var file_input = $('#calendar_file');
+		file_input
+		.ace_file_input('update_settings',
+		{
+			'btn_choose': btn_choose,
+			'no_icon': no_icon,
+			'allowExt': whitelist_ext,
+			'allowMime': whitelist_mime
+		});
+		file_input.ace_file_input('reset_input');
+
+		file_input
+		.off('file.error.ace')
+		.on('file.error.ace', function(e, info) {
+		});
+	};
+	set_only_img();
+	
+	$('#calendarSubmitBtn').click(function(e) {
+		var files = $('#calendar_file').data('ace_input_files');
+		var formData = new FormData();
+		formData.append("upload", files[0]);
+		// formData.append('param1', '123123');
+		$.ajax({
+			url: '/user/schedule_image', 
+			data: formData, 
+			processData: false,
+			contentType: false, 
+			type: 'POST', 
+			success: function(res){
+				if (res) {
+					if (res.err) {
+						alert(res.err);
+					} else {
+						alert(res.result);
+						$('#calendar_file').ace_file_input('reset_input');
+					}
+				} else {
+					alert('시간표 업로드 실패');
+				}
+			} 
+		});
+	});
+
+
+	
+/////////////////////////////////
+	
 });
 
-/////////////////////////////////
 
 
 
 $.get('/user', function(res) {
-	console.log(res);
 	if (res) {
 		if (res.err) {
 			alert(res.err);
