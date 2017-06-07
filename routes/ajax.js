@@ -1313,8 +1313,7 @@ exports.getTeamInvitation = function(req, res) {
 };
 
 exports.inviteMember = function(req, res) {
-	//var team_id = req.params.team_id || false;
-	var team_id = req.body.team_id || false;
+	var team_id = req.params.team_id || false;
 	var user_id = req.body.user_id || false;
 	var current_user_id = req.session.user_id || false;
 	var invitation_id = 'invitation_' + randString(10);
@@ -2495,39 +2494,40 @@ exports.getMyInvitations = function(req, res) {
 			}
 		},
 		cb => {
-			db.invitation.find({
-				user_id: user_id
-			}, function(err, invitation_data) {
-				cb(err, invitation_data);
-			});
-		},
-		(invitation_data, cb) => {
-			// Error 처리 문제 -> Error가 있을 때 중지
-			async.mapLimit(invitation_data, 10, function (item, next) {
-				db.team.findOne({
-					team_id: item.team_id
-				}, function (err, team_data) {
-					if (err) {
-						item.team_name = "Fail loading data";
-						item.contents = "Fail loading data";
-						next(err);
-					} else {
-						item.team_name = team_data.team_name;
-						item.contents = team_data.contents;
-						console.log('머지중: ' + item.team_name);
-						console.log('머지중: ' + item.contents);
-						console.log('머지 후: ' + item);
-						next(null, item);
+			db.invitation.aggregate([
+				{
+					$match: {
+						user_id: user_id,
+						state: 'Pending'
 					}
-				});
-			}, function (err, merged_data) {
-				if (err) {
-					console.log('team data merging failed');
-				} else {
-					console.log(merged_data);
-					cb(err, merged_data);
+				},
+				{
+				   $lookup: {
+					   from: 'teams',
+					   localField: 'team_id',
+					   foreignField: 'team_id',
+					   as: 'team_data'
+				   }
+				},
+				{
+					$project: {
+						_id: 0,
+						invitation_id: 1,
+						team_id: 1,
+						team_data: { $arrayElemAt: [ "$team_data", 0 ] },
+					}
+				},
+				{
+					$project: {
+						invitation_id: 1,
+						team_id: 1,
+						team_name: '$team_data.team_name',
+						team_contents: '$team_data.contents'
+					}
 				}
-			});			
+			], function(err, data) {
+				cb(err, data);
+			});
 		}
 	], function(err, result) {
 		if (err) {
