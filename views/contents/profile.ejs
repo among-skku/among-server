@@ -88,32 +88,6 @@
 				<i class="ace-icon fa fa-umbrella bigger-120 blue"></i>
 				Click on the image below or on profile fields to edit them ...
 			</div>
-
-			<div class="pull-right">
-				<span class="green middle bolder">Choose profile: &nbsp;</span>
-
-				<div class="btn-toolbar inline middle no-margin">
-					<div data-toggle="buttons" class="btn-group no-margin">
-						<label class="btn btn-sm btn-yellow active">
-							<span class="bigger-110">1</span>
-
-							<input type="radio" value="1" />
-						</label>
-
-						<label class="btn btn-sm btn-yellow">
-							<span class="bigger-110">2</span>
-
-							<input type="radio" value="2" />
-						</label>
-
-						<label class="btn btn-sm btn-yellow">
-							<span class="bigger-110">3</span>
-
-							<input type="radio" value="3" />
-						</label>
-					</div>
-				</div>
-			</div>
 		</div>
 
 		<div class="hr dotted"></div>
@@ -128,7 +102,6 @@
 		<div>
 			<div id="user-profile-1" class="user-profile row">
 				<div class="col-xs-12 col-sm-3 center">
-					<!--profile image-->
 					<div>
 						<span class="profile-picture">
 							<img id="avatar" class="editable img-responsive" alt="Alex's Avatar" src="/images/avatars/profile-pic.jpg" />
@@ -174,19 +147,20 @@
 							</div>
 						</div>
 					</div>
-					<!-- timetable image
-						should make it click and upload img.
-					-->
-					<div class="space space-4"></div>
-					<div>
-						<span class="profile-picture">
-							<img id="timetable" class="editable img-responsive" alt="Alex's Avatar" src="/images/avatars/profile-pic.jpg" />
-						</span>
-
-					</div>
 					
-				</div>
+					<h4 class="widget-title">에브리타임 PC버전 이미지 업로드</h4>
 
+					<div class="widget-main">
+						<div class="form-group">
+							<div class="col-xs-12">
+								<input multiple="" type="file" id="calendar_file" />
+							</div>
+							<div id="calendarSubmitBtn" class="btn btn-success">
+								업로드
+							</div>
+						</div>
+					</div>
+				</div>
 				<div class="col-xs-12 col-sm-9">
 					
 
@@ -221,27 +195,18 @@
 
 					<div class="space-20"></div>
 
-					<div class="widget-box transparent">
+					<div class="widget-box transparent" id="regular_schedule_widget_box">
 						<div class="widget-header widget-header-small">
 							<h4 class="widget-title blue smaller">
 								<i class="ace-icon fa fa-rss orange"></i>
-								Time Table
+								정기 일정
 							</h4>
-
-							<div class="widget-toolbar action-buttons">
-								<a href="#" data-action="reload">
-									<i class="ace-icon fa fa-refresh blue"></i>
-								</a>
-&nbsp;
-								<a href="#" class="pink">
-									<i class="ace-icon fa fa-trash-o"></i>
-								</a>
-							</div>
 						</div>
 
 						<div class="widget-body">
 							<div class="widget-main padding-8">
-								<div id="profile-feed-1" class="profile-feed">
+								<div id="regular_schedule_container" class="profile-feed">
+									<!-- 
 									<div class="profile-activity clearfix">
 										<div>
 											<a class="user" href="#"> 월)  </a>
@@ -258,105 +223,7 @@
 											</a>
 										</div>
 									</div>
-									<div class="profile-activity clearfix">
-										<div>
-											<a class="user" href="#"> 화)  </a>
-											9:00~10:30, 13:30~14:45
-										</div>
-
-										<div class="tools action-buttons">
-											<a href="#" class="blue">
-												<i class="ace-icon fa fa-pencil bigger-125"></i>
-											</a>
-
-											<a href="#" class="red">
-												<i class="ace-icon fa fa-times bigger-125"></i>
-											</a>
-										</div>
-									</div>
-									<div class="profile-activity clearfix">
-										<div>
-											<a class="user" href="#"> 수)  </a>
-											9:00~10:30, 13:30~14:45
-										</div>
-
-										<div class="tools action-buttons">
-											<a href="#" class="blue">
-												<i class="ace-icon fa fa-pencil bigger-125"></i>
-											</a>
-
-											<a href="#" class="red">
-												<i class="ace-icon fa fa-times bigger-125"></i>
-											</a>
-										</div>
-									</div>
-									<div class="profile-activity clearfix">
-										<div>
-											<a class="user" href="#"> 목)  </a>
-											9:00~10:30, 13:30~14:45
-										</div>
-
-										<div class="tools action-buttons">
-											<a href="#" class="blue">
-												<i class="ace-icon fa fa-pencil bigger-125"></i>
-											</a>
-
-											<a href="#" class="red">
-												<i class="ace-icon fa fa-times bigger-125"></i>
-											</a>
-										</div>
-									</div>
-									<div class="profile-activity clearfix">
-										<div>
-											<a class="user" href="#"> 금)  </a>
-											9:00~10:30, 13:30~14:45
-										</div>
-
-										<div class="tools action-buttons">
-											<a href="#" class="blue">
-												<i class="ace-icon fa fa-pencil bigger-125"></i>
-											</a>
-
-											<a href="#" class="red">
-												<i class="ace-icon fa fa-times bigger-125"></i>
-											</a>
-										</div>
-									</div>
-									<div class="profile-activity clearfix">
-										<div>
-											<a class="user" href="#"> 토)  </a>
-											9:00~10:30, 13:30~14:45
-										</div>
-
-										<div class="tools action-buttons">
-											<a href="#" class="blue">
-												<i class="ace-icon fa fa-pencil bigger-125"></i>
-											</a>
-
-											<a href="#" class="red">
-												<i class="ace-icon fa fa-times bigger-125"></i>
-											</a>
-										</div>
-									</div>
-									<div class="profile-activity clearfix">
-										<div>
-											<a class="user" href="#"> 일)  </a>
-											9:00~10:30, 13:30~14:45
-										</div>
-
-										<div class="tools action-buttons">
-											<a href="#" class="blue">
-												<i class="ace-icon fa fa-pencil bigger-125"></i>
-											</a>
-
-											<a href="#" class="red">
-												<i class="ace-icon fa fa-times bigger-125"></i>
-											</a>
-										</div>
-									</div>
-<!--///////////////////////////////-->
-
-
+-->
 								</div>
 							</div>
 						</div>

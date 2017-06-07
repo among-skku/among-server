@@ -2694,7 +2694,7 @@ exports.getTeamList = function (req, res) {
 				if (err) {
 					console.log('team info loading failed');
 				} else {
-					console.log(team_data);
+					// console.log(team_data);
 					cb(err, team_data);
 				}
 			});
@@ -2796,66 +2796,23 @@ exports.getTeamMemberSchedule = function(req, res) {
 	});
 };
 
-exports.uploadTimetable = function(req, res) {
-	
+exports.uploadTimetable = function(req, res) {	
 	var user_id = req.session.user_id || false;
-	var file_id = 'file_' + randString(10);
-	var file_path = __storage_path + '/' + user_id + '/' + file_id;
-	var file_name = req.query.file_name || false;
-	var contents = req.query.contents || '';
-	var uploader = req.session.user_id || false;
-	var upload_time = new Date();
-	
-	console.log('req.file:', req.file);
+	var file_path = __time_table_path + '/' + user_id;
 
 	async.waterfall([
 		cb => {
-			console.log("file_name: " + file_name + " user_id: " + user_id);
-			if (!file_name || !user_id) {
-				// cb(req.body);
-				cb('insufficient parameters');
-			} else if (typeof req.file === 'undefined') {
-				cb('file is not uploaded');
+			if (!user_id) {
+				cb('로그인 하셔야 합니다.');
 			} else {
 				cb(null);
 			}
 		},
 		cb => {
-			if (fs.existsSync(__storage_path + '/' + user_id)) {
-				cb(null);
-			} else {
-				mkdirp(__storage_path + '/' + user_id, function(err) {
-					cb(err);
-				});
-			}
-		},
-		cb => {
-			async.parallel([
-				nj => {
-					var snapshot = new db.timetable_image({
-						user_id: user_id,
-						file_id: file_id,
-						file_path: file_path,
-						file_name: file_name,
-						contents: contents,
-						uploader: uploader,
-						upload_time: upload_time
-					});
-
-					snapshot.save(function(err) {
-						nj(err);
-					});
-					
-				},
-				nj => {
-					var tmp_path = req.file.path;
-					fs.rename(tmp_path, file_path, function(_err) {
-						//fs.chmod(target_path, 0755);	// 755 is wrong. 0755 or '755' are correct.
-						nj(_err);
-					});
-				}
-			], function(err) {
-				cb(err, '파일이 정상적으로 업로드 되었습니다.');
+			var tmp_path = req.file.path;
+			fs.rename(tmp_path, file_path, function(_err) {
+				//fs.chmod(target_path, 0755);	// 755 is wrong. 0755 or '755' are correct.
+				cb(_err, '파일이 정상적으로 업로드 되었습니다.');
 			});
 		}
 	], function(err, result) {
