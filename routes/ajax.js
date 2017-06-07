@@ -2426,7 +2426,6 @@ exports.syncPortal = function(req, res) {
 				var obj = json_data[key];
 				var title = obj.name;
 				var place = obj.place;
-				var user_id = user_id;
 				var contents = user_id + '의 ' + title + ' 수업';
 				var start_date = new Date(0);
 				var end_date = new Date(0);
