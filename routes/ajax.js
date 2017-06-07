@@ -282,7 +282,11 @@ exports.syncCalendar = function(req, res) {
 				console.log('err', err);
 				console.log('stdout', stdout);
 				console.log('stderr', stderr);
-				cb('이미지 프로세싱이 실패했습니다.');
+				if (err) {
+					cb('이미지 프로세싱이 실패했습니다.');
+				} else {
+					cb(null);
+				}
 			});
 		},
 		cb => {
