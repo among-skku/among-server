@@ -252,18 +252,38 @@ exports.updateUser = function(req, res) {
 exports.syncCalendar = function(req, res) {
 	var user_id = req.session.user_id || false;
 	var json_path = __storage_path + '/time_tables/' + user_id + '.json';
-	
+	var img_path = __storage_path + '/time_tables/' + user_id;
+	var cwd = __storage_path + '/time_tables/';
 	async.waterfall([
 		cb => {
 			if (!user_id) {
-				cb('You should be logged in');
+				cb('로그인 하셔야합니다.');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			if (typeof __openCV_bin_path === 'undefined') {
+				return cb('이미지 파싱 환경설정이 되어있지 않습니다.');
+			}
+			if (!fs.existsSync(img_path)) {
+				cb('시간표 이미지가 업로드되지 않았습니다.');
+			} else if (!fs.existsSync(__openCV_bin_path)) {
+				cb('이미지 프로세싱 환경설정이 제대로 되어있지 않습니다.');
 			} else {
 				cb(null);
 			}
 		},
 		cb => {
 			//여기서 openCV 모듈을 붙여서 /storage/time_tables/[유저아이디].json 파일을 만들어내면 됩니다!!
-			cb(null);
+			execFile(__openCV_bin_path, [img_path], {
+				cwd: cwd
+			}, function(err, stdout, stderr) {
+				console.log('err', err);
+				console.log('stdout', stdout);
+				console.log('stderr', stderr);
+				cb('이미지 프로세싱이 실패했습니다.');
+			});
 		},
 		cb => {
 			
