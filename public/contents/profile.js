@@ -303,106 +303,6 @@ jQuery(function($) {
 		
 	}catch(e) {}
 
-	/**
-	//let's display edit mode by default?
-	var blank_image = true;//somehow you determine if image is initially blank or not, or you just want to display file input at first
-	if(blank_image) {
-		$('#avatar').editable('show').on('hidden', function(e, reason) {
-			if(reason == 'onblur') {
-				$('#avatar').editable('show');
-				return;
-			}
-			$('#avatar').off('hidden');
-		})
-	}
-	*/
-	
-
-	//another option is using modals
-	$('#avatar2').on('click', function(){
-		var modal = 
-		'<div class="modal fade">\
-		  <div class="modal-dialog">\
-		   <div class="modal-content">\
-			<div class="modal-header">\
-				<button type="button" class="close" data-dismiss="modal">&times;</button>\
-				<h4 class="blue">Change Avatar</h4>\
-			</div>\
-			\
-			<form class="no-margin">\
-			 <div class="modal-body">\
-				<div class="space-4"></div>\
-				<div style="width:75%;margin-left:12%;"><input type="file" name="file-input" /></div>\
-			 </div>\
-			\
-			 <div class="modal-footer center">\
-				<button type="submit" class="btn btn-sm btn-success"><i class="ace-icon fa fa-check"></i> Submit</button>\
-				<button type="button" class="btn btn-sm" data-dismiss="modal"><i class="ace-icon fa fa-times"></i> Cancel</button>\
-			 </div>\
-			</form>\
-		  </div>\
-		 </div>\
-		</div>';
-
-
-		var modal = $(modal);
-		modal.modal("show").on("hidden", function(){
-			modal.remove();
-		});
-
-		var working = false;
-
-		var form = modal.find('form:eq(0)');
-		var file = form.find('input[type=file]').eq(0);
-		file.ace_file_input({
-			style:'well',
-			btn_choose:'Click to choose new avatar',
-			btn_change:null,
-			no_icon:'ace-icon fa fa-picture-o',
-			thumbnail:'small',
-			before_remove: function() {
-				//don't remove/reset files while being uploaded
-				return !working;
-			},
-			allowExt: ['jpg', 'jpeg', 'png', 'gif'],
-			allowMime: ['image/jpg', 'image/jpeg', 'image/png', 'image/gif']
-		});
-
-		form.on('submit', function(){
-			if(!file.data('ace_input_files')) return false;
-
-			file.ace_file_input('disable');
-			form.find('button').attr('disabled', 'disabled');
-			form.find('.modal-body').append("<div class='center'><i class='ace-icon fa fa-spinner fa-spin bigger-150 orange'></i></div>");
-
-			var deferred = new $.Deferred;
-			working = true;
-			deferred.done(function() {
-				form.find('button').removeAttr('disabled');
-				form.find('input[type=file]').ace_file_input('enable');
-				form.find('.modal-body > :last-child').remove();
-
-				modal.modal("hide");
-
-				var thumb = file.next().find('img').data('thumb');
-				if(thumb) $('#avatar2').get(0).src = thumb;
-
-				working = false;
-			});
-
-
-			setTimeout(function(){
-				deferred.resolve();
-			} , parseInt(Math.random() * 800 + 800));
-
-			return false;
-		});
-
-	});
-
-
-
-	//////////////////////////////a
 	var int2yoil = function(v) {
 		if (v == '0')
 			return '일';
@@ -464,9 +364,6 @@ jQuery(function($) {
 		}
 	});
 	
-		
-///////////////////
-	
 	
 	$('a[ data-original-title]').tooltip();
 
@@ -484,8 +381,6 @@ jQuery(function($) {
 		size: size
 	}).css('color', barColor);
 	});
-
-	///////////////////////////////////////////
 
 	//right & left position
 	//show the user info on right or left depending on its position
@@ -634,21 +529,6 @@ jQuery(function($) {
 			}
 		});
 	});
-	/////////////////////////// 파일 업로드 부분
-	// $('#id-input-file-2').ace_file_input({
-	// 	no_file:'No File ...',
-	// 	btn_choose:'Choose',
-	// 	btn_change:'Change',
-	// 	droppable:false,
-	// 	onchange:null,
-	// 	thumbnail:false //| true | large
-	// 	//whitelist:'gif|png|jpg|jpeg'
-	// 	//blacklist:'exe|php'
-	// 	//onchange:''
-	// 	//
-	// });
-	//pre-show a file name, for example a previously selected file
-	//$('#id-input-file-1').ace_file_input('show_file_list', ['myfile.txt'])
 
 
 	$('#calendar_file').ace_file_input({
@@ -714,6 +594,11 @@ jQuery(function($) {
 	
 	$('#calendarSubmitBtn').click(function(e) {
 		var files = $('#calendar_file').data('ace_input_files');
+		if (!files) {
+			alert('파일을 선택해주세요!');
+			return;
+		}
+		
 		var formData = new FormData();
 		formData.append("upload", files[0]);
 		// formData.append('param1', '123123');
@@ -730,6 +615,8 @@ jQuery(function($) {
 					} else {
 						alert(res.result);
 						$('#calendar_file').ace_file_input('reset_input');
+						var prev_dom = $('#calendarImg');
+						location.reload();
 					}
 				} else {
 					alert('시간표 업로드 실패');
@@ -737,27 +624,22 @@ jQuery(function($) {
 			} 
 		});
 	});
-
-
 	
-/////////////////////////////////
-	
-});
-
-
-
-
-$.get('/user', function(res) {
-	if (res) {
-		if (res.err) {
-			alert(res.err);
+	$.get('/user', function(res) {
+		if (res) {
+			if (res.err) {
+				alert(res.err);
+			} else {
+				var phone_number = res.result.phone;
+				var email_addr = res.result.email;
+				$('#email').text(email_addr);
+				$('#phone').text(phone_number);
+			}
 		} else {
-			var phone_number = res.result.phone;
-			var email_addr = res.result.email;
-			$('#email').text(email_addr);
-			$('#phone').text(phone_number);
+			alert('유저 정보를 불러오지 못했습니다.');
 		}
-	} else {
-		alert('유저 정보를 불러오지 못했습니다.');
-	}
+	});
 });
+
+
+
