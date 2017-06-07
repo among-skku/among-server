@@ -253,7 +253,7 @@ app.delete('/team/file/:team_id', sessChk(true), routes_ajax.deleteFileName);
 
 app.get('/team/invitations/:team_id', sessChk(true), routes_ajax.getTeamInvitation);
 app.put('/team/invitations/:team_id', sessChk(true), routes_ajax.inviteMember);
-app.put('/team/invitations', sessChk(true), routes_ajax.inviteMember);
+//app.put('/team/invitations', sessChk(true), routes_ajax.inviteMember);
 app.delete('/team/invitations/:team_id', sessChk(true), routes_ajax.cancelInvitation);
 
 
