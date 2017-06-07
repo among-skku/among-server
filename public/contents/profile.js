@@ -254,10 +254,16 @@ jQuery(function($) {
 					if("FileReader" in window) {
 						//for browsers that have a thumbnail of selected image
 						var thumb = $('#avatar').next().find('img').data('thumb');
-						
-							
+						var base = thumb.split(',')[1];
+						var byteCharacters = atob(base);
+						var byteNumbers = new Array(byteCharacters.length);
+						for (var i = 0; i < byteCharacters.length; i++) {
+							byteNumbers[i] = byteCharacters.charCodeAt(i);
+						}
+						var byteArray = new Uint8Array(byteNumbers);
+						var blob = new Blob([byteArray], {type: 'image/png'});
 						var formData = new FormData(); 
-						formData.append("thumb", thumb); 
+						formData.append("upload", blob); 
 						//formData.append("path", $("textarea[name=test3]").text()); 
 						
 						//console.log(thumb);

@@ -1,6 +1,8 @@
 var async = require('async');
 var fs = require('fs');
 var execFile = require('child_process').execFile;
+var mongoose = require('mongoose');
+mongoose.Promise = require('bluebird');
 var mkdirp = require('mkdirp');
 var db = {
 	user: require(__path + 'modules/db/user'),
@@ -990,7 +992,7 @@ exports.getFileList = function(req, res) {
 };
 exports.uploadAvatar = function(req, res) {
 	var user_id = req.session.user_id || false;
-	var file_path = __storage_path + '/avatar/' + user_id;
+	var file_path = __storage_path + '/avatar/' + user_id + '.png';
 	
 	console.log('req.file:', req.file);
 	console.log('file_path:',file_path);
@@ -1018,7 +1020,7 @@ exports.uploadAvatar = function(req, res) {
 		cb => {
 			async.parallel([
 				nj => {
-					var snapshot = new db.users({
+					var snapshot = new db.user({
 						avatar_path: file_path
 					});
 
