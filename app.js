@@ -200,8 +200,6 @@ app.get('/dashboard/team_schedule', pageSessChk(true), function(req, res) {
 });
 app.get('/dashboard/team_schedule/:team_id', pageSessChk(true), routes_view.teamSchedulePage);
 
-app.get('/dashboard/user_profile', pageSessChk(true), routes_view.userProfilePage);
-
 app.get('/calendar', routes_view.calendarPage);
 app.get('/news_feed', routes_view.newsFeedPage);
 app.get('/report', routes_view.reportPage);
@@ -241,7 +239,8 @@ app.post('/team/file/:team_id/upload', sessChk(true), multer_upload.single('uplo
 app.delete('/team/file/:team_id', sessChk(true), routes_ajax.deleteFileName);
 
 app.get('/team/invitations/:team_id', sessChk(true), routes_ajax.getTeamInvitation);
-app.put('/team/invitations/:team_id', sessChk(true), routes_ajax.inviteMember);
+//app.put('/team/invitations/:team_id', sessChk(true), routes_ajax.inviteMember);
+app.put('/team/invitations', sessChk(true), routes_ajax.inviteMember);
 app.delete('/team/invitations/:team_id', sessChk(true), routes_ajax.cancelInvitation);
 
 
@@ -272,6 +271,8 @@ app.delete('/team/:team_id', sessChk(true), routes_ajax.deleteTeam);
 app.get('/user/invite', sessChk(true), routes_ajax.getMyInvitations);
 app.post('/user/invite', sessChk(true), routes_ajax.acceptInvitation);
 app.delete('/user/invite', sessChk(true), routes_ajax.rejectInvitation);
+
+app.post('/user/schedule_image', sessChk(true), multer_upload.single('upload'), routes_ajax.uploadTimetable);
 
 routes_sock.init_io(io);
 global.__io = io;

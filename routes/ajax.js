@@ -13,7 +13,8 @@ var db = {
 	notice: require(__path + 'modules/db/notice'),
 	file_manager: require(__path + 'modules/db/file_manager'),
 	team: require(__path + 'modules/db/team'),
-	invitation: require(__path + 'modules/db/invitation')
+	invitation: require(__path + 'modules/db/invitation'),
+	timetable_image: require(__path + 'modules/db/timetable_image')
 };
 
 exports.loginUser = function(req, res) {
@@ -1312,7 +1313,8 @@ exports.getTeamInvitation = function(req, res) {
 };
 
 exports.inviteMember = function(req, res) {
-	var team_id = req.params.team_id || false;
+	//var team_id = req.params.team_id || false;
+	var team_id = req.body.team_id || false;
 	var user_id = req.body.user_id || false;
 	var current_user_id = req.session.user_id || false;
 	var invitation_id = 'invitation_' + randString(10);
@@ -2103,7 +2105,6 @@ exports.createTeam = function (req, res) {
 		}
 	});	
 };
-
 exports.getTeamData = function (req, res) {
 	
 	if (Object.keys(req.query).length) {
@@ -2499,6 +2500,34 @@ exports.getMyInvitations = function(req, res) {
 			}, function(err, invitation_data) {
 				cb(err, invitation_data);
 			});
+		},
+		(invitation_data, cb) => {
+			// Error 처리 문제 -> Error가 있을 때 중지
+			async.mapLimit(invitation_data, 10, function (item, next) {
+				db.team.findOne({
+					team_id: item.team_id
+				}, function (err, team_data) {
+					if (err) {
+						item.team_name = "Fail loading data";
+						item.contents = "Fail loading data";
+						next(err);
+					} else {
+						item.team_name = team_data.team_name;
+						item.contents = team_data.contents;
+						console.log('머지중: ' + item.team_name);
+						console.log('머지중: ' + item.contents);
+						console.log('머지 후: ' + item);
+						next(null, item);
+					}
+				});
+			}, function (err, merged_data) {
+				if (err) {
+					console.log('team data merging failed');
+				} else {
+					console.log(merged_data);
+					cb(err, merged_data);
+				}
+			});			
 		}
 	], function(err, result) {
 		if (err) {
@@ -2650,7 +2679,7 @@ exports.getTeamList = function (req, res) {
 			});
 		},
 		(user_info, cb) => {			
-			async.mapLimit(user_info.team_id, 10, function (item, next) {
+			async.mapLimit(user_info.team_id, 100, function (item, next) {
 				db.team.findOne({
 					team_id: item
 				}, function (err, team_info) {
@@ -2753,6 +2782,81 @@ exports.getTeamMemberSchedule = function(req, res) {
 			// ], function(err, data) {
 			// 	cb(err, data);
 			// });
+		}
+	], function(err, result) {
+		if (err) {
+			res.json({
+				err: err
+			});
+		} else {
+			res.json({
+				result: result
+			});
+		}
+	});
+};
+
+exports.uploadTimetable = function(req, res) {
+	
+	var user_id = req.session.user_id || false;
+	var file_id = 'file_' + randString(10);
+	var file_path = __storage_path + '/' + user_id + '/' + file_id;
+	var file_name = req.query.file_name || false;
+	var contents = req.query.contents || '';
+	var uploader = req.session.user_id || false;
+	var upload_time = new Date();
+	
+	console.log('req.file:', req.file);
+
+	async.waterfall([
+		cb => {
+			console.log("file_name: " + file_name + " user_id: " + user_id);
+			if (!file_name || !user_id) {
+				// cb(req.body);
+				cb('insufficient parameters');
+			} else if (typeof req.file === 'undefined') {
+				cb('file is not uploaded');
+			} else {
+				cb(null);
+			}
+		},
+		cb => {
+			if (fs.existsSync(__storage_path + '/' + user_id)) {
+				cb(null);
+			} else {
+				mkdirp(__storage_path + '/' + user_id, function(err) {
+					cb(err);
+				});
+			}
+		},
+		cb => {
+			async.parallel([
+				nj => {
+					var snapshot = new db.timetable_image({
+						user_id: user_id,
+						file_id: file_id,
+						file_path: file_path,
+						file_name: file_name,
+						contents: contents,
+						uploader: uploader,
+						upload_time: upload_time
+					});
+
+					snapshot.save(function(err) {
+						nj(err);
+					});
+					
+				},
+				nj => {
+					var tmp_path = req.file.path;
+					fs.rename(tmp_path, file_path, function(_err) {
+						//fs.chmod(target_path, 0755);	// 755 is wrong. 0755 or '755' are correct.
+						nj(_err);
+					});
+				}
+			], function(err) {
+				cb(err, '파일이 정상적으로 업로드 되었습니다.');
+			});
 		}
 	], function(err, result) {
 		if (err) {
